@@ -1,0 +1,136 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Resolve runtime API URL
+        run: |
+          echo "NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:4000}" >> "$GITHUB_ENV"
+        env:
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
+
+      - name: Create production Dockerfile
+        run: |
+          cat > Dockerfile.deploy <<'EOF'
+          FROM node:20-alpine AS deps
+          WORKDIR /app
+          COPY package*.json ./
+          RUN npm ci
+
+          FROM node:20-alpine AS builder
+          WORKDIR /app
+          ARG NEXT_PUBLIC_API_URL
+          ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+          COPY --from=deps /app/node_modules ./node_modules
+          COPY . .
+          RUN npm run build
+
+          FROM node:20-alpine AS runner
+          WORKDIR /app
+          ENV NODE_ENV=production
+          ENV PORT=3002
+          ARG NEXT_PUBLIC_API_URL
+          ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+          COPY package*.json ./
+          RUN npm ci --omit=dev
+          COPY --from=builder /app/public ./public
+          COPY --from=builder /app/.next ./.next
+          COPY --from=builder /app/next.config.mjs ./next.config.mjs
+          EXPOSE 3002
+          CMD ["npm", "run", "start"]
+          EOF
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build ARM64 image and export
+        run: |
+          docker buildx build \
+            --platform linux/arm64 \
+            --build-arg NEXT_PUBLIC_API_URL="$NEXT_PUBLIC_API_URL" \
+            --tag rhoddo-web:latest \
+            --output type=docker,dest=rhoddo-web.tar \
+            -f Dockerfile.deploy \
+            .
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add server to known hosts
+        run: ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Transfer image to server
+        run: |
+          scp rhoddo-web.tar ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/tmp/rhoddo-web.tar
+
+      - name: Write environment file on server
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << EOF
+            mkdir -p /home/${{ secrets.SERVER_USER }}/rhoddo-web
+            cat > /home/${{ secrets.SERVER_USER }}/rhoddo-web/.env << 'ENVFILE'
+          NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+          ENVFILE
+          EOF
+
+      - name: Deploy on server
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+            docker load -i /tmp/rhoddo-web.tar
+            docker stop rhoddo-web || true
+            docker rm rhoddo-web || true
+            docker run -d \
+              --name rhoddo-web \
+              --network waglogy-net \
+              --restart unless-stopped \
+              --env-file /home/${{ secrets.SERVER_USER }}/rhoddo-web/.env \
+              -p 3002:3002 \
+              rhoddo-web:latest
+            rm /tmp/rhoddo-web.tar
+          EOF
