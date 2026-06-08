@@ -60,23 +60,23 @@ export default function Landing() {
           <div className="absolute bottom-[-200px] left-1/2 h-[400px] w-[800px] -translate-x-1/2 rounded-full bg-primary/15 blur-[160px]" />
         </div>
 
-        <div className="relative mx-auto grid max-w-6xl gap-16 px-6 pb-24 pt-16 md:grid-cols-[1.1fr_0.9fr] md:pt-24">
-          <div className="flex flex-col justify-center">
-            <div className="label">Made in Sikkim</div>
-            <h1 className="mt-3 font-display text-5xl leading-[1.05] text-ink md:text-7xl">
+        <div className="relative mx-auto max-w-6xl px-5 pb-16 pt-10 sm:px-6 sm:pb-24 sm:pt-16 md:grid md:grid-cols-[1.1fr_0.9fr] md:gap-16 md:pt-24">
+          <div className="flex min-w-0 flex-col justify-center text-center md:text-left">
+            <div className="label flex justify-center md:justify-start">Made in Sikkim</div>
+            <h1 className="mt-3 font-display text-[2.25rem] leading-[1.08] text-ink sm:text-5xl md:text-7xl">
               Catch the
               <br />
               <span className="text-gold">bloom</span> before
               <br />
               it fades.
             </h1>
-            <p className="mt-6 max-w-xl text-base text-mute md:text-lg">
+            <p className="mt-5 text-sm leading-relaxed text-mute sm:mt-6 sm:text-base md:text-lg">
               Like the rhododendrons that paint Sikkim&apos;s hillsides every season,
               the best events don&apos;t wait. Rhoddo brings you every concert, festival,
               resort dinner, and mountain gathering — before they&apos;re gone.
             </p>
 
-            <div className="mt-10 flex flex-wrap items-center gap-3">
+            <div className="mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:justify-center md:justify-start">
               <Link href="#download" className="btn-primary">
                 ↓ Download app
               </Link>
@@ -88,33 +88,29 @@ export default function Landing() {
               </Link>
             </div>
 
-            <div className="mt-10 flex items-center gap-6 text-xs text-mute">
+            <div className="mt-8 flex items-center justify-center gap-4 text-xs text-mute sm:mt-10 sm:gap-6 md:justify-start">
               <div>
-                <div className="font-display text-2xl text-ink">12</div>
-                <div className="mt-0.5 uppercase tracking-wider">Districts covered</div>
+                <div className="font-display text-xl text-ink sm:text-2xl">6</div>
+                <div className="mt-0.5 uppercase tracking-wider">Districts</div>
               </div>
               <div className="h-8 w-px bg-line" />
               <div>
-                <div className="font-display text-2xl text-ink">40+</div>
-                <div className="mt-0.5 uppercase tracking-wider">Curated venues</div>
+                <div className="font-display text-xl text-ink sm:text-2xl">₹0</div>
+                <div className="mt-0.5 uppercase tracking-wider">Buyer fees</div>
               </div>
               <div className="h-8 w-px bg-line" />
               <div>
-                <div className="font-display text-2xl text-gold">1 tap</div>
-                <div className="mt-0.5 uppercase tracking-wider">From browse to pass</div>
+                <div className="font-display text-xl text-gold sm:text-2xl">1 tap</div>
+                <div className="mt-0.5 uppercase tracking-wider">To pass</div>
               </div>
             </div>
           </div>
 
-          {/* Phone mocks — real iOS + Android screenshots */}
-          <div className="relative flex items-center justify-center">
+          {/* Phone mocks — hidden on mobile, shown on md+ */}
+          <div className="hidden items-center justify-center md:relative md:flex">
             <div className="relative flex items-center">
-              {/* iOS phone — back, tilted left, light theme screen.
-                  Aspect ratio (9:19.5) matches the screenshot so object-contain
-                  fills the bezel without cropping the tab bar. Light bg so any
-                  rounding-shim margin blends with the parchment screen. */}
+              {/* iOS phone — back, tilted left */}
               <div className="relative -mr-8 aspect-[9/19.5] w-[232px] -rotate-[6deg] rounded-[44px] border border-line bg-panel p-2 shadow-card">
-                {/* Dynamic Island-ish pill */}
                 <div className="absolute left-1/2 top-2.5 z-10 h-5 w-20 -translate-x-1/2 rounded-full bg-[#111]" />
                 <div className="relative h-full w-full overflow-hidden rounded-[36px] bg-[#FFFCF2]">
                   <Image
@@ -131,9 +127,8 @@ export default function Landing() {
                 </div>
               </div>
 
-              {/* Android phone — front, tilted right, dark pine-forest screen. */}
+              {/* Android phone — front, tilted right */}
               <div className="relative z-10 aspect-[9/19.5] w-[248px] rotate-[5deg] rounded-[36px] border border-line bg-panel p-2 shadow-card">
-                {/* Hole-punch camera */}
                 <div className="absolute left-1/2 top-3 z-10 h-2.5 w-2.5 -translate-x-1/2 rounded-full bg-[#111]" />
                 <div className="relative h-full w-full overflow-hidden rounded-[30px] bg-[#0E1512]">
                   <Image
@@ -274,40 +269,29 @@ export default function Landing() {
           </p>
 
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <a
-              href="#"
-              aria-label="Download on the App Store"
-              className="group flex items-center gap-3 rounded-2xl border border-line bg-panel px-6 py-4 transition hover:border-gold"
-            >
-              <svg viewBox="0 0 24 24" className="h-7 w-7 fill-ink group-hover:fill-gold" aria-hidden>
+            <div className="group flex items-center gap-3 rounded-2xl border border-line bg-panel px-6 py-4 opacity-60">
+              <svg viewBox="0 0 24 24" className="h-7 w-7 fill-ink" aria-hidden>
                 <path d="M16.365 1.43c0 1.14-.42 2.23-1.18 3.04-.81.86-2.13 1.52-3.22 1.43-.13-1.1.43-2.25 1.16-3 .82-.84 2.21-1.46 3.24-1.47ZM20.5 17.45c-.55 1.27-.81 1.84-1.52 2.96-.99 1.55-2.39 3.49-4.13 3.51-1.55.02-1.95-1-4.05-1-2.1.01-2.54 1.02-4.09 1-1.74-.02-3.07-1.77-4.06-3.32C-.13 17.43-.4 12.36 1.5 9.66c1.34-1.92 3.46-3.05 5.45-3.05 2.03 0 3.31 1.11 4.99 1.11 1.63 0 2.62-1.11 4.97-1.11 1.78 0 3.66.97 5 2.65-4.4 2.41-3.68 8.7-1.41 8.19Z"/>
               </svg>
               <div className="text-left">
-                <div className="text-[10px] uppercase tracking-wider text-mute">Download on the</div>
+                <div className="text-[10px] uppercase tracking-wider text-gold">Coming soon</div>
                 <div className="font-display text-lg text-ink">App Store</div>
               </div>
-            </a>
+            </div>
 
-            <a
-              href="#"
-              aria-label="Get it on Google Play"
-              className="group flex items-center gap-3 rounded-2xl border border-line bg-panel px-6 py-4 transition hover:border-gold"
-            >
-              <svg viewBox="0 0 24 24" className="h-7 w-7 fill-ink group-hover:fill-gold" aria-hidden>
+            <div className="group flex items-center gap-3 rounded-2xl border border-line bg-panel px-6 py-4 opacity-60">
+              <svg viewBox="0 0 24 24" className="h-7 w-7 fill-ink" aria-hidden>
                 <path d="M3.6 2.5C3.22 2.85 3 3.4 3 4.1v15.8c0 .7.22 1.25.6 1.6l8.4-9.5L3.6 2.5Zm10.06 9 2.7-3.05L5.55 2.27c-.36-.2-.7-.27-1-.21l9.11 9.44Zm0 1L4.55 21.94c.3.06.64-.01 1-.21l10.81-6.18-2.7-3.05Zm6.5-3.7-3.32-1.9-2.96 3.34 2.96 3.34 3.32-1.9c1.05-.6 1.05-2.27 0-2.88Z"/>
               </svg>
               <div className="text-left">
-                <div className="text-[10px] uppercase tracking-wider text-mute">Get it on</div>
+                <div className="text-[10px] uppercase tracking-wider text-gold">Coming soon</div>
                 <div className="font-display text-lg text-ink">Google Play</div>
               </div>
-            </a>
+            </div>
           </div>
 
           <div className="mt-8 text-xs text-mute">
-            Coming soon to iOS and Android · Beta available on Android via{' '}
-            <a href="#" className="text-gold underline-offset-4 hover:underline">
-              direct link
-            </a>
+            Launching soon on iOS and Android. Stay tuned.
           </div>
         </div>
       </section>
@@ -331,8 +315,6 @@ export default function Landing() {
           </div>
           <div className="text-center text-[11px] text-mute md:text-right">
             Built by <span className="text-gold">WAGLOGY</span>
-            <br />
-            in collaboration with <span className="text-gold italic">Den&apos;s Den</span>
           </div>
         </div>
       </footer>
