@@ -6,7 +6,7 @@ import { ADMIN_COOKIE } from '@/lib/auth';
 // The compose UI (client component) can't read that cookie directly, so it
 // calls this route and we forward to the backend verbatim.
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.rhoddo.com';
 
 export async function POST(req: Request) {
   const c = await cookies();

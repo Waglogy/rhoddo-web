@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { ADMIN_COOKIE, HOST_COOKIE } from './auth';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.rhoddo.com';
 
 export type ApiRole = 'admin' | 'host';
 

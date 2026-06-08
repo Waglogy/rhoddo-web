@@ -5,7 +5,7 @@ import { ADMIN_COOKIE } from '@/lib/auth';
 // Proxies GET /admin/notifications/audience-count using the httpOnly admin
 // cookie. Preserves query string so the compose form's live preview works.
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.rhoddo.com';
 
 export async function GET(req: Request) {
   const c = await cookies();

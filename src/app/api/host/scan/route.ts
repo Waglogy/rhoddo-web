@@ -7,7 +7,7 @@ import { HOST_COOKIE } from '@/lib/auth';
 // so it calls this route and we forward to the backend verbatim —
 // status code AND structured body — so the UI can switch on `reason`.
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.rhoddo.com';
 
 export async function POST(req: Request) {
   const c = await cookies();
