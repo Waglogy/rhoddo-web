@@ -44,7 +44,7 @@ jobs:
 
       - name: Resolve runtime API URL
         run: |
-          echo "NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:4000}" >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-https://api.rhoddo.com}" >> "$GITHUB_ENV"
         env:
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
 
