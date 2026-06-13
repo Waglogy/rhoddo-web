@@ -306,8 +306,8 @@ export default function Landing() {
             </span>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-mute md:justify-start">
-            <a href="#" className="hover:text-ink">Privacy</a>
-            <a href="#" className="hover:text-ink">Terms</a>
+            <Link href="/privacy" className="hover:text-ink">Privacy</Link>
+            <Link href="/terms" className="hover:text-ink">Terms</Link>
             <a href="#" className="hover:text-ink">Contact</a>
             <Link href="/host/login" className="hover:text-gold">Host sign in</Link>
             <Link href="/host/register" className="hover:text-gold">Apply as a host</Link>
