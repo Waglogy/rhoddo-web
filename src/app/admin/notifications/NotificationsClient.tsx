@@ -171,7 +171,32 @@ export function NotificationsClient({
     [events],
   );
 
+  // ---------- Festival trigger ----------
+  const [festivalSending, setFestivalSending] = useState<'eve' | 'morning' | null>(null);
+  const [festivalResult, setFestivalResult] = useState<string | null>(null);
+
+  const triggerFestival = async (type: 'eve' | 'morning') => {
+    const label = type === 'eve' ? 'eve-of-festival (7:30 PM)' : 'morning (7:00 AM)';
+    const ok = window.confirm(`Send ${label} festival notifications now?`);
+    if (!ok) return;
+
+    setFestivalSending(type);
+    setFestivalResult(null);
+    try {
+      await proxyFetch('/api/admin/notifications/festival-trigger', {
+        method: 'POST',
+        body: JSON.stringify({ type }),
+      });
+      setFestivalResult(`${type === 'eve' ? 'Eve' : 'Morning'} festival notifications sent.`);
+    } catch (err: any) {
+      setFestivalResult(`Failed: ${err?.message || 'Unknown error'}`);
+    } finally {
+      setFestivalSending(null);
+    }
+  };
+
   return (
+    <div className="space-y-10">
     <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
       {/* ---------- Compose ---------- */}
       <div className="card p-6">
@@ -382,6 +407,54 @@ export function NotificationsClient({
           )}
         </div>
       </div>
+    </div>
+
+    {/* ---------- Festival auto-notifications ---------- */}
+    <div className="card p-6">
+      <div className="label">Automated</div>
+      <h2 className="mt-1 font-display text-2xl text-ink">Festival notifications</h2>
+      <p className="mt-1 text-sm text-mute">
+        Festival notifications are sent automatically — eve-of-festival at 7:30 PM and
+        morning-of at 7:00 AM IST. Use the buttons below to trigger them manually.
+      </p>
+
+      <div className="mt-6 flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          disabled={festivalSending !== null}
+          onClick={() => triggerFestival('eve')}
+          className="rounded-xl border border-line bg-bg px-5 py-3 text-sm text-ink transition hover:border-gold/40 hover:bg-gold/5 disabled:opacity-50"
+        >
+          {festivalSending === 'eve' ? 'Sending...' : 'Send eve notification (7:30 PM)'}
+        </button>
+        <button
+          type="button"
+          disabled={festivalSending !== null}
+          onClick={() => triggerFestival('morning')}
+          className="rounded-xl border border-line bg-bg px-5 py-3 text-sm text-ink transition hover:border-gold/40 hover:bg-gold/5 disabled:opacity-50"
+        >
+          {festivalSending === 'morning' ? 'Sending...' : 'Send morning notification (7:00 AM)'}
+        </button>
+      </div>
+
+      {festivalResult && (
+        <div className="mt-4 rounded-xl border border-gold/30 bg-gold/10 px-4 py-3 text-sm text-ink">
+          {festivalResult}
+        </div>
+      )}
+
+      <div className="mt-6 rounded-xl border border-line bg-bg/60 px-4 py-3">
+        <div className="text-xs font-medium text-ink">Schedule</div>
+        <div className="mt-2 space-y-1 text-xs text-mute">
+          <div>7:30 PM IST — &quot;Tomorrow: [Festival Name]&quot; sent to all users</div>
+          <div>7:00 AM IST — &quot;Happy [Festival Name]!&quot; sent to all users</div>
+          <div className="mt-2 text-[11px]">
+            Only fires when there is a festival the next day / that day.
+            Multiple festivals on the same day are combined into one notification.
+          </div>
+        </div>
+      </div>
+    </div>
     </div>
   );
 }
