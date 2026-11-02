@@ -30,7 +30,7 @@ export function VenueForm({
   const router = useRouter();
   const isEdit = !!initial;
   const apiBase = mode === 'host' ? '/organizer/venues' : '/admin/venues';
-  const listPath = mode === 'host' ? '/host/venues' : '/admin/venues';
+  const listPath = mode === 'host' ? '/host/venues' : '/manage-rhoddo/venues';
 
   const [name, setName] = useState(initial?.name || '');
   const [kind, setKind] = useState(initial?.kind || 'resort');

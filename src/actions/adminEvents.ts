@@ -32,12 +32,12 @@ export async function setEventPublished(id: string, published: boolean) {
     method: 'PATCH',
     body: { published },
   });
-  revalidatePath('/admin/events');
-  revalidatePath('/admin');
+  revalidatePath('/manage-rhoddo/events');
+  revalidatePath('/manage-rhoddo');
 }
 
 export async function deleteEvent(id: string) {
   await adminJson(`/admin/events/${id}`, { method: 'DELETE' });
-  revalidatePath('/admin/events');
-  revalidatePath('/admin');
+  revalidatePath('/manage-rhoddo/events');
+  revalidatePath('/manage-rhoddo');
 }

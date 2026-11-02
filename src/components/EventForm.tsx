@@ -49,7 +49,7 @@ export function EventForm({
   const router = useRouter();
   const isEdit = !!initial;
   const apiBase = mode === 'host' ? '/organizer/events' : '/admin/events';
-  const listPath = mode === 'host' ? '/host/events' : '/admin/events';
+  const listPath = mode === 'host' ? '/host/events' : '/manage-rhoddo/events';
 
   const [title, setTitle] = useState(initial?.title || '');
   const [tagline, setTagline] = useState(initial?.tagline || '');

@@ -43,7 +43,7 @@ export default async function OverviewPage() {
       label: 'Pending hosts',
       value: (s.pendingOrganizers ?? 0).toString(),
       accent: (s.pendingOrganizers ?? 0) > 0 ? ('gold' as const) : undefined,
-      href: '/admin/hosts',
+      href: '/manage-rhoddo/hosts',
     },
   ];
 

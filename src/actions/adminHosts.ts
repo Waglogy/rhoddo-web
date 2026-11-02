@@ -30,8 +30,8 @@ export async function setOrganizerStatus(
   status: 'pending' | 'approved' | 'suspended',
 ) {
   await adminJson(`/admin/organizers/${id}/status`, { method: 'PUT', body: { status } });
-  revalidatePath('/admin/hosts');
-  revalidatePath('/admin');
+  revalidatePath('/manage-rhoddo/hosts');
+  revalidatePath('/manage-rhoddo');
 }
 
 export async function setOrganizerCredit(id: string, freeTicketsRemaining: number) {
@@ -39,6 +39,6 @@ export async function setOrganizerCredit(id: string, freeTicketsRemaining: numbe
     method: 'PUT',
     body: { freeTicketsRemaining },
   });
-  revalidatePath('/admin/hosts');
-  revalidatePath('/admin');
+  revalidatePath('/manage-rhoddo/hosts');
+  revalidatePath('/manage-rhoddo');
 }

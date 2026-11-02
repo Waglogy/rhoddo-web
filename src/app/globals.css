@@ -37,3 +37,26 @@
     @apply btn border border-line text-ink hover:bg-primary hover:border-primary;
   }
 }
+
+/* Landing page phone mock: crossfading promo carousel, same 4s rhythm as the app. */
+@keyframes promo-slide {
+  0%, 30% { opacity: 1; }
+  36%, 94% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes promo-dot {
+  0%, 30% { width: 14px; background-color: #f6f1e6; }
+  36%, 94% { width: 5px; background-color: rgba(246, 241, 230, 0.55); }
+  100% { width: 14px; background-color: #f6f1e6; }
+}
+.promo-slide { animation: promo-slide 12s linear infinite; }
+.promo-dot { animation: promo-dot 12s linear infinite; }
+.promo-2 { animation-delay: -8s; }
+.promo-3 { animation-delay: -4s; }
+@media (prefers-reduced-motion: reduce) {
+  .promo-slide, .promo-dot { animation: none; }
+}
+
+/* Scrollable areas inside the landing page phone mock, no visible scrollbar like a real phone. */
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }

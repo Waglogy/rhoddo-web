@@ -20,7 +20,7 @@ export default async function VenuesPage() {
           <div className="label">Catalog</div>
           <h1 className="font-display text-4xl text-ink">Venues</h1>
         </div>
-        <Link href="/admin/venues/new" className="btn-primary">
+        <Link href="/manage-rhoddo/venues/new" className="btn-primary">
           + New venue
         </Link>
       </div>
@@ -32,7 +32,7 @@ export default async function VenuesPage() {
         {data.venues.map((v) => (
           <Link
             key={v.id}
-            href={`/admin/venues/${v.id}`}
+            href={`/manage-rhoddo/venues/${v.id}`}
             className="flex items-center justify-between p-5 transition hover:bg-bg/40"
           >
             <div>

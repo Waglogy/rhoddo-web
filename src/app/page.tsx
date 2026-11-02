@@ -1,12 +1,15 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import type { Metadata } from 'next';
+import { AppHomeMock } from '@/components/AppHomeMock';
 
 export const metadata: Metadata = {
   title: 'Rhoddo — Sikkim Events, in your pocket',
   description:
     'Discover concerts, monastery festivals, resort dinners and cultural nights across Sikkim. One tap, one pass, no fuss.',
 };
+
+const PLAY_STORE_URL =
+  'https://play.google.com/store/apps/details?id=com.rhoddo.app&pcampaignid=web_share';
 
 export default function Landing() {
   return (
@@ -41,12 +44,14 @@ export default function Landing() {
             >
               List your venue
             </Link>
-            <Link
-              href="#download"
+            <a
+              href={PLAY_STORE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               className="rounded-xl border border-line px-4 py-2 text-sm text-ink transition hover:border-gold hover:text-gold"
             >
               Get the app
-            </Link>
+            </a>
           </div>
         </div>
       </header>
@@ -58,6 +63,10 @@ export default function Landing() {
           <div className="absolute -left-40 top-20 h-[520px] w-[520px] rounded-full bg-pine/30 blur-[140px]" />
           <div className="absolute right-[-120px] top-[-80px] h-[420px] w-[420px] rounded-full bg-gold/15 blur-[140px]" />
           <div className="absolute bottom-[-200px] left-1/2 h-[400px] w-[800px] -translate-x-1/2 rounded-full bg-primary/15 blur-[160px]" />
+          {/* Himalayan range: sits at the bottom of the hero and fades out well below the top */}
+          <div className="absolute inset-x-0 bottom-0 h-[62%] bg-[url('/app/mountains.svg')] bg-cover bg-bottom bg-no-repeat opacity-40 md:opacity-80 [mask-image:linear-gradient(to_bottom,transparent_0%,black_12%)]" />
+          {/* Keeps the hero text readable over the peaks */}
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(14,21,18,0.72)_0%,rgba(14,21,18,0.35)_48%,rgba(14,21,18,0)_72%)]" />
         </div>
 
         <div className="relative mx-auto max-w-6xl px-5 pb-16 pt-10 sm:px-6 sm:pb-24 sm:pt-16 md:grid md:grid-cols-[1.1fr_0.9fr] md:gap-16 md:pt-24">
@@ -77,9 +86,14 @@ export default function Landing() {
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:justify-center md:justify-start">
-              <Link href="#download" className="btn-primary">
+              <a
+                href={PLAY_STORE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-primary"
+              >
                 ↓ Download app
-              </Link>
+              </a>
               <a href="#features" className="btn-ghost">
                 See what&apos;s inside
               </a>
@@ -106,45 +120,9 @@ export default function Landing() {
             </div>
           </div>
 
-          {/* Phone mocks — hidden on mobile, shown on md+ */}
+          {/* Phone mock — hidden on mobile, shown on md+ */}
           <div className="hidden items-center justify-center md:relative md:flex">
-            <div className="relative flex items-center">
-              {/* iOS phone — back, tilted left */}
-              <div className="relative -mr-8 aspect-[9/19.5] w-[232px] -rotate-[6deg] rounded-[44px] border border-line bg-panel p-2 shadow-card">
-                <div className="absolute left-1/2 top-2.5 z-10 h-5 w-20 -translate-x-1/2 rounded-full bg-[#111]" />
-                <div className="relative h-full w-full overflow-hidden rounded-[36px] bg-[#FFFCF2]">
-                  <Image
-                    src="/landing-ios.jpg"
-                    alt="Rhoddo iOS app screenshot"
-                    fill
-                    sizes="232px"
-                    className="object-contain"
-                    priority
-                  />
-                </div>
-                <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 rounded-full border border-line bg-panel px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-mute">
-                  iOS
-                </div>
-              </div>
-
-              {/* Android phone — front, tilted right */}
-              <div className="relative z-10 aspect-[9/19.5] w-[248px] rotate-[5deg] rounded-[36px] border border-line bg-panel p-2 shadow-card">
-                <div className="absolute left-1/2 top-3 z-10 h-2.5 w-2.5 -translate-x-1/2 rounded-full bg-[#111]" />
-                <div className="relative h-full w-full overflow-hidden rounded-[30px] bg-[#0E1512]">
-                  <Image
-                    src="/landing-android.jpg"
-                    alt="Rhoddo Android app screenshot"
-                    fill
-                    sizes="248px"
-                    className="object-contain"
-                    priority
-                  />
-                </div>
-                <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 rounded-full border border-line bg-panel px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-mute">
-                  Android
-                </div>
-              </div>
-            </div>
+            <AppHomeMock />
 
             {/* glow accent behind phones */}
             <div className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center">
@@ -269,29 +247,24 @@ export default function Landing() {
           </p>
 
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <div className="group flex items-center gap-3 rounded-2xl border border-line bg-panel px-6 py-4 opacity-60">
-              <svg viewBox="0 0 24 24" className="h-7 w-7 fill-ink" aria-hidden>
-                <path d="M16.365 1.43c0 1.14-.42 2.23-1.18 3.04-.81.86-2.13 1.52-3.22 1.43-.13-1.1.43-2.25 1.16-3 .82-.84 2.21-1.46 3.24-1.47ZM20.5 17.45c-.55 1.27-.81 1.84-1.52 2.96-.99 1.55-2.39 3.49-4.13 3.51-1.55.02-1.95-1-4.05-1-2.1.01-2.54 1.02-4.09 1-1.74-.02-3.07-1.77-4.06-3.32C-.13 17.43-.4 12.36 1.5 9.66c1.34-1.92 3.46-3.05 5.45-3.05 2.03 0 3.31 1.11 4.99 1.11 1.63 0 2.62-1.11 4.97-1.11 1.78 0 3.66.97 5 2.65-4.4 2.41-3.68 8.7-1.41 8.19Z"/>
-              </svg>
-              <div className="text-left">
-                <div className="text-[10px] uppercase tracking-wider text-gold">Coming soon</div>
-                <div className="font-display text-lg text-ink">App Store</div>
-              </div>
-            </div>
-
-            <div className="group flex items-center gap-3 rounded-2xl border border-line bg-panel px-6 py-4 opacity-60">
+            <a
+              href={PLAY_STORE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center gap-3 rounded-2xl border border-line bg-panel px-6 py-4 transition hover:border-gold"
+            >
               <svg viewBox="0 0 24 24" className="h-7 w-7 fill-ink" aria-hidden>
                 <path d="M3.6 2.5C3.22 2.85 3 3.4 3 4.1v15.8c0 .7.22 1.25.6 1.6l8.4-9.5L3.6 2.5Zm10.06 9 2.7-3.05L5.55 2.27c-.36-.2-.7-.27-1-.21l9.11 9.44Zm0 1L4.55 21.94c.3.06.64-.01 1-.21l10.81-6.18-2.7-3.05Zm6.5-3.7-3.32-1.9-2.96 3.34 2.96 3.34 3.32-1.9c1.05-.6 1.05-2.27 0-2.88Z"/>
               </svg>
               <div className="text-left">
-                <div className="text-[10px] uppercase tracking-wider text-gold">Coming soon</div>
+                <div className="text-[10px] uppercase tracking-wider text-gold">Get it on</div>
                 <div className="font-display text-lg text-ink">Google Play</div>
               </div>
-            </div>
+            </a>
           </div>
 
           <div className="mt-8 text-xs text-mute">
-            Launching soon on iOS and Android. Stay tuned.
+            Currently available on Android.
           </div>
         </div>
       </section>
@@ -311,7 +284,6 @@ export default function Landing() {
             <a href="#" className="hover:text-ink">Contact</a>
             <Link href="/host/login" className="hover:text-gold">Host sign in</Link>
             <Link href="/host/register" className="hover:text-gold">Apply as a host</Link>
-            <Link href="/login" className="hover:text-ink">Staff admin</Link>
           </div>
           <div className="text-center text-[11px] text-mute md:text-right">
             Built by <span className="text-gold">WAGLOGY</span>

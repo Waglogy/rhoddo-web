@@ -3,13 +3,13 @@ import { requireAdminToken } from '@/lib/auth';
 import { LogoutButton } from '@/components/LogoutButton';
 
 const NAV = [
-  { href: '/admin', label: 'Overview' },
-  { href: '/admin/hosts', label: 'Hosts' },
-  { href: '/admin/events', label: 'Events' },
-  { href: '/admin/venues', label: 'Venues' },
-  { href: '/admin/bookings', label: 'Bookings' },
-  { href: '/admin/users', label: 'Users' },
-  { href: '/admin/notifications', label: 'Notifications' },
+  { href: '/manage-rhoddo', label: 'Overview' },
+  { href: '/manage-rhoddo/hosts', label: 'Hosts' },
+  { href: '/manage-rhoddo/events', label: 'Events' },
+  { href: '/manage-rhoddo/venues', label: 'Venues' },
+  { href: '/manage-rhoddo/bookings', label: 'Bookings' },
+  { href: '/manage-rhoddo/users', label: 'Users' },
+  { href: '/manage-rhoddo/notifications', label: 'Notifications' },
 ];
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -18,7 +18,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="flex min-h-screen">
       <aside className="hidden w-64 shrink-0 border-r border-line bg-bg p-6 md:block">
-        <Link href="/admin" className="block">
+        <Link href="/manage-rhoddo" className="block">
           <div className="label">Rhoddo</div>
           <div className="font-display text-2xl text-ink">Admin</div>
         </Link>

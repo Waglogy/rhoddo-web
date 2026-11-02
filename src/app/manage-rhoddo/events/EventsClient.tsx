@@ -202,7 +202,7 @@ function EventRowItem({
 }) {
   return (
     <div className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
-      <Link href={`/admin/events/${e.id}`} className="min-w-0 flex-1 transition hover:opacity-80">
+      <Link href={`/manage-rhoddo/events/${e.id}`} className="min-w-0 flex-1 transition hover:opacity-80">
         <div className="flex items-center gap-2">
           <div className="truncate text-base text-ink">{e.title}</div>
           <StatusPill published={e.published} />

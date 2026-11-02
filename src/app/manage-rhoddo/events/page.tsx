@@ -16,7 +16,7 @@ export default async function EventsPage() {
             or delete permanently.
           </p>
         </div>
-        <Link href="/admin/events/new" className="btn-primary">
+        <Link href="/manage-rhoddo/events/new" className="btn-primary">
           + New event
         </Link>
       </div>
