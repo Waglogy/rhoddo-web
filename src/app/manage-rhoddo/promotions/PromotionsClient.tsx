@@ -138,7 +138,7 @@ export function PromotionsClient({ promos, events }: { promos: PromoSlide[]; eve
             <div>
               <FieldLabel
                 label="Image"
-                info="Use a tall image, ideally 1127 × 1400 pixels. Keep the main subject in the middle, because the top holds the weather and profile icons, and the bottom holds your text."
+                info="JPG, PNG or an animated GIF. Use a tall image, ideally 1127 × 1400 pixels, and keep the main subject in the middle, because the top holds the weather and profile icons, and the bottom holds your text. Keep GIFs under 3 MB so they load quickly on mobile data."
               />
               <ImageUpload value={draft.image} onChange={(image) => setDraft({ ...draft, image })} mode="admin" />
             </div>
