@@ -3,10 +3,63 @@
 @tailwind utilities;
 
 @layer base {
+  /* The landing page, host panel and legal pages. Light by default, and visitors can
+     switch to dark. Gold and pine are darker here so they stay readable as text. */
+  .theme-site {
+    --bg: 250 247 240;
+    --panel: 255 255 255;
+    --line: 229 224 212;
+    --ink: 22 32 28;
+    --mute: 92 104 98;
+    --primary: 196 42 64;
+    --gold: 148 99 0;
+    --pine: 31 95 76;
+    --mist: 62 98 158;
+    --shadow-card: 0 1px 2px rgba(22, 32, 28, 0.05), 0 18px 40px -28px rgba(22, 32, 28, 0.22);
+    --art-far: url('/app/himalaya-far-light.svg');
+    --art-peaks: url('/app/himalaya-peaks-light.svg');
+    --hero-scrim: linear-gradient(90deg, rgba(250, 247, 240, 0.85) 0%, rgba(250, 247, 240, 0.45) 48%, rgba(250, 247, 240, 0) 72%);
+    color-scheme: light;
+  }
+  /* Dark: always the admin panel and the landing page's phone mock, plus the site
+     when a visitor chooses it. Must stay after .theme-site so the phone mock wins. */
+  :root,
+  .theme-dark,
+  html[data-theme='dark'] .theme-site {
+    --bg: 14 21 18;
+    --panel: 20 27 24;
+    --line: 31 39 36;
+    --ink: 246 241 230;
+    --mute: 141 152 147;
+    --primary: 209 54 75;
+    --gold: 232 184 74;
+    --pine: 46 110 91;
+    --mist: 91 127 185;
+    --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.04), 0 30px 80px -40px rgba(0, 0, 0, 0.6);
+    --art-far: url('/app/himalaya-far.svg');
+    --art-peaks: url('/app/himalaya-peaks.svg');
+    --hero-scrim: linear-gradient(90deg, rgba(14, 21, 18, 0.72) 0%, rgba(14, 21, 18, 0.35) 48%, rgba(14, 21, 18, 0) 72%);
+  }
+  html[data-theme='dark'] .theme-site {
+    color-scheme: dark;
+  }
+  .theme-site,
+  .theme-dark {
+    color: rgb(var(--ink));
+  }
   html, body {
-    background: #0E1512;
-    color: #F6F1E6;
+    background: rgb(var(--bg));
+    color: rgb(var(--ink));
     -webkit-font-smoothing: antialiased;
+  }
+  /* Keeps the page edges light when scrolling past the top or bottom. */
+  html:has(.theme-site),
+  html:has(.theme-site) body {
+    background: rgb(250 247 240);
+  }
+  html[data-theme='dark']:has(.theme-site),
+  html[data-theme='dark']:has(.theme-site) body {
+    background: rgb(14 21 18);
   }
   ::selection {
     background: #D1364B;
@@ -28,7 +81,8 @@
     @apply inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-medium transition;
   }
   .btn-primary {
-    @apply btn bg-primary text-ink hover:bg-primary/90;
+    @apply btn bg-primary hover:bg-primary/90;
+    color: #f6f1e6;
   }
   .btn-ghost {
     @apply btn border border-line text-ink hover:bg-panel;
@@ -36,7 +90,15 @@
   .btn-danger {
     @apply btn border border-line text-ink hover:bg-primary hover:border-primary;
   }
+  .btn-danger:hover {
+    color: #f6f1e6;
+  }
 }
+
+/* The theme switch shows the theme it will change to. */
+.theme-icon-to-light { display: none; }
+html[data-theme='dark'] .theme-icon-to-light { display: block; }
+html[data-theme='dark'] .theme-icon-to-dark { display: none; }
 
 /* Landing page phone mock: crossfading promo carousel, same 4s rhythm as the app. */
 @keyframes promo-slide {

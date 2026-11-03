@@ -3,6 +3,8 @@ import { hostApi } from '@/lib/api';
 import { EventForm } from '@/components/EventForm';
 
 export default async function HostNewEventPage() {
+  const me = await hostApi<{ organizer: { status: string } }>('/organizer/me');
+  const draftOnly = me.organizer.status !== 'approved';
   const venuesData = await hostApi<{ venues: Array<{ id: string; name: string }> }>(
     '/organizer/venues',
   );
@@ -15,7 +17,8 @@ export default async function HostNewEventPage() {
       <div className="label mt-4">New listing</div>
       <h1 className="font-display text-4xl text-ink">Create event</h1>
       <p className="mt-1 text-sm text-mute">
-        Choose one of your venues. You need an approved host account to publish.
+        Choose one of your venues.
+        {draftOnly && ' You can save it as a draft and publish it once your account is approved.'}
       </p>
 
       {venuesData.venues.length === 0 ? (
@@ -32,7 +35,7 @@ export default async function HostNewEventPage() {
         </div>
       ) : (
         <div className="mt-10">
-          <EventForm venues={venuesData.venues} mode="host" />
+          <EventForm venues={venuesData.venues} mode="host" draftOnly={draftOnly} />
         </div>
       )}
     </div>

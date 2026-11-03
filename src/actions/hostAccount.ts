@@ -10,9 +10,6 @@ export async function updateHostProfile(form: {
   name: string;
   businessName: string;
   phone: string;
-  payoutAccountName: string;
-  payoutAccountNo: string;
-  payoutIfsc: string;
 }) {
   const token = (await cookies()).get(HOST_COOKIE)?.value;
   if (!token) throw new Error('Not signed in');
@@ -26,12 +23,6 @@ export async function updateHostProfile(form: {
   const body: Record<string, string> = { name, businessName };
   const phone = form.phone.trim();
   if (phone) body.phone = phone;
-  const payoutName = form.payoutAccountName.trim();
-  if (payoutName) body.payoutAccountName = payoutName;
-  const ifsc = form.payoutIfsc.trim().toUpperCase();
-  if (ifsc) body.payoutIfsc = ifsc;
-  const acct = form.payoutAccountNo.trim();
-  if (acct) body.payoutAccountNo = acct;
 
   const res = await fetch(`${API_URL}/organizer/me`, {
     method: 'PUT',

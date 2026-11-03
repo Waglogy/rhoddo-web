@@ -13,6 +13,8 @@ type Stats = {
     organizers: number;
     pendingOrganizers: number;
     platformFeeINR: number;
+    feesPaidINR: number;
+    feesDueINR: number;
     payoutINR: number;
   };
   recentBookings: Array<{
@@ -32,7 +34,9 @@ export default async function OverviewPage() {
   const cards = [
     { label: 'Revenue', value: formatINR(s.revenueINR), accent: 'gold' },
     { label: 'Platform fees', value: formatINR(s.platformFeeINR ?? 0), accent: undefined },
-    { label: 'Host payouts', value: formatINR(s.payoutINR ?? 0), accent: undefined },
+    { label: 'Fees paid', value: formatINR(s.feesPaidINR ?? 0), accent: undefined },
+    { label: 'Fees due', value: formatINR(s.feesDueINR ?? 0), accent: (s.feesDueINR ?? 0) > 0 ? 'gold' : undefined },
+    { label: 'Host earnings', value: formatINR(s.payoutINR ?? 0), accent: undefined },
     { label: 'Bookings', value: s.bookings.toString() },
     { label: 'Events', value: s.events.toString() },
     { label: 'Upcoming', value: s.upcomingEvents.toString() },

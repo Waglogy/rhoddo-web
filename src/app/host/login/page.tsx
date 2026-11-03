@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { useRouter } from 'next/navigation';
 
 export default function HostLoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('host@elginpandim.local');
-  const [password, setPassword] = useState('tashi2026');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,6 +35,7 @@ export default function HostLoginPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center px-6">
+      <div className="absolute right-4 top-4 z-10"><ThemeToggle /></div>
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute -left-40 top-20 h-[420px] w-[420px] rounded-full bg-pine/25 blur-[140px]" />
         <div className="absolute right-[-100px] bottom-10 h-[360px] w-[360px] rounded-full bg-gold/12 blur-[140px]" />
@@ -43,7 +45,7 @@ export default function HostLoginPage() {
         <Link href="/" className="inline-block label">← Rhoddo</Link>
         <h1 className="mt-3 font-display text-3xl text-ink">Host sign in</h1>
         <p className="mt-1 text-sm text-mute">
-          Manage your venues, events, bookings and payouts.
+          Manage your venues, events and bookings.
         </p>
 
         <form onSubmit={onSubmit} className="mt-8 space-y-4">

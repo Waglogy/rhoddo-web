@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { updateHostProfile } from '@/actions/hostAccount';
+import type { HostPayments } from './HostPaymentsCard';
 
 export type OrganizerProfile = {
   id: string;
@@ -10,11 +11,10 @@ export type OrganizerProfile = {
   name: string;
   businessName: string;
   phone: string | null;
+  phoneVerified: boolean;
   status: 'pending' | 'approved' | 'suspended';
   freeTicketsRemaining: number;
-  payoutAccountName: string | null;
-  payoutAccountNo: string | null;
-  payoutIfsc: string | null;
+  payments: HostPayments;
   createdAt: string;
   approvedAt: string | null;
 };
@@ -27,30 +27,16 @@ export function HostAccountForm({ organizer }: { organizer: OrganizerProfile }) 
   const [name, setName] = useState(organizer.name);
   const [businessName, setBusinessName] = useState(organizer.businessName);
   const [phone, setPhone] = useState(organizer.phone ?? '');
-  const [payoutAccountName, setPayoutAccountName] = useState(organizer.payoutAccountName ?? '');
-  const [payoutAccountNo, setPayoutAccountNo] = useState('');
-  const [payoutIfsc, setPayoutIfsc] = useState(organizer.payoutIfsc ?? '');
-
-  const maskedHint =
-    organizer.payoutAccountNo && organizer.payoutAccountNo.startsWith('****')
-      ? `${organizer.payoutAccountNo} on file — enter a new number only if you want to replace it`
-      : undefined;
 
   useEffect(() => {
     setName(organizer.name);
     setBusinessName(organizer.businessName);
     setPhone(organizer.phone ?? '');
-    setPayoutAccountName(organizer.payoutAccountName ?? '');
-    setPayoutIfsc(organizer.payoutIfsc ?? '');
-    setPayoutAccountNo('');
   }, [
     organizer.id,
     organizer.name,
     organizer.businessName,
     organizer.phone,
-    organizer.payoutAccountName,
-    organizer.payoutIfsc,
-    organizer.payoutAccountNo,
   ]);
 
   function onSubmit(e: React.FormEvent) {
@@ -61,21 +47,15 @@ export function HostAccountForm({ organizer }: { organizer: OrganizerProfile }) 
         name,
         businessName,
         phone,
-        payoutAccountName,
-        payoutAccountNo,
-        payoutIfsc,
       })
-        .then(() => {
-          setPayoutAccountNo('');
-          router.refresh();
-        })
+        .then(() => router.refresh())
         .catch((err) => setError(err instanceof Error ? err.message : 'Save failed'));
     });
   }
 
   return (
     <form onSubmit={onSubmit} className="card space-y-6 p-6">
-      <h2 className="font-display text-xl text-ink">Profile &amp; payout</h2>
+      <h2 className="font-display text-xl text-ink">Profile</h2>
 
       <div className="grid gap-5 md:grid-cols-2">
         <div className="md:col-span-2">
@@ -99,42 +79,16 @@ export function HostAccountForm({ organizer }: { organizer: OrganizerProfile }) 
         <div className="md:col-span-2">
           <label className="label mb-1 block">Phone</label>
           <input className="input" value={phone} onChange={(e) => setPhone(e.target.value)} />
+          <p className="mt-1 text-[11px] text-mute">If you change your number, you&apos;ll need to verify it again.</p>
         </div>
       </div>
 
       <div className="border-t border-line pt-6">
-        <h3 className="text-sm font-medium text-ink">Payout (INR)</h3>
-        <p className="mt-1 text-xs text-mute">Bank details for settlements. Keep these accurate.</p>
-        <div className="mt-4 grid gap-5 md:grid-cols-2">
-          <div className="md:col-span-2">
-            <label className="label mb-1 block">Account holder name</label>
-            <input
-              className="input"
-              value={payoutAccountName}
-              onChange={(e) => setPayoutAccountName(e.target.value)}
-            />
-          </div>
-          <div className="md:col-span-2">
-            <label className="label mb-1 block">Account number</label>
-            <input
-              className="input"
-              value={payoutAccountNo}
-              onChange={(e) => setPayoutAccountNo(e.target.value)}
-              placeholder="Leave blank to keep current account on file"
-              autoComplete="off"
-            />
-            {maskedHint && <p className="mt-1 text-[11px] text-mute">{maskedHint}</p>}
-          </div>
-          <div>
-            <label className="label mb-1 block">IFSC</label>
-            <input
-              className="input uppercase"
-              value={payoutIfsc}
-              onChange={(e) => setPayoutIfsc(e.target.value)}
-              placeholder="e.g. SBIN0001234"
-            />
-          </div>
-        </div>
+        <h3 className="text-sm font-medium text-ink">Receiving payments</h3>
+        <p className="mt-1 text-xs text-mute">
+          You&apos;ll receive payments through your own Razorpay account, so Rhoddo never holds
+          your money. Setup is coming soon.
+        </p>
       </div>
 
       {error && (

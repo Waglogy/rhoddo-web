@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useMemo, useState, useTransition } from 'react';
 import { formatDate, formatINR } from '@/lib/format';
-import { setEventPublished, deleteEvent } from '@/actions/adminEvents';
+import { setEventPublished, deleteEvent, reviewCulturalEvent } from '@/actions/adminEvents';
 
 export type EventRow = {
   id: string;
@@ -13,6 +13,7 @@ export type EventRow = {
   date: string;
   priceFromINR: number;
   published: boolean;
+  culturalStatus: 'pending' | 'approved' | 'rejected';
   bookingCount: number;
   venue: { name: string };
   organizer: {
@@ -167,6 +168,7 @@ export function EventsClient({ events }: { events: EventRow[] }) {
                       runAction(e.id, () => setEventPublished(e.id, !e.published))
                     }
                     onDelete={() => runAction(e.id, () => deleteEvent(e.id))}
+                  onReview={(decision) => runAction(e.id, () => reviewCulturalEvent(e.id, decision))}
                   />
                 ))}
               </div>
@@ -181,6 +183,7 @@ export function EventsClient({ events }: { events: EventRow[] }) {
                   busy={pending && busyId === e.id}
                   onToggle={() => runAction(e.id, () => setEventPublished(e.id, !e.published))}
                   onDelete={() => runAction(e.id, () => deleteEvent(e.id))}
+                  onReview={(decision) => runAction(e.id, () => reviewCulturalEvent(e.id, decision))}
                 />
               ))}
             </div>
@@ -194,18 +197,32 @@ function EventRowItem({
   busy,
   onToggle,
   onDelete,
+  onReview,
 }: {
   e: EventRow;
   busy: boolean;
   onToggle: () => void;
   onDelete: () => void;
+  onReview: (decision: 'approved' | 'rejected') => void;
 }) {
+  const inReview = e.category === 'cultural' && e.culturalStatus === 'pending';
+  const notApproved = e.category === 'cultural' && e.culturalStatus === 'rejected';
   return (
     <div className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
       <Link href={`/manage-rhoddo/events/${e.id}`} className="min-w-0 flex-1 transition hover:opacity-80">
         <div className="flex items-center gap-2">
           <div className="truncate text-base text-ink">{e.title}</div>
           <StatusPill published={e.published} />
+          {inReview && (
+            <span className="inline-block rounded-full border border-gold/60 bg-gold/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-gold">
+              Cultural review
+            </span>
+          )}
+          {notApproved && (
+            <span className="inline-block rounded-full border border-primary/60 bg-primary/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-primary">
+              Not approved
+            </span>
+          )}
         </div>
         <div className="mt-1 text-xs text-mute">
           {e.venue.name} · {e.district} · {e.category} · {formatDate(e.date)}
@@ -218,10 +235,31 @@ function EventRowItem({
           <div className="text-[11px] text-mute">{e.bookingCount} bookings</div>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap justify-end gap-2">
+          {(inReview || notApproved) && (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => onReview('approved')}
+              className="btn-primary text-xs disabled:opacity-50"
+            >
+              Approve as cultural
+            </button>
+          )}
+          {inReview && (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => onReview('rejected')}
+              className="btn-ghost text-xs disabled:opacity-50"
+            >
+              Reject
+            </button>
+          )}
           <button
             type="button"
-            disabled={busy}
+            disabled={busy || ((inReview || notApproved) && !e.published)}
+            title={inReview || notApproved ? 'Approve it as cultural first' : undefined}
             onClick={onToggle}
             className={`text-xs disabled:opacity-50 ${
               e.published ? 'btn-ghost' : 'btn-primary'

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
+import { THEME_INIT_SCRIPT } from '@/lib/theme';
 
 const display = localFont({
   src: '../fonts/Fraunces-latin.woff2',
@@ -24,6 +25,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${display.variable} ${sans.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body className="font-sans" suppressHydrationWarning>
         {children}
       </body>

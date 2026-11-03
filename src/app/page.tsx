@@ -1,6 +1,8 @@
 import Link from 'next/link';
+import { Logo } from '@/components/Logo';
 import type { Metadata } from 'next';
 import { AppHomeMock } from '@/components/AppHomeMock';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 export const metadata: Metadata = {
   title: 'Rhoddo — Sikkim Events, in your pocket',
@@ -13,15 +15,12 @@ const PLAY_STORE_URL =
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-bg text-ink">
+    <div className="theme-site min-h-screen bg-bg text-ink">
       {/* NAV */}
       <header className="relative z-10">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
           <Link href="/" className="flex items-center gap-2">
-            <span className="font-display text-2xl text-ink">Rhoddo</span>
-            <span className="hidden text-[10px] uppercase tracking-[0.18em] text-mute md:inline">
-              · Sikkim
-            </span>
+            <Logo className="h-8 w-auto sm:h-10" />
           </Link>
           <nav className="hidden items-center gap-8 text-sm text-mute md:flex">
             <a href="#features" className="transition hover:text-ink">Features</a>
@@ -32,6 +31,7 @@ export default function Landing() {
             </Link>
           </nav>
           <div className="flex items-center gap-2 sm:gap-3">
+            <ThemeToggle />
             <Link
               href="/host/login"
               className="rounded-xl px-3 py-2 text-sm text-mute transition hover:text-ink md:hidden"
@@ -58,24 +58,25 @@ export default function Landing() {
 
       {/* HERO */}
       <section className="relative overflow-hidden">
-        {/* Background atmosphere — pine + bloom crimson + sunrise gold */}
-        <div className="pointer-events-none absolute inset-0">
+        {/* Background atmosphere — pine + bloom crimson + sunrise gold. Fades in at the
+            top so the glows don't leave a hard line under the header. */}
+        <div className="pointer-events-none absolute inset-0 [mask-image:linear-gradient(to_bottom,transparent_0%,black_24%)]">
           <div className="absolute -left-40 top-20 h-[520px] w-[520px] rounded-full bg-pine/30 blur-[140px]" />
           <div className="absolute right-[-120px] top-[-80px] h-[420px] w-[420px] rounded-full bg-gold/15 blur-[140px]" />
           <div className="absolute bottom-[-200px] left-1/2 h-[400px] w-[800px] -translate-x-1/2 rounded-full bg-primary/15 blur-[160px]" />
-          {/* Himalayan range: sits at the bottom of the hero and fades out well below the top */}
-          <div className="absolute inset-x-0 bottom-0 h-[62%] bg-[url('/app/mountains.svg')] bg-cover bg-bottom bg-no-repeat opacity-40 md:opacity-80 [mask-image:linear-gradient(to_bottom,transparent_0%,black_12%)]" />
+          {/* Distant ridges across the whole hero */}
+          <div className="absolute inset-x-0 bottom-0 h-[62%] bg-[image:var(--art-far)] bg-cover bg-bottom bg-no-repeat opacity-40 md:opacity-70 [mask-image:linear-gradient(to_bottom,transparent_0%,black_30%)]" />
           {/* Keeps the hero text readable over the peaks */}
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(14,21,18,0.72)_0%,rgba(14,21,18,0.35)_48%,rgba(14,21,18,0)_72%)]" />
+          <div className="absolute inset-0 [background-image:var(--hero-scrim)]" />
         </div>
 
         <div className="relative mx-auto max-w-6xl px-5 pb-16 pt-10 sm:px-6 sm:pb-24 sm:pt-16 md:grid md:grid-cols-[1.1fr_0.9fr] md:gap-16 md:pt-24">
-          <div className="flex min-w-0 flex-col justify-center text-center md:text-left">
+          <div className="relative z-10 flex min-w-0 flex-col justify-center text-center md:text-left">
             <div className="label flex justify-center md:justify-start">Made in Sikkim</div>
             <h1 className="mt-3 font-display text-[2.25rem] leading-[1.08] text-ink sm:text-5xl md:text-7xl">
               Catch the
               <br />
-              <span className="text-gold">bloom</span> before
+              <span className="text-primary">bloom</span> before
               <br />
               it fades.
             </h1>
@@ -120,16 +121,18 @@ export default function Landing() {
             </div>
           </div>
 
-          {/* Phone mock — hidden on mobile, shown on md+ */}
+          {/* Phone mock, set into the landscape — hidden on mobile, shown on md+ */}
           <div className="hidden items-center justify-center md:relative md:flex">
-            <AppHomeMock />
-
-            {/* glow accent behind phones */}
-            <div className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center">
-              <div className="h-[460px] w-[440px] rounded-full bg-gold/10 blur-3xl" />
+            {/* Sunrise behind the peaks */}
+            <div className="pointer-events-none absolute left-1/2 top-1/2 h-[760px] w-[760px] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(circle,rgba(232,184,74,0.26)_0%,rgba(209,54,75,0.1)_45%,transparent_68%)]" />
+            {/* Peaks centred on the phone, so it always sits in the valley between them */}
+            <div className="pointer-events-none absolute -bottom-24 left-1/2 h-[760px] w-[1400px] -translate-x-1/2 bg-[image:var(--art-peaks)] bg-contain bg-bottom bg-no-repeat opacity-90 [mask-image:linear-gradient(to_right,transparent_24%,black_36%)]" />
+            <div className="theme-dark relative z-10">
+              <AppHomeMock />
             </div>
           </div>
         </div>
+
       </section>
 
       {/* FEATURES */}
@@ -273,7 +276,7 @@ export default function Landing() {
       <footer className="border-t border-line">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 px-6 py-12 md:flex-row">
           <div className="flex items-center gap-3">
-            <span className="font-display text-xl text-ink">Rhoddo</span>
+            <Logo className="h-8 w-auto" />
             <span className="text-[10px] uppercase tracking-[0.18em] text-mute">
               · Sikkim
             </span>

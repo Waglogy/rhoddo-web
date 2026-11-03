@@ -1,26 +1,15 @@
 "use client";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.rhoddo.com';
-
-function readClientToken(): string | undefined {
-  if (typeof document === 'undefined') return undefined;
-  // Try host cookie first (host portal pages), fall back to admin cookie.
-  const host = document.cookie.match(/(?:^|;\s*)rhoddo_host=([^;]+)/);
-  if (host) return decodeURIComponent(host[1]);
-  const admin = document.cookie.match(/(?:^|;\s*)rhoddo_admin=([^;]+)/);
-  return admin ? decodeURIComponent(admin[1]) : undefined;
-}
-
+// Goes through /api/backend, which adds the login token on the server. Only
+// /organizer/* and /admin/* paths work here.
 export async function clientApi<T = any>(
   path: string,
   init: { method?: string; body?: unknown; isFormData?: boolean } = {}
 ): Promise<T> {
-  const token = readClientToken();
   const headers: Record<string, string> = {};
   if (!init.isFormData) headers['Content-Type'] = 'application/json';
-  if (token) headers['Authorization'] = `Bearer ${token}`;
 
-  const res = await fetch(`${API_URL}${path}`, {
+  const res = await fetch(`/api/backend${path}`, {
     method: init.method || 'GET',
     headers,
     body: init.isFormData
@@ -31,9 +20,12 @@ export async function clientApi<T = any>(
   });
 
   const text = await res.text();
-  const data = text ? JSON.parse(text) : null;
+  let data: any = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    // Non-JSON error page; fall through to the generic message below.
+  }
   if (!res.ok) throw new Error(data?.error || `Request failed (${res.status})`);
   return data as T;
 }
-
-export const API_BASE = API_URL;

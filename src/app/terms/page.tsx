@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { Logo } from '@/components/Logo';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -9,22 +11,22 @@ export const metadata: Metadata = {
 
 export default function TermsAndConditions() {
   return (
-    <div className="min-h-screen bg-bg text-ink">
+    <div className="theme-site min-h-screen bg-bg text-ink">
       {/* NAV */}
       <header className="border-b border-line">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-6">
           <Link href="/" className="flex items-center gap-2">
-            <span className="font-display text-2xl text-ink">Rhoddo</span>
-            <span className="text-[10px] uppercase tracking-[0.18em] text-mute">
-              · Sikkim
-            </span>
+            <Logo className="h-8 w-auto sm:h-10" />
           </Link>
-          <Link
-            href="/"
-            className="text-sm text-mute transition hover:text-ink"
-          >
-            Back to home
-          </Link>
+          <div className="flex items-center gap-4">
+            <ThemeToggle />
+            <Link
+              href="/"
+              className="text-sm text-mute transition hover:text-ink"
+            >
+              Back to home
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -318,7 +320,7 @@ export default function TermsAndConditions() {
       <footer className="border-t border-line">
         <div className="mx-auto flex max-w-4xl flex-col items-center justify-between gap-6 px-6 py-12 md:flex-row">
           <div className="flex items-center gap-3">
-            <span className="font-display text-xl text-ink">Rhoddo</span>
+            <Logo className="h-8 w-auto" />
             <span className="text-[10px] uppercase tracking-[0.18em] text-mute">
               · Sikkim
             </span>

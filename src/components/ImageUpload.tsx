@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { clientApi, API_BASE } from '@/lib/client-api';
+import { clientApi } from '@/lib/client-api';
 
 export function ImageUpload({
   value,
@@ -63,15 +63,7 @@ export function ImageUpload({
               }}
             />
           </label>
-          <p className="mt-2 text-xs text-mute">
-            Or paste a URL below. Uploads go to {API_BASE}/uploads.
-          </p>
-          <input
-            className="input mt-2"
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder="https://…"
-          />
+          <p className="mt-2 text-xs text-mute">Upload an image, up to 8 MB.</p>
           {error && <p className="mt-2 text-xs text-primary">{error}</p>}
         </div>
       </div>

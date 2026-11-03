@@ -12,6 +12,8 @@ type VenueRow = {
 
 export default async function HostVenuesPage() {
   const data = await hostApi<{ venues: VenueRow[] }>('/organizer/venues');
+  const me = await hostApi<{ organizer: { status: string } }>('/organizer/me');
+  const draftOnly = me.organizer.status !== 'approved';
 
   return (
     <div>
@@ -41,7 +43,14 @@ export default async function HostVenuesPage() {
             className="flex items-center justify-between p-5 transition hover:bg-bg/40"
           >
             <div>
-              <div className="text-base text-ink">{v.name}</div>
+              <div className="flex items-center gap-2">
+                <div className="text-base text-ink">{v.name}</div>
+                {draftOnly && (
+                  <span className="rounded-full border border-line px-2 py-0.5 text-[10px] uppercase tracking-wider text-mute">
+                    Draft
+                  </span>
+                )}
+              </div>
               <div className="mt-1 text-xs text-mute">
                 {v.kind} · {v.district} · ★ {v.rating.toFixed(1)}
               </div>

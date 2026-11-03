@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { ADMIN_COOKIE, HOST_COOKIE } from './auth';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.rhoddo.com';
@@ -37,7 +38,8 @@ async function readToken(role: ApiRole): Promise<string | undefined> {
 export async function api<T = any>(path: string, init: ApiInit = {}): Promise<T> {
   const { body, token, noAuth, headers, as = 'admin', ...rest } = init;
 
-  const finalToken = token ?? (noAuth ? undefined : await readToken(as));
+  const cookieToken = token || noAuth ? undefined : await readToken(as);
+  const finalToken = token ?? cookieToken;
 
   let res: Response;
   try {
@@ -59,6 +61,9 @@ export async function api<T = any>(path: string, init: ApiInit = {}): Promise<T>
     }
     throw e;
   }
+
+  // The saved login is no longer valid, so ask the person to sign in again.
+  if (res.status === 401 && cookieToken) redirect(`/api/session-expired?as=${as}`);
 
   const text = await res.text();
   const data = text ? JSON.parse(text) : null;

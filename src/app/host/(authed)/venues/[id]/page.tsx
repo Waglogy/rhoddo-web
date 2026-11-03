@@ -8,6 +8,9 @@ type Props = { params: Promise<{ id: string }> };
 export default async function HostEditVenuePage({ params }: Props) {
   const { id } = await params;
 
+  const me = await hostApi<{ organizer: { status: string } }>('/organizer/me');
+  const draftOnly = me.organizer.status !== 'approved';
+
   let data: { venue: Record<string, unknown> };
   try {
     data = await hostApi<{ venue: Record<string, unknown> }>(`/organizer/venues/${id}`);
@@ -25,7 +28,7 @@ export default async function HostEditVenuePage({ params }: Props) {
       <p className="mt-1 text-sm text-mute">{String(data.venue.address)}</p>
 
       <div className="mt-10">
-        <VenueForm initial={data.venue as any} mode="host" />
+        <VenueForm initial={data.venue as any} mode="host" draftOnly={draftOnly} />
       </div>
     </div>
   );

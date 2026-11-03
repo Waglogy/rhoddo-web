@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { useRouter } from 'next/navigation';
 
 export default function HostRegisterPage() {
@@ -36,7 +37,8 @@ export default function HostRegisterPage() {
   }
 
   return (
-    <div className="relative min-h-screen px-6 py-16">
+    <div className="relative min-h-screen overflow-hidden px-6 py-16">
+      <div className="absolute right-4 top-4 z-10"><ThemeToggle /></div>
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute -left-40 top-20 h-[520px] w-[520px] rounded-full bg-pine/25 blur-[140px]" />
         <div className="absolute right-[-120px] top-40 h-[420px] w-[420px] rounded-full bg-gold/12 blur-[140px]" />
@@ -64,19 +66,19 @@ export default function HostRegisterPage() {
               note="The price you set is the price they pay. Always."
             />
             <Promise
-              big="₹15–₹25"
-              label="Flat per-ticket fee"
-              note="Capped at 3–4% of ticket price. Cultural events are free, forever."
-            />
-            <Promise
-              big="100"
+              big="30"
               label="Free tickets to start"
-              note="Your first 100 sold tickets cost you nothing in fees."
+              note="Your first 30 tickets cost you nothing."
             />
             <Promise
-              big="T+2"
-              label="Payouts"
-              note="Money in your account two business days after the event."
+              big="₹9"
+              label="Per ticket after that"
+              note="Only on events with more than 10 attendees. Smaller events and cultural events stay free."
+            />
+            <Promise
+              big="Direct"
+              label="Payments straight to you"
+              note="Buyers pay into your own Razorpay account, so Rhoddo never holds your money."
             />
           </div>
         </div>
@@ -86,8 +88,9 @@ export default function HostRegisterPage() {
           <div className="label">Apply to host</div>
           <h2 className="mt-1 font-display text-2xl text-ink">Tell us about you</h2>
           <p className="mt-1 text-xs text-mute">
-            We&apos;ll review your application within 2 working days. You&apos;ll be
-            able to set up your venue and events while you wait.
+            After signing up, verify your phone number with a code. We&apos;ll then review
+            your application within 2 working days. Once approved, you can add your venues
+            and events.
           </p>
 
           <form onSubmit={onSubmit} className="mt-6 space-y-4">
@@ -129,7 +132,8 @@ export default function HostRegisterPage() {
                   className="input"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+91"
+                  placeholder="10-digit mobile"
+                  required
                 />
               </div>
             </div>

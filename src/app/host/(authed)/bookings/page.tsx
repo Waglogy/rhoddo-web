@@ -1,12 +1,13 @@
 import { hostApi } from '@/lib/api';
 import { formatINR, formatDateTime } from '@/lib/format';
+import { includesEarlierTickets } from '@/lib/pricing';
 
 type Booking = {
   id: string;
   orderNo: string;
   qty: number;
   total: number;
-  payoutINR: number;
+  platformFeeINR: number;
   status: string;
   createdAt: string;
   event?: { title: string; venue?: { name: string } };
@@ -45,7 +46,10 @@ export default async function HostBookingsPage() {
             </div>
             <div className="flex shrink-0 flex-col items-start gap-1 sm:items-end">
               <div className="font-display text-base text-gold">{formatINR(b.total)}</div>
-              <div className="text-xs text-mute">Payout {formatINR(b.payoutINR ?? 0)}</div>
+              <div className="text-xs text-mute">
+                Rhoddo fee {formatINR(b.platformFeeINR ?? 0)}
+                {includesEarlierTickets(b.qty, b.platformFeeINR ?? 0) && ' · includes earlier tickets'}
+              </div>
             </div>
           </div>
         ))}

@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import type { ReactNode } from 'react';
+import { AutoScrollArea } from './AutoScrollArea';
 
 // A coded recreation of the app's home screen (rhoddo-app-/app/(tabs)/home.tsx)
 // in an Android frame, sized at roughly 0.79x the app's 360dp layout.
@@ -388,8 +389,8 @@ export function AppHomeMock() {
               <span className="absolute left-[3px] top-[3px] h-[3px] w-[3px] rounded-full bg-[#27384F]" />
             </span>
 
-            {/* Scrolls with wheel, trackpad or arrow keys; the page takes over at either end. */}
-            <div
+            {/* Scrolls by itself. Hover to scroll with wheel, trackpad or arrow keys; the page takes over at either end. */}
+            <AutoScrollArea
               role="region"
               aria-label="Scrollable preview of the Rhoddo Android app home screen, with promotional banners, Browse by mood categories, the Sikkim Festival Calendar and upcoming events"
               tabIndex={0}
@@ -418,7 +419,7 @@ export function AppHomeMock() {
                   <ResortRows />
                 </div>
               </div>
-            </div>
+            </AutoScrollArea>
 
             <TabBar />
 

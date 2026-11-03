@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('admin@rhoddo.local');
-  const [password, setPassword] = useState('tashi2026');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -68,10 +68,6 @@ export default function LoginPage() {
             {loading ? 'Signing in…' : 'Sign in'}
           </button>
         </form>
-
-        <p className="mt-6 text-center text-xs text-mute">
-          Default: admin@rhoddo.local / tashi2026
-        </p>
       </div>
     </div>
   );

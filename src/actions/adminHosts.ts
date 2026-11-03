@@ -34,6 +34,11 @@ export async function setOrganizerStatus(
   revalidatePath('/manage-rhoddo');
 }
 
+export async function markOrganizerPhoneVerified(id: string) {
+  await adminJson(`/admin/organizers/${id}/phone-verified`, { method: 'PUT' });
+  revalidatePath('/manage-rhoddo/hosts');
+}
+
 export async function setOrganizerCredit(id: string, freeTicketsRemaining: number) {
   await adminJson(`/admin/organizers/${id}/credit`, {
     method: 'PUT',

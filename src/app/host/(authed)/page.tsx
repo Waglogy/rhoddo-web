@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { hostApi } from '@/lib/api';
 import { formatINR, formatDate } from '@/lib/format';
+import { includesEarlierTickets } from '@/lib/pricing';
 
 type Stats = {
   stats: {
@@ -10,7 +11,8 @@ type Stats = {
     bookings: number;
     grossSalesINR: number;
     platformFeeINR: number;
-    payoutINR: number;
+    feesPaidINR: number;
+    feesDueINR: number;
     discountGivenINR: number;
     freeTicketsRemaining: number;
     status: string;
@@ -41,26 +43,39 @@ export default async function HostDashboard() {
       <div className="mt-10 grid gap-4 md:grid-cols-[2fr_1fr]">
         <div className="card relative overflow-hidden p-7">
           <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-gold/12 blur-3xl" />
-          <div className="label">You&apos;ve kept</div>
+          <div className="label">Ticket sales</div>
           <div className="mt-2 font-display text-5xl text-gold">
-            {formatINR(s.payoutINR)}
+            {formatINR(s.grossSalesINR)}
           </div>
           <div className="mt-4 grid grid-cols-2 gap-6 text-sm">
             <div>
               <div className="text-[11px] uppercase tracking-wider text-mute">
-                Gross sales
-              </div>
-              <div className="mt-1 font-display text-lg text-ink">
-                {formatINR(s.grossSalesINR)}
-              </div>
-            </div>
-            <div>
-              <div className="text-[11px] uppercase tracking-wider text-mute">
-                Rhoddo fee
+                Rhoddo fees to date
               </div>
               <div className="mt-1 font-display text-lg text-ink">
                 {formatINR(s.platformFeeINR)}
               </div>
+            </div>
+            <div>
+              <div className="text-[11px] uppercase tracking-wider text-mute">
+                Paid to Rhoddo
+              </div>
+              <div className="mt-1 font-display text-lg text-ink">
+                {formatINR(s.feesPaidINR)}
+              </div>
+            </div>
+            <div>
+              <div className="text-[11px] uppercase tracking-wider text-mute">
+                Fee due
+              </div>
+              <div className={`mt-1 font-display text-lg ${s.feesDueINR > 0 ? 'text-gold' : 'text-ink'}`}>
+                {formatINR(s.feesDueINR)}
+              </div>
+              {s.feesDueINR > 0 && (
+                <Link href="/host/account" className="mt-0.5 block text-[11px] text-mute underline hover:text-ink">
+                  How to pay
+                </Link>
+              )}
             </div>
             {s.discountGivenINR > 0 && (
               <div>
@@ -82,13 +97,14 @@ export default async function HostDashboard() {
         </div>
 
         <div className="card p-7">
-          <div className="label">Free ticket credit</div>
+          <div className="label">Free tickets remaining</div>
           <div className="mt-2 font-display text-5xl text-ink">
             {s.freeTicketsRemaining}
           </div>
           <p className="mt-3 text-xs text-mute">
-            Tickets you can sell with zero Rhoddo fee. Your launch credit refills
-            on request — talk to us when you&apos;re close to running out.
+            Tickets you can sell with no Rhoddo fee. After these, events with more
+            than 10 attendees cost ₹9 per ticket. Smaller events and cultural events
+            stay free.
           </p>
         </div>
       </div>
@@ -108,7 +124,7 @@ export default async function HostDashboard() {
           {data.recentBookings.length === 0 && (
             <div className="p-6 text-sm text-mute">
               No bookings yet. Once buyers book your events, they&apos;ll show up here
-              with the exact payout breakdown.
+              with any Rhoddo fee.
             </div>
           )}
           {data.recentBookings.map((b) => (
@@ -122,10 +138,11 @@ export default async function HostDashboard() {
               </div>
               <div className="text-right">
                 <div className="font-display text-base text-gold">
-                  {formatINR(b.payoutINR)}
+                  {formatINR(b.total)}
                 </div>
                 <div className="text-[11px] text-mute">
-                  fee {formatINR(b.platformFeeINR)}
+                  Rhoddo fee {formatINR(b.platformFeeINR)}
+                  {includesEarlierTickets(b.qty, b.platformFeeINR) && ' · includes earlier tickets'}
                 </div>
               </div>
             </div>

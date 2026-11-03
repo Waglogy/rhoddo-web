@@ -1,21 +1,29 @@
 import Link from 'next/link';
 import { hostApi } from '@/lib/api';
 import { formatDate, formatINR } from '@/lib/format';
+import { EventPublishButton, EventStatusBadge } from '@/components/EventStatus';
 
 type EventRow = {
   id: string;
   title: string;
+  endDate?: string | null;
   category: string;
   district: string;
   date: string;
   priceFromINR: number;
   published: boolean;
   bookingCount: number;
+  culturalStatus: 'pending' | 'approved' | 'rejected';
+  fees: { feeINR: number };
   venue: { name: string };
 };
 
 export default async function HostEventsPage() {
-  const data = await hostApi<{ events: EventRow[] }>('/organizer/events');
+  const [data, me] = await Promise.all([
+    hostApi<{ events: EventRow[] }>('/organizer/events'),
+    hostApi<{ organizer: { status: string } }>('/organizer/me'),
+  ]);
+  const hostApproved = me.organizer.status === 'approved';
 
   return (
     <div>
@@ -37,29 +45,29 @@ export default async function HostEventsPage() {
           </div>
         )}
         {data.events.map((e) => (
-          <Link
+          <div
             key={e.id}
-            href={`/host/events/${e.id}`}
-            className="flex items-center justify-between gap-6 p-5 transition hover:bg-bg/40"
+            className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 p-5 transition hover:bg-bg/40"
           >
-            <div className="min-w-0 flex-1">
+            <Link href={`/host/events/${e.id}`} className="min-w-0 flex-1 basis-64">
               <div className="flex items-center gap-2">
                 <div className="truncate text-base text-ink">{e.title}</div>
-                {!e.published && (
-                  <span className="rounded-full border border-line px-2 py-0.5 text-[10px] uppercase tracking-wider text-mute">
-                    Draft
-                  </span>
-                )}
+                <EventStatusBadge event={e} />
               </div>
               <div className="mt-1 text-xs text-mute">
                 {e.venue.name} · {e.district} · {e.category} · {formatDate(e.date)}
               </div>
+            </Link>
+            <div className="flex items-center gap-6">
+              <div className="text-right">
+                <div className="font-display text-base text-gold">{formatINR(e.priceFromINR)}</div>
+                <div className="text-[11px] text-mute">
+                  {e.bookingCount} bookings · {formatINR(e.fees.feeINR)} fee
+                </div>
+              </div>
+              <EventPublishButton event={e} hostApproved={hostApproved} />
             </div>
-            <div className="text-right">
-              <div className="font-display text-base text-gold">{formatINR(e.priceFromINR)}</div>
-              <div className="text-[11px] text-mute">{e.bookingCount} bookings</div>
-            </div>
-          </Link>
+          </div>
         ))}
       </div>
     </div>

@@ -36,6 +36,12 @@ export async function setEventPublished(id: string, published: boolean) {
   revalidatePath('/manage-rhoddo');
 }
 
+export async function reviewCulturalEvent(id: string, decision: 'approved' | 'rejected') {
+  await adminJson(`/admin/events/${id}/cultural-review`, { method: 'PUT', body: { decision } });
+  revalidatePath('/manage-rhoddo/events');
+  revalidatePath('/manage-rhoddo');
+}
+
 export async function deleteEvent(id: string) {
   await adminJson(`/admin/events/${id}`, { method: 'DELETE' });
   revalidatePath('/manage-rhoddo/events');

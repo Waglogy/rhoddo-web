@@ -23,9 +23,12 @@ const DISTRICTS = ['Gangtok', 'Pelling', 'Lachung', 'Yuksom', 'Namchi', 'Ravangl
 export function VenueForm({
   initial,
   mode = 'admin',
+  draftOnly = false,
 }: {
   initial?: VenueInitial;
   mode?: 'admin' | 'host';
+  /** The host isn't approved yet, so what they save stays private. */
+  draftOnly?: boolean;
 }) {
   const router = useRouter();
   const isEdit = !!initial;
@@ -46,6 +49,10 @@ export function VenueForm({
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!image || !cover) {
+      setError('Please upload both a square image and a cover image');
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
@@ -152,7 +159,7 @@ export function VenueForm({
         <div className="flex gap-3">
           <button type="button" onClick={() => router.back()} className="btn-ghost">Cancel</button>
           <button type="submit" disabled={saving} className="btn-primary">
-            {saving ? 'Saving…' : isEdit ? 'Save changes' : 'Create venue'}
+            {saving ? 'Saving…' : draftOnly ? 'Save draft' : isEdit ? 'Save changes' : 'Create venue'}
           </button>
         </div>
       </div>
