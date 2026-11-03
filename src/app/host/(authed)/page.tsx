@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { hostApi } from '@/lib/api';
 import { formatINR, formatDate } from '@/lib/format';
 import { includesEarlierTickets } from '@/lib/pricing';
+import { HostGuideVideo } from '@/components/HostGuideVideo';
 
 type Stats = {
   stats: {
@@ -29,7 +30,12 @@ type Stats = {
   }>;
 };
 
-export default async function HostDashboard() {
+export default async function HostDashboard({
+  searchParams,
+}: {
+  searchParams: Promise<{ welcome?: string }>;
+}) {
+  const { welcome } = await searchParams;
   const data = await hostApi<Stats>('/organizer/stats');
   const s = data.stats;
 
@@ -46,8 +52,10 @@ export default async function HostDashboard() {
         </Link>
       </div>
 
+      <HostGuideVideo openOnLoad={welcome === '1'} />
+
       {/* Transparency card — the USP, made visible */}
-      <div className="mt-10 grid gap-4 md:grid-cols-[2fr_1fr]">
+      <div className="mt-6 grid gap-4 md:grid-cols-[2fr_1fr]">
         <div className="card relative overflow-hidden p-7">
           <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-gold/12 blur-3xl" />
           <div className="label">Ticket sales</div>

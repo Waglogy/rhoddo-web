@@ -27,7 +27,7 @@ export default function HostRegisterPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || 'Registration failed');
-      router.push('/host');
+      router.push('/host?welcome=1');
       router.refresh();
     } catch (err: any) {
       setError(err?.message || 'Registration failed');
