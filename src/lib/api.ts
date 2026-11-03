@@ -79,4 +79,12 @@ export async function api<T = any>(path: string, init: ApiInit = {}): Promise<T>
 export const hostApi = <T = any>(path: string, init: Omit<ApiInit, 'as'> = {}) =>
   api<T>(path, { ...init, as: 'host' });
 
+export type CategoryOption = { key: string; label: string };
+
+/** The categories hosts and admins can choose from. */
+export async function fetchCategoryOptions(): Promise<CategoryOption[]> {
+  const { categories } = await api<{ categories: CategoryOption[] }>('/categories', { noAuth: true });
+  return categories;
+}
+
 export const API_BASE = API_URL;

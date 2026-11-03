@@ -7,6 +7,7 @@ const NAV = [
   { href: '/manage-rhoddo/hosts', label: 'Hosts' },
   { href: '/manage-rhoddo/events', label: 'Events' },
   { href: '/manage-rhoddo/promotions', label: 'Promotions' },
+  { href: '/manage-rhoddo/categories', label: 'Categories' },
   { href: '/manage-rhoddo/venues', label: 'Venues' },
   { href: '/manage-rhoddo/bookings', label: 'Bookings' },
   { href: '/manage-rhoddo/users', label: 'Users' },

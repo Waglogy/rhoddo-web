@@ -1,13 +1,14 @@
 import Link from 'next/link';
-import { hostApi } from '@/lib/api';
+import { fetchCategoryOptions, hostApi } from '@/lib/api';
 import { EventForm } from '@/components/EventForm';
 
 export default async function HostNewEventPage() {
   const me = await hostApi<{ organizer: { status: string } }>('/organizer/me');
   const draftOnly = me.organizer.status !== 'approved';
-  const venuesData = await hostApi<{ venues: Array<{ id: string; name: string }> }>(
-    '/organizer/venues',
-  );
+  const [venuesData, categories] = await Promise.all([
+    hostApi<{ venues: Array<{ id: string; name: string }> }>('/organizer/venues'),
+    fetchCategoryOptions(),
+  ]);
 
   return (
     <div>
@@ -35,7 +36,7 @@ export default async function HostNewEventPage() {
         </div>
       ) : (
         <div className="mt-10">
-          <EventForm venues={venuesData.venues} mode="host" draftOnly={draftOnly} />
+          <EventForm venues={venuesData.venues} categories={categories} mode="host" draftOnly={draftOnly} />
         </div>
       )}
     </div>

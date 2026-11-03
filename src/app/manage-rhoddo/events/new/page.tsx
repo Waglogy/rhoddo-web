@@ -1,8 +1,11 @@
-import { api } from '@/lib/api';
+import { api, fetchCategoryOptions } from '@/lib/api';
 import { EventForm } from '@/components/EventForm';
 
 export default async function NewEventPage() {
-  const venuesData = await api<{ venues: Array<{ id: string; name: string }> }>('/admin/venues');
+  const [venuesData, categories] = await Promise.all([
+    api<{ venues: Array<{ id: string; name: string }> }>('/admin/venues'),
+    fetchCategoryOptions(),
+  ]);
 
   return (
     <div>
@@ -11,7 +14,7 @@ export default async function NewEventPage() {
       <p className="mt-1 text-sm text-mute">Fill in the details below to publish.</p>
 
       <div className="mt-10">
-        <EventForm venues={venuesData.venues} />
+        <EventForm venues={venuesData.venues} categories={categories} />
       </div>
     </div>
   );

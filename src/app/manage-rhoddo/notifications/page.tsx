@@ -1,4 +1,4 @@
-import { api } from '@/lib/api';
+import { api, fetchCategoryOptions } from '@/lib/api';
 import { NotificationsClient } from './NotificationsClient';
 
 type EventLite = { id: string; title: string; district: string; category: string };
@@ -13,9 +13,10 @@ type HistoryRow = {
 export default async function AdminNotificationsPage() {
   // Pull event list + recent history in parallel so the form can pre-populate
   // the event dropdown and the history panel shows something immediately.
-  const [eventsData, historyData] = await Promise.all([
+  const [eventsData, historyData, categories] = await Promise.all([
     api<{ events: EventLite[] }>('/admin/events'),
     api<{ history: HistoryRow[] }>('/admin/notifications/history'),
+    fetchCategoryOptions(),
   ]);
 
   return (
@@ -28,7 +29,7 @@ export default async function AdminNotificationsPage() {
       </p>
 
       <div className="mt-10">
-        <NotificationsClient events={eventsData.events} initialHistory={historyData.history} />
+        <NotificationsClient categories={categories} events={eventsData.events} initialHistory={historyData.history} />
       </div>
     </div>
   );

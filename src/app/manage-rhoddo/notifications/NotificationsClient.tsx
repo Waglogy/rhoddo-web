@@ -29,7 +29,6 @@ type HistoryRow = {
 type Audience = 'all_users' | 'event_attendees' | 'district_users' | 'category_interest';
 
 const DISTRICTS = ['Gangtok', 'Pelling', 'Lachung', 'Yuksom', 'Namchi', 'Ravangla'];
-const CATEGORIES = ['music', 'food', 'cultural', 'resort', 'adventure', 'festival'];
 
 const AUDIENCE_LABELS: Record<Audience, string> = {
   all_users: 'All users',
@@ -42,9 +41,11 @@ const TITLE_MAX = 80;
 const BODY_MAX = 240;
 
 export function NotificationsClient({
+  categories,
   events,
   initialHistory,
 }: {
+  categories: Array<{ key: string; label: string }>;
   events: EventLite[];
   initialHistory: HistoryRow[];
 }) {
@@ -52,7 +53,7 @@ export function NotificationsClient({
   const [audience, setAudience] = useState<Audience>('all_users');
   const [eventId, setEventId] = useState<string>(events[0]?.id ?? '');
   const [district, setDistrict] = useState<string>('Gangtok');
-  const [category, setCategory] = useState<string>('music');
+  const [category, setCategory] = useState<string>(categories[0]?.key ?? '');
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [route, setRoute] = useState('');
@@ -266,9 +267,9 @@ export function NotificationsClient({
               value={category}
               onChange={(e) => setCategory(e.target.value)}
             >
-              {CATEGORIES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
+              {categories.map((c) => (
+                <option key={c.key} value={c.key}>
+                  {c.label}
                 </option>
               ))}
             </select>

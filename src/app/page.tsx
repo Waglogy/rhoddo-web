@@ -10,6 +10,8 @@ export const metadata: Metadata = {
     'Discover concerts, monastery festivals, resort dinners and cultural nights across Sikkim. One tap, one pass, no fuss.',
 };
 
+// A plain link, because /app is a separate single-page build rather than a Next.js route.
+const WEB_APP_URL = '/app';
 const PLAY_STORE_URL =
   'https://play.google.com/store/apps/details?id=com.rhoddo.app&pcampaignid=web_share';
 
@@ -95,8 +97,8 @@ export default function Landing() {
               >
                 ↓ Download app
               </a>
-              <a href="#features" className="btn-ghost">
-                See what&apos;s inside
+              <a href={WEB_APP_URL} className="btn-ghost">
+                Explore on web
               </a>
               <Link href="/host/login" className="btn-ghost border-gold/30 text-gold hover:border-gold">
                 Host portal →
@@ -267,7 +269,11 @@ export default function Landing() {
           </div>
 
           <div className="mt-8 text-xs text-mute">
-            Currently available on Android.
+            Android app on Google Play. On iPhone?{' '}
+            <a href={WEB_APP_URL} className="text-gold hover:underline">
+              Book on the web
+            </a>
+            .
           </div>
         </div>
       </section>

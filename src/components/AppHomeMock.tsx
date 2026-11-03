@@ -5,29 +5,29 @@ import { AutoScrollArea } from './AutoScrollArea';
 // A coded recreation of the app's home screen (rhoddo-app-/app/(tabs)/home.tsx)
 // in an Android frame, sized at roughly 0.79x the app's 360dp layout.
 
-const PROMOS = ['/app/promo-1.jpg', '/app/promo-2.jpg', '/app/promo-3.jpg'];
+const PROMOS = ['/landing/promo-1.jpg', '/landing/promo-2.jpg', '/landing/promo-3.jpg'];
 
 const MOODS = [
-  { label: 'Live Music', sub: 'gigs & nights', image: '/app/mood-livemusic.jpg', tint: '#D1364B', icon: 'music' },
-  { label: 'Food & Dining', sub: 'chef tables', image: '/app/mood-foodanddining.jpg', tint: '#E8B84A', icon: 'food' },
-  { label: 'Cultural', sub: 'heritage & rituals', image: '/app/mood-cultural.jpg', tint: '#5B7FB9', icon: 'palette' },
-  { label: 'Workshops', sub: 'hands-on', image: '/app/mood-workshops.jpg', tint: '#4A9C7F', icon: 'wrench' },
-  { label: 'Festivals', sub: 'seasonal', image: '/app/mood-festivals.jpg', tint: '#E8576A', icon: 'sparkles' },
-  { label: 'Sports', sub: 'runs & rides', image: '/app/mood-sports.jpg', tint: '#8CA8D1', icon: 'bike' },
-  { label: 'Adventure', sub: 'trek & ride', image: '/app/mood-adventure.jpg', tint: '#2E6E5B', icon: 'signpost' },
-  { label: 'Stays & Retreats', sub: 'weekend stays', image: '/app/mood-stays.jpg', tint: '#B88A1F', icon: 'bed' },
+  { label: 'Live Music', sub: 'gigs & nights', image: '/landing/mood-livemusic.jpg', tint: '#D1364B', icon: 'music' },
+  { label: 'Food & Dining', sub: 'chef tables', image: '/landing/mood-foodanddining.jpg', tint: '#E8B84A', icon: 'food' },
+  { label: 'Cultural', sub: 'heritage & rituals', image: '/landing/mood-cultural.jpg', tint: '#5B7FB9', icon: 'palette' },
+  { label: 'Workshops', sub: 'hands-on', image: '/landing/mood-workshops.jpg', tint: '#4A9C7F', icon: 'wrench' },
+  { label: 'Festivals', sub: 'seasonal', image: '/landing/mood-festivals.jpg', tint: '#E8576A', icon: 'sparkles' },
+  { label: 'Sports', sub: 'runs & rides', image: '/landing/mood-sports.jpg', tint: '#8CA8D1', icon: 'bike' },
+  { label: 'Adventure', sub: 'trek & ride', image: '/landing/mood-adventure.jpg', tint: '#2E6E5B', icon: 'signpost' },
+  { label: 'Stays & Retreats', sub: 'weekend stays', image: '/landing/mood-stays.jpg', tint: '#B88A1F', icon: 'bed' },
 ] as const;
 
 // Illustrative listings, taken from the app's sample data (src/data/mock.ts).
 const THIS_WEEK = [
-  { title: 'Himalayan Sound Sessions', when: 'Thursday', district: 'Pelling', price: '₹1,200', image: '/app/mood-livemusic.jpg' },
-  { title: 'Phagshapa Chef Table', when: 'Saturday', district: 'Gangtok', price: '₹2,200', image: '/app/mood-foodanddining.jpg' },
-  { title: 'Goecha La Ridge Trek', when: 'Sunday', district: 'Yuksom', price: '₹18,000', image: '/app/mood-adventure.jpg' },
+  { title: 'Himalayan Sound Sessions', when: 'Thursday', district: 'Pelling', price: '₹1,200', image: '/landing/mood-livemusic.jpg' },
+  { title: 'Phagshapa Chef Table', when: 'Saturday', district: 'Gangtok', price: '₹2,200', image: '/landing/mood-foodanddining.jpg' },
+  { title: 'Goecha La Ridge Trek', when: 'Sunday', district: 'Yuksom', price: '₹18,000', image: '/landing/mood-adventure.jpg' },
 ];
 
 const RESORT_ROWS = [
-  { title: 'Himalayan Sound Sessions', when: 'THURSDAY', district: 'Pelling', price: '₹1,200', image: '/app/mood-livemusic.jpg' },
-  { title: 'Pine & Fire Weekend', when: 'NEXT WEEK', district: 'Ravangla', price: '₹4,500', image: '/app/mood-stays.jpg' },
+  { title: 'Himalayan Sound Sessions', when: 'THURSDAY', district: 'Pelling', price: '₹1,200', image: '/landing/mood-livemusic.jpg' },
+  { title: 'Pine & Fire Weekend', when: 'NEXT WEEK', district: 'Ravangla', price: '₹4,500', image: '/landing/mood-stays.jpg' },
 ];
 
 // November 2026 starts on a Sunday and has 30 days, so no leading blanks.

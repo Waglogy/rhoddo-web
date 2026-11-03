@@ -1,13 +1,14 @@
-import { api } from '@/lib/api';
+import { api, fetchCategoryOptions } from '@/lib/api';
 import { EventForm } from '@/components/EventForm';
 
 type Props = { params: Promise<{ id: string }> };
 
 export default async function EditEventPage({ params }: Props) {
   const { id } = await params;
-  const [eventData, venuesData] = await Promise.all([
+  const [eventData, venuesData, categories] = await Promise.all([
     api<{ event: any }>(`/admin/events/${id}`),
     api<{ venues: Array<{ id: string; name: string }> }>('/admin/venues'),
+    fetchCategoryOptions(),
   ]);
 
   return (
@@ -17,7 +18,7 @@ export default async function EditEventPage({ params }: Props) {
       <p className="mt-1 text-sm text-mute">Update or unpublish.</p>
 
       <div className="mt-10">
-        <EventForm venues={venuesData.venues} initial={eventData.event} />
+        <EventForm venues={venuesData.venues} categories={categories} initial={eventData.event} />
       </div>
     </div>
   );

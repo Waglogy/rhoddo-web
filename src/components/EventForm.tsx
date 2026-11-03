@@ -38,16 +38,17 @@ type EventInitial = {
   tiers: Tier[];
 };
 
-const CATEGORIES = ['music', 'food', 'cultural', 'resort', 'adventure', 'festival'];
 const DISTRICTS = ['Gangtok', 'Pelling', 'Lachung', 'Yuksom', 'Namchi', 'Ravangla'];
 
 export function EventForm({
   venues,
+  categories,
   initial,
   mode = 'admin',
   draftOnly = false,
 }: {
   venues: Array<{ id: string; name: string }>;
+  categories: Array<{ key: string; label: string }>;
   initial?: EventInitial;
   mode?: 'admin' | 'host';
   /** The host isn't approved yet, so this can only be saved as a draft. */
@@ -60,7 +61,7 @@ export function EventForm({
 
   const [title, setTitle] = useState(initial?.title || '');
   const [tagline, setTagline] = useState(initial?.tagline || '');
-  const [category, setCategory] = useState(initial?.category || 'music');
+  const [category, setCategory] = useState(initial?.category || categories[0]?.key || '');
   const [district, setDistrict] = useState(initial?.district || 'Gangtok');
   const [date, setDate] = useState(toDateInput(initial?.date) || '');
   const [venueId, setVenueId] = useState(initial?.venueId || venues[0]?.id || '');
@@ -188,7 +189,11 @@ export function EventForm({
               onChange={(e) => setCategory(e.target.value)}
               disabled={mode === 'host' && initial?.categoryLocked}
             >
-              {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+              {/* A hidden category stays selectable on events that already use it. */}
+              {initial?.category && !categories.some((c) => c.key === initial.category) && (
+                <option value={initial.category}>{initial.category}</option>
+              )}
+              {categories.map((c) => <option key={c.key} value={c.key}>{c.label}</option>)}
             </select>
             {mode === 'host' && <CategoryNote category={category} locked={!!initial?.categoryLocked} />}
           </div>
