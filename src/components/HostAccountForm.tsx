@@ -48,7 +48,10 @@ export function HostAccountForm({ organizer }: { organizer: OrganizerProfile }) 
         businessName,
         phone,
       })
-        .then(() => router.refresh())
+        .then((result) => {
+          if (result.ok) router.refresh();
+          else setError(result.error);
+        })
         .catch((err) => setError(err instanceof Error ? err.message : 'Save failed'));
     });
   }

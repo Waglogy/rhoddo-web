@@ -65,6 +65,11 @@ export default async function HostEventsPage() {
                   {e.bookingCount} bookings · {formatINR(e.fees.feeINR)} fee
                 </div>
               </div>
+              {e.published && (
+                <Link href={`/host/events/${e.id}/scan`} className="btn-ghost whitespace-nowrap">
+                  Scan tickets
+                </Link>
+              )}
               <EventPublishButton event={e} hostApproved={hostApproved} />
             </div>
           </div>

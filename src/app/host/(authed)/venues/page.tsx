@@ -6,7 +6,6 @@ type VenueRow = {
   name: string;
   kind: string;
   district: string;
-  rating: number;
   eventCount: number;
 };
 
@@ -52,7 +51,7 @@ export default async function HostVenuesPage() {
                 )}
               </div>
               <div className="mt-1 text-xs text-mute">
-                {v.kind} · {v.district} · ★ {v.rating.toFixed(1)}
+                {v.kind} · {v.district}
               </div>
             </div>
             <div className="text-xs text-mute">{v.eventCount} events</div>

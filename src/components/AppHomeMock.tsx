@@ -410,12 +410,12 @@ export function AppHomeMock() {
                 </div>
 
                 <div className="mt-[25px]">
-                  <SectionHead title="Happening this week" subtitle="Across the state" />
+                  <SectionHead title="What's happening" subtitle="Across the state" />
                   <WeekCards />
                 </div>
 
                 <div className="mt-[25px]">
-                  <SectionHead title="Hosted by resorts" subtitle="Weekend-worthy stays" />
+                  <SectionHead title="At resorts" subtitle="Weekend-worthy getaways" />
                   <ResortRows />
                 </div>
               </div>

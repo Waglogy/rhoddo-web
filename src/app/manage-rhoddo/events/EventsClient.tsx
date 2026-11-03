@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useMemo, useState, useTransition } from 'react';
 import { formatDate, formatINR } from '@/lib/format';
-import { setEventPublished, deleteEvent, reviewCulturalEvent } from '@/actions/adminEvents';
+import { setEventPublished, setEventShowFirst, deleteEvent, reviewCulturalEvent } from '@/actions/adminEvents';
 
 export type EventRow = {
   id: string;
@@ -13,6 +13,7 @@ export type EventRow = {
   date: string;
   priceFromINR: number;
   published: boolean;
+  showFirstRank: number | null;
   culturalStatus: 'pending' | 'approved' | 'rejected';
   bookingCount: number;
   venue: { name: string };
@@ -67,6 +68,14 @@ export function EventsClient({ events }: { events: EventRow[] }) {
     });
   }
 
+  const shownFirst = useMemo(
+    () =>
+      events
+        .filter((e) => e.showFirstRank !== null)
+        .sort((a, b) => (b.showFirstRank ?? 0) - (a.showFirstRank ?? 0)),
+    [events],
+  );
+
   // Group rows by host for the grouped view.
   const groups = useMemo(() => {
     const map = new Map<
@@ -101,6 +110,25 @@ export function EventsClient({ events }: { events: EventRow[] }) {
           {err}
         </div>
       )}
+
+      <div className="card mt-6 p-5">
+        <div className="text-sm font-medium text-ink">Order in the app</div>
+        {shownFirst.length === 0 ? (
+          <p className="mt-1 text-xs text-mute">
+            Events are in date order. Click Show first on an event to move it to the top.
+          </p>
+        ) : (
+          <ol className="mt-2 space-y-1 text-sm text-mute">
+            {shownFirst.map((e, i) => (
+              <li key={e.id}>
+                <span className="text-gold">{i + 1}.</span> {e.title}
+                {!e.published && ' (not live)'}
+              </li>
+            ))}
+            <li className="pt-1 text-xs">Then all other events by date. Past events are never shown first.</li>
+          </ol>
+        )}
+      </div>
 
       <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap gap-2">
@@ -167,6 +195,7 @@ export function EventsClient({ events }: { events: EventRow[] }) {
                     onToggle={() =>
                       runAction(e.id, () => setEventPublished(e.id, !e.published))
                     }
+                    onShowFirst={(showFirst) => runAction(e.id, () => setEventShowFirst(e.id, showFirst))}
                     onDelete={() => runAction(e.id, () => deleteEvent(e.id))}
                   onReview={(decision) => runAction(e.id, () => reviewCulturalEvent(e.id, decision))}
                   />
@@ -182,6 +211,7 @@ export function EventsClient({ events }: { events: EventRow[] }) {
                   e={e}
                   busy={pending && busyId === e.id}
                   onToggle={() => runAction(e.id, () => setEventPublished(e.id, !e.published))}
+                  onShowFirst={(showFirst) => runAction(e.id, () => setEventShowFirst(e.id, showFirst))}
                   onDelete={() => runAction(e.id, () => deleteEvent(e.id))}
                   onReview={(decision) => runAction(e.id, () => reviewCulturalEvent(e.id, decision))}
                 />
@@ -196,12 +226,14 @@ function EventRowItem({
   e,
   busy,
   onToggle,
+  onShowFirst,
   onDelete,
   onReview,
 }: {
   e: EventRow;
   busy: boolean;
   onToggle: () => void;
+  onShowFirst: (showFirst: boolean) => void;
   onDelete: () => void;
   onReview: (decision: 'approved' | 'rejected') => void;
 }) {
@@ -213,6 +245,11 @@ function EventRowItem({
         <div className="flex items-center gap-2">
           <div className="truncate text-base text-ink">{e.title}</div>
           <StatusPill published={e.published} />
+          {e.showFirstRank !== null && (
+            <span className="inline-block rounded-full border border-gold/60 bg-gold/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-gold">
+              Shown first
+            </span>
+          )}
           {inReview && (
             <span className="inline-block rounded-full border border-gold/60 bg-gold/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-gold">
               Cultural review
@@ -236,6 +273,14 @@ function EventRowItem({
         </div>
 
         <div className="flex flex-wrap justify-end gap-2">
+          {e.showFirstRank !== null && (
+            <button type="button" className="btn-ghost" disabled={busy} onClick={() => onShowFirst(false)}>
+              Remove from top
+            </button>
+          )}
+          <button type="button" className="btn-ghost" disabled={busy} onClick={() => onShowFirst(true)}>
+            Show first
+          </button>
           {(inReview || notApproved) && (
             <button
               type="button"

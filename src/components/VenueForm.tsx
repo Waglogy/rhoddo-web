@@ -56,7 +56,17 @@ export function VenueForm({
     setSaving(true);
     setError(null);
     try {
-      const payload = { name, kind, district, address, image, cover, rating: Number(rating), blurb };
+      const payload = {
+        name,
+        kind,
+        district,
+        address,
+        image,
+        cover,
+        blurb,
+        // Hosts can't rate their own venues.
+        ...(mode === 'admin' && { rating: Number(rating) }),
+      };
       if (isEdit) {
         await clientApi(`${apiBase}/${initial!.id}`, { method: 'PUT', body: payload });
       } else {
@@ -108,18 +118,20 @@ export function VenueForm({
             <label className="label mb-1 block">Address</label>
             <input className="input" value={address} onChange={(e) => setAddress(e.target.value)} required />
           </div>
-          <div>
-            <label className="label mb-1 block">Rating</label>
-            <input
-              type="number"
-              step="0.1"
-              min={0}
-              max={5}
-              className="input"
-              value={rating}
-              onChange={(e) => setRating(Number(e.target.value))}
-            />
-          </div>
+          {mode === 'admin' && (
+            <div>
+              <label className="label mb-1 block">Rating</label>
+              <input
+                type="number"
+                step="0.1"
+                min={0}
+                max={5}
+                className="input"
+                value={rating}
+                onChange={(e) => setRating(Number(e.target.value))}
+              />
+            </div>
+          )}
           <div className="md:col-span-2">
             <label className="label mb-1 block">Blurb</label>
             <textarea

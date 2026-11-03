@@ -36,6 +36,12 @@ export async function setEventPublished(id: string, published: boolean) {
   revalidatePath('/manage-rhoddo');
 }
 
+// Puts an event at the top of the app's list, or back into the normal order.
+export async function setEventShowFirst(id: string, showFirst: boolean) {
+  await adminJson(`/admin/events/${id}/show-first`, { method: 'PATCH', body: { showFirst } });
+  revalidatePath('/manage-rhoddo/events');
+}
+
 export async function reviewCulturalEvent(id: string, decision: 'approved' | 'rejected') {
   await adminJson(`/admin/events/${id}/cultural-review`, { method: 'PUT', body: { decision } });
   revalidatePath('/manage-rhoddo/events');

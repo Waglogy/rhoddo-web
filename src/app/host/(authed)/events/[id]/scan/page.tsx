@@ -20,8 +20,8 @@ export default async function HostScanEventPage({ params }: Props) {
 
   return (
     <div>
-      <Link href={`/host/events/${id}`} className="text-xs text-mute hover:text-gold">
-        ← Event
+      <Link href="/host/events" className="text-xs text-mute hover:text-gold">
+        ← Events
       </Link>
       <div className="label mt-4">Gate scanner</div>
       <h1 className="font-display text-4xl text-ink">{event.title}</h1>

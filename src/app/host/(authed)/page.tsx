@@ -35,9 +35,16 @@ export default async function HostDashboard() {
 
   return (
     <div>
-      <div className="label">Dashboard</div>
-      <h1 className="font-display text-4xl text-ink">Welcome back.</h1>
-      <p className="mt-1 text-sm text-mute">Here&apos;s how your events are doing.</p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <div className="label">Dashboard</div>
+          <h1 className="font-display text-4xl text-ink">Welcome back.</h1>
+          <p className="mt-1 text-sm text-mute">Here&apos;s how your events are doing.</p>
+        </div>
+        <Link href="/host/scanner" className="btn-primary w-full text-center sm:w-auto">
+          Scan tickets
+        </Link>
+      </div>
 
       {/* Transparency card — the USP, made visible */}
       <div className="mt-10 grid gap-4 md:grid-cols-[2fr_1fr]">

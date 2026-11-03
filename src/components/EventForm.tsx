@@ -215,7 +215,10 @@ export function EventForm({
             </select>
           </div>
           <div>
-            <label className="label mb-1 block">Host name</label>
+            <FieldLabel
+              label="Host name"
+              info="The person, group or company running this event. Buyers see this on the event page, so it can be different from the venue."
+            />
             <input className="input" value={hostName} onChange={(e) => setHostName(e.target.value)} required />
           </div>
           <div>

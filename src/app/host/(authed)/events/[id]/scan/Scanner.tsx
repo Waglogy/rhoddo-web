@@ -258,7 +258,7 @@ export function Scanner({ eventId, initialStats }: Props) {
           </p>
         )}
         {error && (
-          <p className="mt-4 rounded border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-300">
+          <p className="mt-4 rounded border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-700 [html[data-theme=dark]_&]:text-red-300">
             {error}
           </p>
         )}
@@ -304,7 +304,7 @@ function ResultBanner({
       <div className="rounded-lg border border-emerald-500/60 bg-emerald-500/15 p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <div className="label text-emerald-300">Admit</div>
+            <div className="label text-emerald-800 [html[data-theme=dark]_&]:text-emerald-300">Admit</div>
             <div className="mt-1 font-display text-2xl text-ink">{result.attendeeName}</div>
             <div className="mt-1 text-sm text-mute">
               {result.tierName} · Pass {result.ticketNumber}
@@ -329,7 +329,7 @@ function ResultBanner({
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
-          <div className={`label ${tone === 'hard' ? 'text-red-300' : 'text-amber-300'}`}>
+          <div className={`label ${tone === 'hard' ? 'text-red-700 [html[data-theme=dark]_&]:text-red-300' : 'text-amber-800 [html[data-theme=dark]_&]:text-amber-300'}`}>
             {labelForReason(result.reason)}
           </div>
           <div className="mt-1 font-display text-2xl text-ink">{result.message}</div>

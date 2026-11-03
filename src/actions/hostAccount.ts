@@ -35,7 +35,11 @@ export async function updateHostProfile(form: {
 
   const text = await res.text();
   const data = text ? JSON.parse(text) : null;
-  if (!res.ok) throw new Error(data?.error || `Request failed (${res.status})`);
+  // Returned rather than thrown: production Next.js hides thrown action messages,
+  // and hosts need to read errors like "already used by another host account".
+  if (!res.ok) {
+    return { ok: false as const, error: (data?.error as string) || `Request failed (${res.status})` };
+  }
 
   revalidatePath('/host/account');
   revalidatePath('/host');
