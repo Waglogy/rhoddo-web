@@ -1,0 +1,13 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.rhoddo.app",
+      "sha256_cert_fingerprints": [
+        "86:44:E3:B7:49:D8:D6:A1:F9:87:B3:6A:4C:F1:B7:01:05:29:A1:AA:D5:68:6B:B6:8F:C1:C7:FC:EC:1D:6F:4D",
+        "E1:C8:50:3A:F5:C5:B7:BD:04:C4:10:9C:B3:D6:26:1B:9B:AC:8E:BC:74:78:03:93:87:89:A4:6A:DE:5B:5C:4B"
+      ]
+    }
+  }
+]

@@ -3,6 +3,7 @@ import { fetchCategoryOptions, hostApi } from '@/lib/api';
 import { EventForm } from '@/components/EventForm';
 import { EventFeeCard, type EventFees } from '@/components/EventFeeCard';
 import { EventPublishButton, EventStatusBadge } from '@/components/EventStatus';
+import { ShareEventLink } from '@/components/ShareEventLink';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -40,6 +41,12 @@ export default async function HostEditEventPage({ params }: Props) {
           </Link>
         </div>
       </div>
+
+      {Boolean(eventData.event.published) && (
+        <div className="mt-8">
+          <ShareEventLink eventId={id} title={String(eventData.event.title)} />
+        </div>
+      )}
 
       <div className="mt-8">
         <EventFeeCard fees={eventData.event.fees as EventFees} />

@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { ADMIN_COOKIE, HOST_COOKIE } from './auth';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.rhoddo.com';
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.rhoddo.com';
 
 export type ApiRole = 'admin' | 'host';
 

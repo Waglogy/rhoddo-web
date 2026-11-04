@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { hostApi } from '@/lib/api';
 import { formatDate, formatINR } from '@/lib/format';
 import { EventPublishButton, EventStatusBadge } from '@/components/EventStatus';
+import { ShareEventLink } from '@/components/ShareEventLink';
 
 type EventRow = {
   id: string;
@@ -58,13 +59,14 @@ export default async function HostEventsPage() {
                 {e.venue.name} · {e.district} · {e.category} · {formatDate(e.date)}
               </div>
             </Link>
-            <div className="flex items-center gap-6">
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
               <div className="text-right">
                 <div className="font-display text-base text-gold">{formatINR(e.priceFromINR)}</div>
                 <div className="text-[11px] text-mute">
                   {e.bookingCount} bookings · {formatINR(e.fees.feeINR)} fee
                 </div>
               </div>
+              {e.published && <ShareEventLink eventId={e.id} title={e.title} compact />}
               {e.published && (
                 <Link href={`/host/events/${e.id}/scan`} className="btn-ghost whitespace-nowrap">
                   Scan tickets
