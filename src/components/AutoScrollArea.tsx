@@ -3,7 +3,7 @@
 import { useEffect, useRef, type HTMLAttributes } from 'react';
 
 const SPEED_PX_PER_SECOND = 28;
-const PAUSE_AT_ENDS_MS = 1800;
+const PAUSE_AT_ENDS_MS = 3500;
 const RESUME_AFTER_INTERACTION_MS = 2500;
 
 /**

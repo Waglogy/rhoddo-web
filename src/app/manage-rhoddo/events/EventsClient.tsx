@@ -3,7 +3,15 @@
 import Link from 'next/link';
 import { useMemo, useState, useTransition } from 'react';
 import { formatDate, formatINR } from '@/lib/format';
-import { setEventPublished, setEventShowFirst, deleteEvent, reviewCulturalEvent } from '@/actions/adminEvents';
+import { formatPercent } from '@/lib/pricing';
+import { CommissionInput, parseCommission } from '@/components/CommissionInput';
+import {
+  setEventPublished,
+  setEventShowFirst,
+  deleteEvent,
+  reviewEvent,
+  setEventCommission,
+} from '@/actions/adminEvents';
 
 export type EventRow = {
   id: string;
@@ -14,7 +22,9 @@ export type EventRow = {
   priceFromINR: number;
   published: boolean;
   showFirstRank: number | null;
-  culturalStatus: 'pending' | 'approved' | 'rejected';
+  reviewStatus: 'pending' | 'approved' | 'rejected';
+  commissionPercent: number | null;
+  form?: { name: string; fields: unknown[] } | null;
   bookingCount: number;
   venue: { name: string };
   organizer: {
@@ -22,10 +32,11 @@ export type EventRow = {
     businessName: string;
     name: string;
     status: string;
+    commissionPercent: number | null;
   } | null;
 };
 
-type Filter = 'all' | 'live' | 'paused';
+type Filter = 'all' | 'review' | 'live' | 'paused';
 
 // Bucket key for a host. Organizer-owned events group by the organizer;
 // legacy/platform events fall under a single "Platform" bucket.
@@ -44,7 +55,8 @@ function StatusPill({ published }: { published: boolean }) {
 }
 
 export function EventsClient({ events }: { events: EventRow[] }) {
-  const [filter, setFilter] = useState<Filter>('all');
+  const reviewCount = events.filter((e) => e.reviewStatus === 'pending').length;
+  const [filter, setFilter] = useState<Filter>(reviewCount > 0 ? 'review' : 'all');
   const [grouped, setGrouped] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -52,6 +64,7 @@ export function EventsClient({ events }: { events: EventRow[] }) {
 
   const rows = useMemo(() => {
     if (filter === 'all') return events;
+    if (filter === 'review') return events.filter((e) => e.reviewStatus === 'pending');
     return events.filter((e) => (filter === 'live' ? e.published : !e.published));
   }, [events, filter]);
 
@@ -135,6 +148,7 @@ export function EventsClient({ events }: { events: EventRow[] }) {
           {(
             [
               ['all', `All (${events.length})`],
+              ['review', `In review (${reviewCount})`],
               ['live', `Live (${liveCount})`],
               ['paused', `Paused (${pausedCount})`],
             ] as const
@@ -197,7 +211,8 @@ export function EventsClient({ events }: { events: EventRow[] }) {
                     }
                     onShowFirst={(showFirst) => runAction(e.id, () => setEventShowFirst(e.id, showFirst))}
                     onDelete={() => runAction(e.id, () => deleteEvent(e.id))}
-                  onReview={(decision) => runAction(e.id, () => reviewCulturalEvent(e.id, decision))}
+                    onReview={(review) => runAction(e.id, () => reviewEvent(e.id, review))}
+                    onCommission={(pct) => runAction(e.id, () => setEventCommission(e.id, pct))}
                   />
                 ))}
               </div>
@@ -213,7 +228,8 @@ export function EventsClient({ events }: { events: EventRow[] }) {
                   onToggle={() => runAction(e.id, () => setEventPublished(e.id, !e.published))}
                   onShowFirst={(showFirst) => runAction(e.id, () => setEventShowFirst(e.id, showFirst))}
                   onDelete={() => runAction(e.id, () => deleteEvent(e.id))}
-                  onReview={(decision) => runAction(e.id, () => reviewCulturalEvent(e.id, decision))}
+                  onReview={(review) => runAction(e.id, () => reviewEvent(e.id, review))}
+                  onCommission={(pct) => runAction(e.id, () => setEventCommission(e.id, pct))}
                 />
               ))}
             </div>
@@ -229,16 +245,33 @@ function EventRowItem({
   onShowFirst,
   onDelete,
   onReview,
+  onCommission,
 }: {
   e: EventRow;
   busy: boolean;
   onToggle: () => void;
   onShowFirst: (showFirst: boolean) => void;
   onDelete: () => void;
-  onReview: (decision: 'approved' | 'rejected') => void;
+  onReview: (review: { decision: 'approved'; commissionPercent: number } | { decision: 'rejected' }) => void;
+  onCommission: (commissionPercent: number) => void;
 }) {
-  const inReview = e.category === 'cultural' && e.culturalStatus === 'pending';
-  const notApproved = e.category === 'cultural' && e.culturalStatus === 'rejected';
+  const inReview = e.reviewStatus === 'pending';
+  const notApproved = e.reviewStatus === 'rejected';
+  // What this event is charged at now, or what the admin is offered when approving it.
+  const currentRate = e.commissionPercent ?? e.organizer?.commissionPercent ?? null;
+  const [rate, setRate] = useState(currentRate === null ? '' : String(currentRate));
+  const [editingRate, setEditingRate] = useState(false);
+  const [rateError, setRateError] = useState<string | null>(null);
+
+  function withRate(fn: (pct: number) => void) {
+    const pct = parseCommission(rate);
+    if (pct === null) {
+      setRateError('Enter a commission between 0 and 50%');
+      return;
+    }
+    setRateError(null);
+    fn(pct);
+  }
   return (
     <div className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
       <Link href={`/manage-rhoddo/events/${e.id}`} className="min-w-0 flex-1 transition hover:opacity-80">
@@ -250,9 +283,14 @@ function EventRowItem({
               Shown first
             </span>
           )}
+          {e.form && (
+            <span className="inline-block rounded-full border border-line px-2 py-0.5 text-[10px] uppercase tracking-wider text-mute">
+              Form · {e.form.fields.length} question{e.form.fields.length === 1 ? '' : 's'}
+            </span>
+          )}
           {inReview && (
             <span className="inline-block rounded-full border border-gold/60 bg-gold/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-gold">
-              Cultural review
+              In review
             </span>
           )}
           {notApproved && (
@@ -269,7 +307,15 @@ function EventRowItem({
       <div className="flex items-center gap-4">
         <div className="text-right">
           <div className="font-display text-base text-gold">{formatINR(e.priceFromINR)}</div>
-          <div className="text-[11px] text-mute">{e.bookingCount} bookings</div>
+          <div className="text-[11px] text-mute">
+            {e.bookingCount} bookings
+            {e.organizer && !inReview && !notApproved && (
+              <>
+                {' · '}
+                {currentRate === null ? 'no commission set' : `${formatPercent(currentRate)} commission`}
+              </>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-wrap justify-end gap-2">
@@ -281,30 +327,54 @@ function EventRowItem({
           <button type="button" className="btn-ghost" disabled={busy} onClick={() => onShowFirst(true)}>
             Show first
           </button>
+          {(inReview || notApproved || editingRate) && (
+            <CommissionInput value={rate} onChange={setRate} disabled={busy} />
+          )}
           {(inReview || notApproved) && (
             <button
               type="button"
               disabled={busy}
-              onClick={() => onReview('approved')}
+              onClick={() => withRate((pct) => onReview({ decision: 'approved', commissionPercent: pct }))}
               className="btn-primary text-xs disabled:opacity-50"
             >
-              Approve as cultural
+              Approve
             </button>
           )}
           {inReview && (
             <button
               type="button"
               disabled={busy}
-              onClick={() => onReview('rejected')}
+              onClick={() => onReview({ decision: 'rejected' })}
               className="btn-ghost text-xs disabled:opacity-50"
             >
               Reject
             </button>
           )}
+          {e.organizer && !inReview && !notApproved && (
+            editingRate ? (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() =>
+                  withRate((pct) => {
+                    onCommission(pct);
+                    setEditingRate(false);
+                  })
+                }
+                className="btn-primary text-xs disabled:opacity-50"
+              >
+                Save rate
+              </button>
+            ) : (
+              <button type="button" className="btn-ghost text-xs" disabled={busy} onClick={() => setEditingRate(true)}>
+                Change rate
+              </button>
+            )
+          )}
           <button
             type="button"
             disabled={busy || ((inReview || notApproved) && !e.published)}
-            title={inReview || notApproved ? 'Approve it as cultural first' : undefined}
+            title={inReview || notApproved ? 'Approve it first' : undefined}
             onClick={onToggle}
             className={`text-xs disabled:opacity-50 ${
               e.published ? 'btn-ghost' : 'btn-primary'
@@ -328,6 +398,7 @@ function EventRowItem({
           >
             Delete
           </button>
+          {rateError && <p className="w-full text-right text-xs text-primary">{rateError}</p>}
         </div>
       </div>
     </div>

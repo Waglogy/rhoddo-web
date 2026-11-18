@@ -11,7 +11,7 @@ type EventState = {
   endDate?: string | null;
   published: boolean;
   category: string;
-  culturalStatus: 'pending' | 'approved' | 'rejected';
+  reviewStatus: 'pending' | 'approved' | 'rejected';
 };
 
 const PILL = 'whitespace-nowrap rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-wider';
@@ -21,10 +21,10 @@ function hasEnded(e: EventState) {
 }
 
 export function EventStatusBadge({ event }: { event: EventState }) {
-  if (event.category === 'cultural' && event.culturalStatus === 'pending') {
+  if (event.reviewStatus === 'pending') {
     return <span className={`${PILL} border-gold/60 bg-gold/10 text-gold`}>In review</span>;
   }
-  if (event.category === 'cultural' && event.culturalStatus === 'rejected') {
+  if (event.reviewStatus === 'rejected') {
     return <span className={`${PILL} border-primary/60 bg-primary/10 text-primary`}>Not approved</span>;
   }
   if (!event.published) {
@@ -48,7 +48,7 @@ export function EventPublishButton({
   const [error, setError] = useState<string | null>(null);
   const [busy, startTransition] = useTransition();
 
-  if (event.category === 'cultural' && event.culturalStatus !== 'approved') return null;
+  if (event.reviewStatus !== 'approved') return null;
   if (!hostApproved) {
     return <span className="text-[11px] text-mute">You can publish once you&apos;re approved</span>;
   }

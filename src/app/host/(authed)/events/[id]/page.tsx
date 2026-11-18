@@ -4,11 +4,13 @@ import { EventForm } from '@/components/EventForm';
 import { EventFeeCard, type EventFees } from '@/components/EventFeeCard';
 import { EventPublishButton, EventStatusBadge } from '@/components/EventStatus';
 import { ShareEventLink } from '@/components/ShareEventLink';
+import { RegistrationFormEditor, type EventFormDef } from '@/components/RegistrationFormEditor';
 
-type Props = { params: Promise<{ id: string }> };
+type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ created?: string }> };
 
-export default async function HostEditEventPage({ params }: Props) {
+export default async function HostEditEventPage({ params, searchParams }: Props) {
   const { id } = await params;
+  const { created } = await searchParams;
   const me = await hostApi<{ organizer: { status: string } }>('/organizer/me');
   const draftOnly = me.organizer.status !== 'approved';
   const [eventData, venuesData, categories] = await Promise.all([
@@ -42,14 +44,32 @@ export default async function HostEditEventPage({ params }: Props) {
         </div>
       </div>
 
+      {created && (
+        <div className="mt-6 rounded-xl border border-pine/40 bg-pine/10 px-4 py-3 text-sm text-ink">
+          Event sent to Rhoddo for review. If you need details from buyers, like runner names or
+          T-shirt sizes, add a registration form below.
+        </div>
+      )}
+
       {Boolean(eventData.event.published) && (
         <div className="mt-8">
-          <ShareEventLink eventId={id} title={String(eventData.event.title)} />
+          <ShareEventLink eventId={id} slug={eventData.event.slug as string | null | undefined} title={String(eventData.event.title)} />
         </div>
       )}
 
       <div className="mt-8">
-        <EventFeeCard fees={eventData.event.fees as EventFees} />
+        <EventFeeCard
+          fees={eventData.event.fees as EventFees}
+          reviewStatus={eventData.event.reviewStatus as 'pending' | 'approved' | 'rejected'}
+        />
+      </div>
+
+      <div className="mt-8">
+        <RegistrationFormEditor
+          eventId={id}
+          initial={(eventData.event.form as EventFormDef | null) ?? null}
+          hasSales={Boolean(eventData.event.categoryLocked)}
+        />
       </div>
 
       <div className="mt-8">

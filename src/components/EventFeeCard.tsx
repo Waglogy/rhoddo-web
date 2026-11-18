@@ -1,30 +1,34 @@
 import { formatINR } from '@/lib/format';
-import { PER_TICKET_FEE_INR, SMALL_EVENT_MAX_TICKETS } from '@/lib/pricing';
+import { formatPercent } from '@/lib/pricing';
 
 export type EventFees = {
-  alwaysFree: boolean;
+  commissionPercent: number;
   paidTickets: number;
-  freeTicketsUsed: number;
-  chargedTickets: number;
+  salesINR: number;
   feeINR: number;
-  ticketsUntilFeeApplies: number | null;
 };
 
-export function EventFeeCard({ fees }: { fees: EventFees }) {
+export function EventFeeCard({
+  fees,
+  reviewStatus,
+}: {
+  fees: EventFees;
+  reviewStatus: 'pending' | 'approved' | 'rejected';
+}) {
   return (
     <div className="card p-6">
       <div className="label">Rhoddo fee for this event</div>
       <div className="mt-2 font-display text-3xl text-gold">{formatINR(fees.feeINR)}</div>
-      <p className="mt-2 text-sm text-mute">{explain(fees)}</p>
+      <p className="mt-2 text-sm text-mute">{explain(fees, reviewStatus)}</p>
     </div>
   );
 }
 
-function explain(f: EventFees): string {
-  if (f.alwaysFree) return 'Cultural events are always free.';
-  const sold = `${f.paidTickets} paid ticket${f.paidTickets === 1 ? '' : 's'} sold`;
-  if (f.ticketsUntilFeeApplies !== null) {
-    return `${sold}. No fee up to ${SMALL_EVENT_MAX_TICKETS} tickets, and ${f.ticketsUntilFeeApplies} more would take this event past that limit.`;
+function explain(f: EventFees, reviewStatus: 'pending' | 'approved' | 'rejected'): string {
+  if (reviewStatus !== 'approved') {
+    return 'Rhoddo sets this event’s commission when it reviews the event.';
   }
-  return `${sold} · ${f.freeTicketsUsed} covered by free tickets · ${f.chargedTickets} charged at ₹${PER_TICKET_FEE_INR}.`;
+  const rate = `Commission ${formatPercent(f.commissionPercent)} of each booking.`;
+  if (f.paidTickets === 0) return `${rate} No paid tickets sold yet.`;
+  return `${rate} ${f.paidTickets} paid ticket${f.paidTickets === 1 ? '' : 's'} sold for ${formatINR(f.salesINR)}.`;
 }

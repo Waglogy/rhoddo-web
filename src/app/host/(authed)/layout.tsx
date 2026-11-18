@@ -4,6 +4,7 @@ import { hostApi } from '@/lib/api';
 import { HostLogoutButton } from '@/components/HostLogoutButton';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { HostPhoneVerify } from '@/components/HostPhoneVerify';
+import { redirect } from 'next/navigation';
 
 const NAV = [
   { href: '/host', label: 'Dashboard' },
@@ -22,7 +23,8 @@ type Me = {
     phone: string | null;
     phoneVerified: boolean;
     status: 'pending' | 'approved' | 'suspended';
-    freeTicketsRemaining: number;
+    commissionPercent: number | null;
+    termsAccepted: boolean;
     payments: { connected: boolean };
   };
 };
@@ -30,6 +32,7 @@ type Me = {
 export default async function HostLayout({ children }: { children: React.ReactNode }) {
   await requireHostToken();
   const me = await hostApi<Me>('/organizer/me');
+  if (!me.organizer.termsAccepted) redirect('/host/accept-terms');
   const suspended = me.organizer.status === 'suspended';
 
   return (

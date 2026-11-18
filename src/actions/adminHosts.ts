@@ -25,11 +25,16 @@ async function adminJson(path: string, init: { method: string; body?: unknown })
   return data;
 }
 
+// Approving needs Rhoddo's commission for the host, unless they already have one.
 export async function setOrganizerStatus(
   id: string,
   status: 'pending' | 'approved' | 'suspended',
+  commissionPercent?: number,
 ) {
-  await adminJson(`/admin/organizers/${id}/status`, { method: 'PUT', body: { status } });
+  await adminJson(`/admin/organizers/${id}/status`, {
+    method: 'PUT',
+    body: { status, ...(commissionPercent !== undefined && { commissionPercent }) },
+  });
   revalidatePath('/manage-rhoddo/hosts');
   revalidatePath('/manage-rhoddo');
 }
@@ -39,11 +44,11 @@ export async function markOrganizerPhoneVerified(id: string) {
   revalidatePath('/manage-rhoddo/hosts');
 }
 
-export async function setOrganizerCredit(id: string, freeTicketsRemaining: number) {
-  await adminJson(`/admin/organizers/${id}/credit`, {
+// The host's starting rate for events reviewed from now on.
+export async function setOrganizerCommission(id: string, commissionPercent: number) {
+  await adminJson(`/admin/organizers/${id}/commission`, {
     method: 'PUT',
-    body: { freeTicketsRemaining },
+    body: { commissionPercent },
   });
   revalidatePath('/manage-rhoddo/hosts');
-  revalidatePath('/manage-rhoddo');
 }

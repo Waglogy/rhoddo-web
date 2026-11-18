@@ -1,6 +1,7 @@
 import { hostApi } from '@/lib/api';
 import { formatINR, formatDateTime } from '@/lib/format';
-import { includesEarlierTickets } from '@/lib/pricing';
+import { formatPercent } from '@/lib/pricing';
+import { BookingFormAnswers, type BookingFormAnswersData } from '@/components/BookingFormAnswers';
 
 type Booking = {
   id: string;
@@ -8,10 +9,14 @@ type Booking = {
   qty: number;
   total: number;
   platformFeeINR: number;
+  commissionPercent: number | null;
+  formAnswers: BookingFormAnswersData | null;
   status: string;
   createdAt: string;
   event?: { title: string; venue?: { name: string } };
-  user?: { name: string; email: string };
+  /** Typed by the buyer on the website, not verified. */
+  contactPhone?: string | null;
+  user?: { name: string; email: string | null; phone?: string | null };
 };
 
 export default async function HostBookingsPage() {
@@ -39,16 +44,17 @@ export default async function HostBookingsPage() {
               </div>
               {b.user && (
                 <div className="mt-1 text-xs text-mute">
-                  {b.user.name} · {b.user.email}
+                  {[b.user.name, b.user.email, b.contactPhone ?? b.user.phone].filter(Boolean).join(' · ')}
                 </div>
               )}
               <div className="mt-1 text-[10px] uppercase tracking-wider text-mute">{b.status}</div>
+              {b.formAnswers && <BookingFormAnswers data={b.formAnswers} />}
             </div>
             <div className="flex shrink-0 flex-col items-start gap-1 sm:items-end">
               <div className="font-display text-base text-gold">{formatINR(b.total)}</div>
               <div className="text-xs text-mute">
                 Rhoddo fee {formatINR(b.platformFeeINR ?? 0)}
-                {includesEarlierTickets(b.qty, b.platformFeeINR ?? 0) && ' · includes earlier tickets'}
+                {b.commissionPercent != null && ` · ${formatPercent(b.commissionPercent)}`}
               </div>
             </div>
           </div>

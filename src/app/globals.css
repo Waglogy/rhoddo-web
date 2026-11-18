@@ -21,8 +21,7 @@
     --hero-scrim: linear-gradient(90deg, rgba(250, 247, 240, 0.85) 0%, rgba(250, 247, 240, 0.45) 48%, rgba(250, 247, 240, 0) 72%);
     color-scheme: light;
   }
-  /* Dark: always the admin panel and the landing page's phone mock, plus the site
-     when a visitor chooses it. Must stay after .theme-site so the phone mock wins. */
+  /* Dark: always the admin panel, plus the site when a visitor chooses it. */
   :root,
   .theme-dark,
   html[data-theme='dark'] .theme-site {
@@ -43,8 +42,22 @@
   html[data-theme='dark'] .theme-site {
     color-scheme: dark;
   }
+  /* The landing page's phone mock: the app's own light palette (rhoddo-app-
+     src/theme/palettes.ts), whichever theme the site is in. Must stay after the dark block. */
+  .theme-app-light {
+    --bg: 244 238 223;
+    --panel: 255 255 255;
+    --line: 217 207 180;
+    --ink: 26 37 32;
+    --mute: 92 104 98;
+    --primary: 184 43 62;
+    --gold: 176 128 26;
+    --pine: 34 96 77;
+    --mist: 63 95 142;
+  }
   .theme-site,
-  .theme-dark {
+  .theme-dark,
+  .theme-app-light {
     color: rgb(var(--ink));
   }
   html, body {

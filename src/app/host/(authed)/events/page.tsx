@@ -1,12 +1,14 @@
 import Link from 'next/link';
 import { hostApi } from '@/lib/api';
 import { formatDate, formatINR } from '@/lib/format';
+import { formatPercent } from '@/lib/pricing';
 import { EventPublishButton, EventStatusBadge } from '@/components/EventStatus';
 import { ShareEventLink } from '@/components/ShareEventLink';
 
 type EventRow = {
   id: string;
   title: string;
+  slug?: string | null;
   endDate?: string | null;
   category: string;
   district: string;
@@ -14,8 +16,8 @@ type EventRow = {
   priceFromINR: number;
   published: boolean;
   bookingCount: number;
-  culturalStatus: 'pending' | 'approved' | 'rejected';
-  fees: { feeINR: number };
+  reviewStatus: 'pending' | 'approved' | 'rejected';
+  fees: { feeINR: number; commissionPercent: number };
   venue: { name: string };
 };
 
@@ -64,9 +66,10 @@ export default async function HostEventsPage() {
                 <div className="font-display text-base text-gold">{formatINR(e.priceFromINR)}</div>
                 <div className="text-[11px] text-mute">
                   {e.bookingCount} bookings · {formatINR(e.fees.feeINR)} fee
+                  {e.reviewStatus === 'approved' && ` · ${formatPercent(e.fees.commissionPercent)}`}
                 </div>
               </div>
-              {e.published && <ShareEventLink eventId={e.id} title={e.title} compact />}
+              {e.published && <ShareEventLink eventId={e.id} slug={e.slug} title={e.title} compact />}
               {e.published && (
                 <Link href={`/host/events/${e.id}/scan`} className="btn-ghost whitespace-nowrap">
                   Scan tickets

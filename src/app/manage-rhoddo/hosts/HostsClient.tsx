@@ -2,9 +2,16 @@
 
 import { useEffect, useMemo, useState, useTransition } from 'react';
 import { formatDate, formatINR } from '@/lib/format';
-import { markOrganizerPhoneVerified, setOrganizerCredit, setOrganizerStatus } from '@/actions/adminHosts';
+import {
+  markOrganizerPhoneVerified,
+  setOrganizerCommission,
+  setOrganizerStatus,
+} from '@/actions/adminHosts';
+import { CommissionInput, parseCommission } from '@/components/CommissionInput';
+import { formatPercent } from '@/lib/pricing';
 import { recordFeePayment, undoFeePayment, type FeePaymentResult } from '@/actions/hostFeePayments';
 import type { OrganizerRow } from './types';
+import { DeleteHostDialog } from './DeleteHostDialog';
 
 export type { OrganizerRow };
 
@@ -76,10 +83,10 @@ export function HostsClient({ organizers }: { organizers: OrganizerRow[] }) {
             key={o.id}
             o={o}
             disabled={pending}
-            onApprove={() => runAction(() => setOrganizerStatus(o.id, 'approved'))}
+            onApprove={(pct) => runAction(() => setOrganizerStatus(o.id, 'approved', pct))}
             onSuspend={() => runAction(() => setOrganizerStatus(o.id, 'suspended'))}
             onPending={() => runAction(() => setOrganizerStatus(o.id, 'pending'))}
-            onSaveCredit={(n) => runAction(() => setOrganizerCredit(o.id, n))}
+            onSaveCommission={(pct) => runAction(() => setOrganizerCommission(o.id, pct))}
             onMarkPhoneVerified={() => runAction(() => markOrganizerPhoneVerified(o.id))}
           />
         ))}
@@ -94,21 +101,29 @@ function OrganizerCard({
   onApprove,
   onSuspend,
   onPending,
-  onSaveCredit,
+  onSaveCommission,
   onMarkPhoneVerified,
 }: {
   o: OrganizerRow;
   disabled: boolean;
-  onApprove: () => void;
+  onApprove: (commissionPercent: number) => void;
   onSuspend: () => void;
   onPending: () => void;
-  onSaveCredit: (n: number) => void;
+  onSaveCommission: (commissionPercent: number) => void;
   onMarkPhoneVerified: () => void;
 }) {
-  const [credit, setCredit] = useState(String(o.freeTicketsRemaining));
+  const saved = o.commissionPercent === null ? '' : String(o.commissionPercent);
+  const [rate, setRate] = useState(saved);
   useEffect(() => {
-    setCredit(String(o.freeTicketsRemaining));
-  }, [o.freeTicketsRemaining]);
+    setRate(saved);
+  }, [saved]);
+  const parsedRate = parseCommission(rate);
+  const [deleting, setDeleting] = useState(false);
+  const approveBlocker = !o.phoneVerified
+    ? 'Verify their phone number first'
+    : parsedRate === null
+      ? 'Set their commission first'
+      : undefined;
 
   return (
     <div className="flex flex-col gap-4 p-5 md:flex-row md:items-start md:justify-between">
@@ -165,12 +180,12 @@ function OrganizerCard({
           {o.status === 'pending' && (
             <button
               type="button"
-              disabled={disabled || !o.phoneVerified}
-              title={o.phoneVerified ? undefined : 'Verify their phone number first'}
-              onClick={onApprove}
+              disabled={disabled || approveBlocker !== undefined}
+              title={approveBlocker}
+              onClick={() => parsedRate !== null && onApprove(parsedRate)}
               className="btn-primary text-xs disabled:opacity-50"
             >
-              Approve
+              Approve at {parsedRate === null ? '…%' : formatPercent(parsedRate)}
             </button>
           )}
           {o.status === 'approved' && (
@@ -187,9 +202,9 @@ function OrganizerCard({
             <>
               <button
                 type="button"
-                disabled={disabled || !o.phoneVerified}
-                title={o.phoneVerified ? undefined : 'Verify their phone number first'}
-                onClick={onApprove}
+                disabled={disabled || approveBlocker !== undefined}
+                title={approveBlocker}
+                onClick={() => parsedRate !== null && onApprove(parsedRate)}
                 className="btn-primary text-xs disabled:opacity-50"
               >
                 Approve again
@@ -216,29 +231,43 @@ function OrganizerCard({
           )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 border-t border-line pt-3 md:border-0 md:pt-0">
-          <label className="text-[10px] uppercase tracking-wider text-mute">Free-ticket credit</label>
-          <input
-            className="input max-w-[100px] py-2 text-sm"
-            type="number"
-            min={0}
-            value={credit}
-            onChange={(e) => setCredit(e.target.value)}
-          />
-          <button
-            type="button"
-            disabled={disabled}
-            className="btn-ghost py-2 text-xs disabled:opacity-50"
-            onClick={() => {
-              const n = Number.parseInt(credit, 10);
-              if (Number.isNaN(n) || n < 0) return;
-              onSaveCredit(n);
-            }}
-          >
-            Save
-          </button>
+        <div className="flex flex-col gap-1 border-t border-line pt-3 md:items-end md:border-0 md:pt-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <CommissionInput value={rate} onChange={setRate} disabled={disabled} label="Rhoddo commission" />
+            {o.status !== 'pending' && (
+              <button
+                type="button"
+                disabled={disabled || parsedRate === null || rate === saved}
+                className="btn-ghost py-2 text-xs disabled:opacity-50"
+                onClick={() => parsedRate !== null && onSaveCommission(parsedRate)}
+              >
+                Save
+              </button>
+            )}
+          </div>
+          <p className="max-w-xs text-[11px] text-mute md:text-right">
+            {o.commissionPercent === null
+              ? o.status === 'approved'
+                ? 'No rate set, so their events with no rate of their own are charged nothing.'
+                : 'Usually 5–10%. Their events start at this rate when reviewed.'
+              : 'Changes apply to events reviewed from now on. Approved events keep their own rate.'}
+          </p>
+          {rate !== '' && parsedRate === null && (
+            <p className="text-[11px] text-primary">Enter a number from 0 to 50.</p>
+          )}
         </div>
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => setDeleting(true)}
+          className="self-start text-xs text-mute underline-offset-4 hover:text-primary hover:underline disabled:opacity-50 md:self-end"
+        >
+          Delete host…
+        </button>
       </div>
+      {deleting && (
+        <DeleteHostDialog organizerId={o.id} businessName={o.businessName} onClose={() => setDeleting(false)} />
+      )}
     </div>
   );
 }

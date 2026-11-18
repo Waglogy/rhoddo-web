@@ -42,10 +42,20 @@ export async function setEventShowFirst(id: string, showFirst: boolean) {
   revalidatePath('/manage-rhoddo/events');
 }
 
-export async function reviewCulturalEvent(id: string, decision: 'approved' | 'rejected') {
-  await adminJson(`/admin/events/${id}/cultural-review`, { method: 'PUT', body: { decision } });
+// Every host event is reviewed once. Approving sets Rhoddo's commission for it.
+export async function reviewEvent(
+  id: string,
+  review: { decision: 'approved'; commissionPercent: number } | { decision: 'rejected' },
+) {
+  await adminJson(`/admin/events/${id}/review`, { method: 'PUT', body: review });
   revalidatePath('/manage-rhoddo/events');
   revalidatePath('/manage-rhoddo');
+}
+
+// Changes an approved event's commission. Bookings already made keep their fee.
+export async function setEventCommission(id: string, commissionPercent: number) {
+  await adminJson(`/admin/events/${id}/commission`, { method: 'PUT', body: { commissionPercent } });
+  revalidatePath('/manage-rhoddo/events');
 }
 
 export async function deleteEvent(id: string) {

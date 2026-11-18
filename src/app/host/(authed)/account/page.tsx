@@ -1,5 +1,6 @@
 import { hostApi } from '@/lib/api';
 import { formatDate, formatINR } from '@/lib/format';
+import { formatPercent } from '@/lib/pricing';
 import { HostAccountForm, type OrganizerProfile } from '@/components/HostAccountForm';
 import { HostPaymentsCard } from '@/components/HostPaymentsCard';
 
@@ -65,9 +66,13 @@ export default async function HostAccountPage() {
           {o.phone && <div className="mt-1 truncate text-[11px] text-mute">{o.phone}</div>}
         </div>
         <div className="card p-5">
-          <div className="label">Free tickets</div>
-          <div className="mt-2 font-display text-2xl text-gold">{o.freeTicketsRemaining}</div>
-          <div className="mt-1 text-[11px] text-mute">Remaining, with no Rhoddo fee</div>
+          <div className="label">Rhoddo commission</div>
+          <div className="mt-2 font-display text-2xl text-gold">
+            {o.commissionPercent === null ? '—' : formatPercent(o.commissionPercent)}
+          </div>
+          <div className="mt-1 text-[11px] text-mute">
+            {o.commissionPercent === null ? 'Set when Rhoddo approves you' : 'Of each booking. Each event shows its own rate.'}
+          </div>
         </div>
         <div className="card p-5">
           <div className="label">Joined</div>

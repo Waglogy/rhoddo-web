@@ -6,7 +6,7 @@ export type OrganizerRow = {
   phone: string | null;
   phoneVerified: boolean;
   status: 'pending' | 'approved' | 'suspended';
-  freeTicketsRemaining: number;
+  commissionPercent: number | null;
   venueCount: number;
   ticketsSold: number;
   feesToDateINR: number;

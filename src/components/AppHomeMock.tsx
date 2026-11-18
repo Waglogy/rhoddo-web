@@ -8,12 +8,12 @@ import { AutoScrollArea } from './AutoScrollArea';
 const PROMOS = ['/landing/promo-1.jpg', '/landing/promo-2.jpg', '/landing/promo-3.jpg'];
 
 const MOODS = [
+  { label: 'Sports', sub: 'runs & races', image: '/landing/mood-sports.jpg', tint: '#8CA8D1', icon: 'bike' },
   { label: 'Live Music', sub: 'gigs & nights', image: '/landing/mood-livemusic.jpg', tint: '#D1364B', icon: 'music' },
   { label: 'Food & Dining', sub: 'chef tables', image: '/landing/mood-foodanddining.jpg', tint: '#E8B84A', icon: 'food' },
   { label: 'Cultural', sub: 'heritage & rituals', image: '/landing/mood-cultural.jpg', tint: '#5B7FB9', icon: 'palette' },
   { label: 'Workshops', sub: 'hands-on', image: '/landing/mood-workshops.jpg', tint: '#4A9C7F', icon: 'wrench' },
   { label: 'Festivals', sub: 'seasonal', image: '/landing/mood-festivals.jpg', tint: '#E8576A', icon: 'sparkles' },
-  { label: 'Sports', sub: 'runs & rides', image: '/landing/mood-sports.jpg', tint: '#8CA8D1', icon: 'bike' },
   { label: 'Adventure', sub: 'trek & ride', image: '/landing/mood-adventure.jpg', tint: '#2E6E5B', icon: 'signpost' },
   { label: 'Stays & Retreats', sub: 'weekend stays', image: '/landing/mood-stays.jpg', tint: '#B88A1F', icon: 'bed' },
 ] as const;
@@ -25,9 +25,9 @@ const THIS_WEEK = [
   { title: 'Goecha La Ridge Trek', when: 'Sunday', district: 'Yuksom', price: '₹18,000', image: '/landing/mood-adventure.jpg' },
 ];
 
-const RESORT_ROWS = [
-  { title: 'Himalayan Sound Sessions', when: 'THURSDAY', district: 'Pelling', price: '₹1,200', image: '/landing/mood-livemusic.jpg' },
-  { title: 'Pine & Fire Weekend', when: 'NEXT WEEK', district: 'Ravangla', price: '₹4,500', image: '/landing/mood-stays.jpg' },
+const RACE_ROWS = [
+  { title: 'Gangtok Hill Half Marathon', when: 'SUNDAY', district: 'Gangtok', price: '₹799', image: '/landing/mood-sports.jpg' },
+  { title: 'Ravangla Trail 10K', when: 'NEXT WEEK', district: 'Ravangla', price: '₹499', image: '/landing/mood-adventure.jpg' },
 ];
 
 // November 2026 starts on a Sunday and has 30 days, so no leading blanks.
@@ -126,7 +126,7 @@ function Icon({ name, size = 14 }: { name: string; size?: number }) {
 
 function StatusBar() {
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex h-[38px] items-start justify-between bg-gradient-to-b from-bg from-[68%] to-transparent px-[22px] pt-[8px] text-[10px] font-semibold text-ink">
+    <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex h-[30px] items-start justify-between bg-bg px-[22px] pt-[8px] text-[10px] font-semibold text-ink">
       <span>9:41</span>
       <span className="flex items-center gap-[5px]">
         <svg viewBox="0 0 16 12" width="13" height="10" fill="currentColor">
@@ -146,7 +146,7 @@ function StatusBar() {
 
 function PromoHero() {
   return (
-    <div className="relative h-[275px] overflow-hidden rounded-b-[25px] border-b border-ink/20 bg-[#141E1A]">
+    <div className="relative h-[275px] overflow-hidden rounded-b-[25px] border-b border-line bg-[#141E1A]">
       {PROMOS.map((src, i) => (
         <div
           key={src}
@@ -160,34 +160,34 @@ function PromoHero() {
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(14,21,18,0.62)_0%,rgba(14,21,18,0.08)_45%,rgba(14,21,18,0.94)_100%)]" />
 
       <div className="absolute right-[19px] top-[36px] flex items-center gap-[6px]">
-        <div className="flex items-center gap-[4px] rounded-full border border-gold/45 bg-bg/55 px-[9px] py-[4px] text-[8.5px] font-medium tracking-[0.04em] text-ink/80">
+        <div className="flex items-center gap-[4px] rounded-full border border-[#E8B84A]/45 bg-[#0E1512]/55 px-[9px] py-[4px] text-[8.5px] font-medium tracking-[0.04em] text-[#F6F1E6]/80">
           <svg viewBox="0 0 24 24" width="11" height="11" fill="#E8B84A" stroke="#E8B84A" strokeWidth="2" strokeLinecap="round">
             <circle cx="12" cy="12" r="4.5" />
             <path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19" />
           </svg>
           12° Gangtok
         </div>
-        <div className="relative flex h-[32px] w-[32px] items-center justify-center rounded-full border border-[#2D3E37] bg-[#1B2722] text-primary">
+        <div className="relative flex h-[32px] w-[32px] items-center justify-center rounded-full border border-line bg-panel text-primary">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
             <path d="M12 2.5a6.5 6.5 0 0 0-6.5 6.5c0 5-2.5 7-2.5 8h18c0-1-2.5-3-2.5-8A6.5 6.5 0 0 0 12 2.5ZM9.5 19.5a2.5 2.5 0 0 0 5 0Z" />
           </svg>
-          <span className="absolute right-[7px] top-[6px] h-[7px] w-[7px] rounded-full border-[1.5px] border-[#1B2722] bg-primary" />
+          <span className="absolute right-[7px] top-[6px] h-[7px] w-[7px] rounded-full border-[1.5px] border-panel bg-primary" />
         </div>
-        <div className="flex h-[32px] w-[32px] items-center justify-center rounded-full border-[1.5px] border-ink bg-primary text-[9px] font-semibold tracking-[0.04em] text-white">
+        <div className="flex h-[32px] w-[32px] items-center justify-center rounded-full border-[1.5px] border-[#F6F1E6] bg-primary text-[9px] font-semibold tracking-[0.04em] text-white">
           TS
         </div>
       </div>
 
       <div className="absolute inset-x-[19px] bottom-[16px]">
-        <div className="text-[10.5px] font-medium text-ink/80">Hello, Tashi</div>
-        <div className="mt-[2px] font-display text-[21px] font-bold leading-[25px] tracking-[-0.02em] text-ink">
+        <div className="text-[10.5px] font-medium text-[#F6F1E6]/80">Hello, Tashi</div>
+        <div className="mt-[2px] font-display text-[21px] font-bold leading-[25px] tracking-[-0.02em] text-[#F6F1E6]">
           What&rsquo;s on tonight?
         </div>
         <div className="mt-[10px] flex items-center gap-[5px]">
           {PROMOS.map((src, i) => (
             <span
               key={src}
-              className={`promo-dot promo-${i + 1} h-[5px] rounded-full ${i === 0 ? 'w-[14px] bg-ink' : 'w-[5px] bg-ink/55'}`}
+              className={`promo-dot promo-${i + 1} h-[5px] rounded-full ${i === 0 ? 'w-[14px] bg-[#F6F1E6]' : 'w-[5px] bg-[#F6F1E6]/55'}`}
             />
           ))}
         </div>
@@ -213,7 +213,7 @@ function Moods() {
       {MOODS.map((m) => (
         <div
           key={m.label}
-          className="relative h-[133px] w-[118px] shrink-0 overflow-hidden rounded-[14px] border border-ink/10"
+          className="relative h-[133px] w-[118px] shrink-0 overflow-hidden rounded-[14px] border border-line"
         >
           <Image src={m.image} alt="" fill sizes="118px" draggable={false} className="object-cover" />
           <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_0%,rgba(14,21,18,0.18)_50%,rgba(14,21,18,0.82)_100%)]" />
@@ -236,7 +236,7 @@ function Moods() {
 function FestivalCard() {
   const festivalDays = new Set(NOVEMBER_FESTIVALS.map((f) => f.day));
   return (
-    <div className="mx-[19px] mt-[13px] overflow-hidden rounded-[14px] border-[1.5px] border-primary bg-[#1B2722]">
+    <div className="mx-[19px] mt-[13px] overflow-hidden rounded-[14px] border-[1.5px] border-primary bg-panel">
       <div className="flex items-start justify-between bg-gradient-to-b from-gold/10 to-transparent px-[10px] pb-[6px] pt-[10px]">
         <div>
           <div className="text-[8px] font-medium tracking-[0.2em] text-ink/50">2026</div>
@@ -291,7 +291,7 @@ function WeekCards() {
   return (
     <div className="no-scrollbar mt-[13px] flex gap-[9px] overflow-x-auto px-[19px]">
       {THIS_WEEK.map((e) => (
-        <div key={e.title} className="w-[182px] shrink-0 overflow-hidden rounded-[14px] border border-[#2D3E37] bg-[#1B2722]">
+        <div key={e.title} className="w-[182px] shrink-0 overflow-hidden rounded-[14px] border border-line bg-panel">
           <div className="relative h-[118px]">
             <Image src={e.image} alt="" fill sizes="182px" draggable={false} className="object-cover" />
             <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent,rgba(14,21,18,0.85))]" />
@@ -311,17 +311,17 @@ function WeekCards() {
   );
 }
 
-function ResortRows() {
+function RaceRows() {
   return (
     <div className="mt-[13px] space-y-[13px] px-[19px]">
-      {RESORT_ROWS.map((e) => (
-        <div key={e.title} className="flex rounded-[14px] border border-[#2D3E37] bg-[#1B2722] p-[9px]">
+      {RACE_ROWS.map((e) => (
+        <div key={e.title} className="flex rounded-[14px] border border-line bg-panel p-[9px]">
           <div className="relative h-[87px] w-[87px] shrink-0 overflow-hidden rounded-[11px]">
             <Image src={e.image} alt="" fill sizes="87px" draggable={false} className="object-cover" />
           </div>
           <div className="ml-[12px] flex min-w-0 flex-1 flex-col justify-between">
             <div>
-              <div className="flex items-center gap-[4px] text-[8px] font-medium tracking-[0.05em] text-[#E8576A]">
+              <div className="flex items-center gap-[4px] text-[8px] font-medium tracking-[0.05em] text-primary">
                 {e.when}
                 <span className="h-[2.5px] w-[2.5px] rounded-full bg-ink/50" />
                 <Icon name="pin" size={8} />
@@ -331,7 +331,7 @@ function ResortRows() {
             </div>
             <div className="flex items-center justify-between">
               <div className="text-[12px] font-semibold text-gold">{e.price}</div>
-              <span className="flex h-[25px] w-[25px] items-center justify-center rounded-full bg-primary text-ink">
+              <span className="flex h-[25px] w-[25px] items-center justify-center rounded-full bg-primary text-[#FFFCF2]">
                 <Icon name="arrow" size={11} />
               </span>
             </div>
@@ -350,12 +350,12 @@ function TabBar() {
   ];
   const labelClass = 'mt-[2px] text-[7.5px] font-medium tracking-[0.05em]';
   return (
-    <div className="pointer-events-none absolute inset-x-[13px] bottom-[13px] z-20 flex justify-around rounded-[25px] border border-ink/10 bg-[#141E1A]/90 px-[6px] pb-[9px] pt-[8px] backdrop-blur-md">
+    <div className="pointer-events-none absolute inset-x-[13px] bottom-[13px] z-20 flex justify-around rounded-[25px] border border-line bg-[#FFFCF2]/90 px-[6px] pb-[9px] pt-[8px] backdrop-blur-md">
       <div className="flex w-[52px] flex-col items-center text-primary">
         <span className="mb-[5px] h-[2.5px] w-[14px] rounded-full bg-primary" />
         <svg viewBox="0 0 24 24" width="18" height="18">
           <circle cx="12" cy="12" r="10.5" fill="currentColor" />
-          <path d="m16.5 7.5-2.8 6.2-6.2 2.8 2.8-6.2Z" fill="#141E1A" />
+          <path d="m16.5 7.5-2.8 6.2-6.2 2.8 2.8-6.2Z" fill="#FFFCF2" />
         </svg>
         <span className={labelClass}>DISCOVER</span>
       </div>
@@ -392,7 +392,7 @@ export function AppHomeMock() {
             {/* Scrolls by itself. Hover to scroll with wheel, trackpad or arrow keys; the page takes over at either end. */}
             <AutoScrollArea
               role="region"
-              aria-label="Scrollable preview of the Rhoddo Android app home screen, with promotional banners, Browse by mood categories, the Sikkim Festival Calendar and upcoming events"
+              aria-label="Scrollable preview of the Rhoddo Android app home screen, with promotional banners, Browse by mood categories led by Sports, upcoming races and runs, the Sikkim Festival Calendar and upcoming events"
               tabIndex={0}
               className="no-scrollbar absolute inset-0 overflow-y-auto outline-none"
             >
@@ -405,6 +405,11 @@ export function AppHomeMock() {
                 </div>
 
                 <div className="mt-[25px]">
+                  <SectionHead title="Races & runs" subtitle="Marathons, trail runs & rides" />
+                  <RaceRows />
+                </div>
+
+                <div className="mt-[25px]">
                   <SectionHead title="Sikkim Festival Calendar" subtitle="Festivals & celebrations · 2026" />
                   <FestivalCard />
                 </div>
@@ -414,17 +419,13 @@ export function AppHomeMock() {
                   <WeekCards />
                 </div>
 
-                <div className="mt-[25px]">
-                  <SectionHead title="At resorts" subtitle="Weekend-worthy getaways" />
-                  <ResortRows />
-                </div>
               </div>
             </AutoScrollArea>
 
             <TabBar />
 
             {/* Glass reflection */}
-            <div className="pointer-events-none absolute inset-0 z-50 bg-[linear-gradient(115deg,rgba(255,255,255,0.07)_0%,rgba(255,255,255,0)_32%)]" />
+            <div className="pointer-events-none absolute inset-0 z-50 bg-[linear-gradient(115deg,rgba(255,255,255,0.12)_0%,rgba(255,255,255,0)_32%)]" />
           </div>
         </div>
       </div>

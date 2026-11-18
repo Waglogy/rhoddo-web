@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { hostApi } from '@/lib/api';
 import { formatINR, formatDate } from '@/lib/format';
-import { includesEarlierTickets } from '@/lib/pricing';
+import { formatPercent } from '@/lib/pricing';
 import { HostGuideVideo } from '@/components/HostGuideVideo';
 
 type Stats = {
@@ -15,7 +15,7 @@ type Stats = {
     feesPaidINR: number;
     feesDueINR: number;
     discountGivenINR: number;
-    freeTicketsRemaining: number;
+    commissionPercent: number | null;
     status: string;
   };
   recentBookings: Array<{
@@ -25,6 +25,7 @@ type Stats = {
     total: number;
     payoutINR: number;
     platformFeeINR: number;
+    commissionPercent: number | null;
     createdAt: string;
     event: { title: string };
   }>;
@@ -112,14 +113,15 @@ export default async function HostDashboard({
         </div>
 
         <div className="card p-7">
-          <div className="label">Free tickets remaining</div>
+          <div className="label">Your Rhoddo commission</div>
           <div className="mt-2 font-display text-5xl text-ink">
-            {s.freeTicketsRemaining}
+            {s.commissionPercent === null ? '—' : formatPercent(s.commissionPercent)}
           </div>
           <p className="mt-3 text-xs text-mute">
-            Tickets you can sell with no Rhoddo fee. After these, events with more
-            than 10 attendees cost ₹9 per ticket. Smaller events and cultural events
-            stay free.
+            {s.commissionPercent === null
+              ? 'Rhoddo sets your commission when it approves your account.'
+              : 'Rhoddo’s share of each booking. Each event is reviewed once, and its rate is shown on the event.'}{' '}
+            Buyers never pay a fee.
           </p>
         </div>
       </div>
@@ -157,7 +159,7 @@ export default async function HostDashboard({
                 </div>
                 <div className="text-[11px] text-mute">
                   Rhoddo fee {formatINR(b.platformFeeINR)}
-                  {includesEarlierTickets(b.qty, b.platformFeeINR) && ' · includes earlier tickets'}
+                  {b.commissionPercent !== null && ` · ${formatPercent(b.commissionPercent)}`}
                 </div>
               </div>
             </div>

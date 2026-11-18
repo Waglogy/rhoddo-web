@@ -13,7 +13,7 @@ export type OrganizerProfile = {
   phone: string | null;
   phoneVerified: boolean;
   status: 'pending' | 'approved' | 'suspended';
-  freeTicketsRemaining: number;
+  commissionPercent: number | null;
   payments: HostPayments;
   createdAt: string;
   approvedAt: string | null;

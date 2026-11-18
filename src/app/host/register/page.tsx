@@ -12,6 +12,7 @@ export default function HostRegisterPage() {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,7 +24,7 @@ export default function HostRegisterPage() {
       const res = await fetch('/api/host/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ businessName, name, email, phone, password }),
+        body: JSON.stringify({ businessName, name, email, phone, password, acceptTerms }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || 'Registration failed');
@@ -54,9 +55,10 @@ export default function HostRegisterPage() {
             <span className="text-gold">Keep more of every ticket.</span>
           </h1>
           <p className="mt-5 text-sm text-mute md:text-base">
-            Resorts, restaurants, monasteries and event organizers across Sikkim
-            already use Rhoddo to manage events, tiers and bookings — without the
-            buyer fees that drive customers away.
+            Marathons, trail runs, cycle races and tournaments, plus concerts,
+            festivals and dinners. Take registrations, collect runner details with
+            your own form, and scan passes at the start line, without the buyer fees
+            that put people off signing up.
           </p>
 
           <div className="mt-8 space-y-4 text-sm">
@@ -66,14 +68,9 @@ export default function HostRegisterPage() {
               note="The price you set is the price they pay. Always."
             />
             <Promise
-              big="30"
-              label="Free tickets to start"
-              note="Your first 30 tickets cost you nothing."
-            />
-            <Promise
-              big="₹9"
-              label="Per ticket after that"
-              note="Only on events with more than 10 attendees. Smaller events and cultural events stay free."
+              big="5–10%"
+              label="Rhoddo commission per booking"
+              note="A small share of each sale, agreed when Rhoddo approves you and confirmed for each event."
             />
             <Promise
               big="Direct"
@@ -90,7 +87,7 @@ export default function HostRegisterPage() {
           <p className="mt-1 text-xs text-mute">
             After signing up, verify your phone number with a code. We&apos;ll then review
             your application within 2 working days. Once approved, you can add your venues
-            and events.
+            and events, from races to concerts.
           </p>
 
           <form onSubmit={onSubmit} className="mt-6 space-y-4">
@@ -150,13 +147,34 @@ export default function HostRegisterPage() {
               />
             </div>
 
+            <label className="flex items-start gap-3 text-sm text-ink">
+              <input
+                type="checkbox"
+                className="mt-0.5 h-4 w-4 shrink-0 accent-[#D1364B]"
+                checked={acceptTerms}
+                onChange={(e) => setAcceptTerms(e.target.checked)}
+                required
+              />
+              <span>
+                I have read and accept the{' '}
+                <Link href="/host-terms" target="_blank" className="text-gold underline-offset-2 hover:underline">
+                  Rhoddo Host Terms
+                </Link>{' '}
+                and the{' '}
+                <Link href="/privacy" target="_blank" className="text-gold underline-offset-2 hover:underline">
+                  Privacy Policy
+                </Link>
+                .
+              </span>
+            </label>
+
             {error && (
               <div className="rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm text-ink">
                 {error}
               </div>
             )}
 
-            <button type="submit" className="btn-primary w-full" disabled={loading}>
+            <button type="submit" className="btn-primary w-full" disabled={loading || !acceptTerms}>
               {loading ? 'Creating account…' : 'Create host account'}
             </button>
 

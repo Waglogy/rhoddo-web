@@ -5,13 +5,11 @@ import { AppHomeMock } from '@/components/AppHomeMock';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
 export const metadata: Metadata = {
-  title: 'Rhoddo — Sikkim Events, in your pocket',
+  title: 'Rhoddo — Races & events across Sikkim',
   description:
-    'Discover concerts, monastery festivals, resort dinners and cultural nights across Sikkim. One tap, one pass, no fuss.',
+    'Register for marathons, trail runs, cycle races and tournaments across Sikkim, plus concerts, festivals and more. One tap, one pass, no fuss.',
 };
 
-// A plain link, because /app is a separate single-page build rather than a Next.js route.
-const WEB_APP_URL = '/app';
 const PLAY_STORE_URL =
   'https://play.google.com/store/apps/details?id=com.rhoddo.app&pcampaignid=web_share';
 
@@ -44,7 +42,7 @@ export default function Landing() {
               href="/host/register"
               className="hidden rounded-xl border border-transparent px-3 py-2 text-sm text-mute transition hover:text-ink sm:inline-block"
             >
-              List your venue
+              List your event
             </Link>
             <a
               href={PLAY_STORE_URL}
@@ -65,27 +63,28 @@ export default function Landing() {
         <div className="pointer-events-none absolute inset-0 [mask-image:linear-gradient(to_bottom,transparent_0%,black_24%)]">
           <div className="absolute -left-40 top-20 h-[520px] w-[520px] rounded-full bg-pine/30 blur-[140px]" />
           <div className="absolute right-[-120px] top-[-80px] h-[420px] w-[420px] rounded-full bg-gold/15 blur-[140px]" />
-          <div className="absolute bottom-[-200px] left-1/2 h-[400px] w-[800px] -translate-x-1/2 rounded-full bg-primary/15 blur-[160px]" />
+          <div className="absolute bottom-[-200px] left-1/2 h-[400px] w-[800px] -translate-x-1/2 rounded-full bg-primary/10 blur-[160px]" />
           {/* Distant ridges across the whole hero */}
           <div className="absolute inset-x-0 bottom-0 h-[62%] bg-[image:var(--art-far)] bg-cover bg-bottom bg-no-repeat opacity-40 md:opacity-70 [mask-image:linear-gradient(to_bottom,transparent_0%,black_30%)]" />
           {/* Keeps the hero text readable over the peaks */}
           <div className="absolute inset-0 [background-image:var(--hero-scrim)]" />
         </div>
 
-        <div className="relative mx-auto max-w-6xl px-5 pb-16 pt-10 sm:px-6 sm:pb-24 sm:pt-16 md:grid md:grid-cols-[1.1fr_0.9fr] md:gap-16 md:pt-24">
+        {/* On larger screens the hero fills the first screen below the nav, phone included. */}
+        <div className="relative mx-auto max-w-6xl px-5 pb-16 pt-10 sm:px-6 sm:pb-24 sm:pt-16 md:grid md:min-h-[min(calc(100svh-96px),820px)] md:grid-cols-[1.1fr_0.9fr] md:items-center md:gap-12 md:py-8">
           <div className="relative z-10 flex min-w-0 flex-col justify-center text-center md:text-left">
             <div className="label flex justify-center md:justify-start">Made in Sikkim</div>
-            <h1 className="mt-3 font-display text-[2.25rem] leading-[1.08] text-ink sm:text-5xl md:text-7xl">
-              Catch the
+            <h1 className="mt-3 font-display text-[2.25rem] leading-[1.08] text-ink sm:text-5xl md:text-6xl lg:text-7xl [@media(min-width:768px)_and_(max-height:820px)]:text-6xl">
+              Run the
               <br />
-              <span className="text-primary">bloom</span> before
+              <span className="text-primary">hills</span> of
               <br />
-              it fades.
+              Sikkim.
             </h1>
             <p className="mt-5 text-sm leading-relaxed text-mute sm:mt-6 sm:text-base md:text-lg">
-              Like the rhododendrons that paint Sikkim&apos;s hillsides every season,
-              the best events don&apos;t wait. Rhoddo brings you every concert, festival,
-              resort dinner, and mountain gathering — before they&apos;re gone.
+              Marathons, trail runs, cycle races and tournaments across Sikkim.
+              Register, fill in your runner details and get your pass in one tap.
+              Concerts, festivals and more are here too, for after the finish line.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:justify-center md:justify-start">
@@ -96,9 +95,6 @@ export default function Landing() {
                 className="btn-primary"
               >
                 ↓ Download app
-              </a>
-              <a href={WEB_APP_URL} className="btn-ghost">
-                Explore on web
               </a>
               <Link href="/host/login" className="btn-ghost border-gold/30 text-gold hover:border-gold">
                 Host portal →
@@ -126,10 +122,11 @@ export default function Landing() {
           {/* Phone mock, set into the landscape — hidden on mobile, shown on md+ */}
           <div className="hidden items-center justify-center md:relative md:flex">
             {/* Sunrise behind the peaks */}
-            <div className="pointer-events-none absolute left-1/2 top-1/2 h-[760px] w-[760px] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(circle,rgba(232,184,74,0.26)_0%,rgba(209,54,75,0.1)_45%,transparent_68%)]" />
+            <div className="pointer-events-none absolute left-1/2 top-1/2 h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(circle,rgba(232,184,74,0.18)_0%,transparent_65%)]" />
             {/* Peaks centred on the phone, so it always sits in the valley between them */}
             <div className="pointer-events-none absolute -bottom-24 left-1/2 h-[760px] w-[1400px] -translate-x-1/2 bg-[image:var(--art-peaks)] bg-contain bg-bottom bg-no-repeat opacity-90 [mask-image:linear-gradient(to_right,transparent_24%,black_36%)]" />
-            <div className="theme-dark relative z-10">
+            {/* Shrinks on shorter screens so the whole phone fits */}
+            <div className="theme-app-light relative z-10 [@media(max-height:900px)]:[zoom:0.88] [@media(max-height:800px)]:[zoom:0.78] [@media(max-height:700px)]:[zoom:0.68]">
               <AppHomeMock />
             </div>
           </div>
@@ -142,25 +139,25 @@ export default function Landing() {
         <div className="mx-auto max-w-6xl px-6 py-24">
           <div className="label">Built for the hills</div>
           <h2 className="mt-2 max-w-2xl font-display text-4xl text-ink md:text-5xl">
-            Every bloom across Sikkim, in one place.
+            Every start line across Sikkim, in one place.
           </h2>
 
           <div className="mt-14 grid gap-6 md:grid-cols-3">
             {[
               {
                 eyebrow: 'Discover',
-                title: 'By district, not by algorithm',
-                body: 'Browse what\'s blooming near you — by district and by mood. Sunrise hikes, pine-lit dinners, hilltop concerts, seasonal festivals.',
+                title: 'Races near you, by district',
+                body: 'Find marathons, 10Ks, trail runs, cycle climbs and tournaments by district and date. Concerts, festivals and dinners are a tap away too.',
               },
               {
                 eyebrow: 'One pass',
-                title: 'Tap, scan, walk in',
-                body: 'A single QR pass per booking. No PDFs, no waiting in line, no scrambling at the gate.',
+                title: 'Register once, race ready',
+                body: 'Fill in runner details as you book and get a QR pass for every runner. No paper forms, no queue on race morning.',
               },
               {
                 eyebrow: 'Hosted by',
-                title: 'Resorts, restaurants, monasteries',
-                body: 'Verified hosts only — Mayfair, Mantram, Rumtek, Yangsum and the small places worth knowing.',
+                title: 'Race organisers, clubs and venues',
+                body: 'Verified organisers only: running and cycling clubs, sports associations, schools, resorts and the small places worth knowing.',
               },
             ].map((f) => (
               <div key={f.title} className="card p-6">
@@ -180,14 +177,14 @@ export default function Landing() {
         <div className="mx-auto max-w-6xl px-6 py-24">
           <div className="label">How it works</div>
           <h2 className="mt-2 max-w-2xl font-display text-4xl text-ink md:text-5xl">
-            From browse to pass in under a minute.
+            From start line to pass in under a minute.
           </h2>
 
           <div className="mt-14 grid gap-10 md:grid-cols-3">
             {[
-              { n: '01', t: 'Browse', b: 'Open the app, pick a district or a mood. See what\'s on tonight, this weekend, this season.' },
-              { n: '02', t: 'Book', b: 'Choose your tier, pay in INR. Your pass is created instantly and lives in your Tickets tab.' },
-              { n: '03', t: 'Walk in', b: 'Show your QR at the gate. The host scans it, you\'re in. No paper, no faff.' },
+              { n: '01', t: 'Find', b: 'Open the app and pick a race, a district or a mood. See what\'s on this weekend and this season.' },
+              { n: '02', t: 'Register', b: 'Choose your race category, fill in your runner details and pay in INR. Your pass is ready instantly in your Tickets tab.' },
+              { n: '03', t: 'Show up', b: 'Show your QR at the start or the gate. The organiser scans it and you\'re in. No paper, no faff.' },
             ].map((s) => (
               <div key={s.n}>
                 <div className="font-display text-5xl text-gold">{s.n}</div>
@@ -206,12 +203,12 @@ export default function Landing() {
             <div>
               <div className="label">For hosts</div>
               <h2 className="mt-2 max-w-2xl font-display text-3xl text-ink md:text-4xl">
-                Run a venue or a festival? List with Rhoddo.
+                Organising a marathon, a race or a tournament? List with Rhoddo.
               </h2>
               <p className="mt-3 max-w-xl text-sm text-mute">
-                Resorts, restaurants, monasteries and event organizers across Sikkim
-                use the Rhoddo host portal to manage events, tiers and bookings —
-                with payouts in INR, no commissions on cultural events.
+                Take registrations, collect runner details, and scan passes on race
+                day, all from the Rhoddo host portal. Payments go straight to you and
+                runners pay no fees. Venues and event organisers are welcome too.
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center md:flex-col md:items-stretch lg:flex-row lg:items-center">
@@ -242,13 +239,13 @@ export default function Landing() {
         <div className="relative mx-auto max-w-4xl px-6 py-28 text-center">
           <div className="label justify-center">Download the app</div>
           <h2 className="mt-3 font-display text-5xl leading-tight text-ink md:text-6xl">
-            Sikkim&apos;s best nights,
+            Sikkim&apos;s races and events,
             <br />
             in your pocket.
           </h2>
           <p className="mx-auto mt-5 max-w-xl text-base text-mute">
-            Free to download. Always free to browse. Pay only when you book a seat,
-            a pass, or a table.
+            Free to download. Always free to browse. Pay only when you register for a
+            race or book a pass.
           </p>
 
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
@@ -269,11 +266,7 @@ export default function Landing() {
           </div>
 
           <div className="mt-8 text-xs text-mute">
-            Android app on Google Play. On iPhone?{' '}
-            <a href={WEB_APP_URL} className="text-gold hover:underline">
-              Book on the web
-            </a>
-            .
+            Android app on Google Play. iPhone app coming soon.
           </div>
         </div>
       </section>
@@ -290,6 +283,7 @@ export default function Landing() {
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-mute md:justify-start">
             <Link href="/privacy" className="hover:text-ink">Privacy</Link>
             <Link href="/terms" className="hover:text-ink">Terms</Link>
+            <Link href="/host-terms" className="hover:text-ink">Host Terms</Link>
             <a href="#" className="hover:text-ink">Contact</a>
             <Link href="/host/login" className="hover:text-gold">Host sign in</Link>
             <Link href="/host/register" className="hover:text-gold">Apply as a host</Link>

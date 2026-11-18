@@ -45,7 +45,7 @@ export default function HostLoginPage() {
         <Link href="/" className="inline-block label">← Rhoddo</Link>
         <h1 className="mt-3 font-display text-3xl text-ink">Host sign in</h1>
         <p className="mt-1 text-sm text-mute">
-          Manage your venues, events and bookings.
+          Manage your races, events, registrations and bookings.
         </p>
 
         <form onSubmit={onSubmit} className="mt-8 space-y-4">

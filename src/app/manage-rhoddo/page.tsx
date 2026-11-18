@@ -12,6 +12,7 @@ type Stats = {
     revenueINR: number;
     organizers: number;
     pendingOrganizers: number;
+    pendingEvents: number;
     platformFeeINR: number;
     feesPaidINR: number;
     feesDueINR: number;
@@ -48,6 +49,12 @@ export default async function OverviewPage() {
       value: (s.pendingOrganizers ?? 0).toString(),
       accent: (s.pendingOrganizers ?? 0) > 0 ? ('gold' as const) : undefined,
       href: '/manage-rhoddo/hosts',
+    },
+    {
+      label: 'Events to review',
+      value: (s.pendingEvents ?? 0).toString(),
+      accent: (s.pendingEvents ?? 0) > 0 ? ('gold' as const) : undefined,
+      href: '/manage-rhoddo/events',
     },
   ];
 

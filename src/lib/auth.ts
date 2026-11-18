@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation';
 
 export const ADMIN_COOKIE = 'rhoddo_admin';
 export const HOST_COOKIE = 'rhoddo_host';
+/** A buyer who signed in on a registration page (rhoddo.com/r/...). Same account as the app. */
+export const USER_COOKIE = 'rhoddo_user';
 
 export async function requireAdminToken(): Promise<string> {
   const c = await cookies();

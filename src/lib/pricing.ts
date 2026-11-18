@@ -1,8 +1,9 @@
-// Display copies of Rhoddo's host pricing. The backend's lib/fees.ts decides what's charged.
-export const PER_TICKET_FEE_INR = 9;
-export const SMALL_EVENT_MAX_TICKETS = 10;
+// Display helpers for Rhoddo's host pricing. The backend's lib/fees.ts decides what's charged:
+// each booking costs the host a percentage of what the buyer paid, set by an admin.
+export const TYPICAL_COMMISSION_RANGE = { min: 5, max: 10 };
+export const MAX_COMMISSION_PERCENT = 50;
 
-/** A booking's fee can be bigger than its own tickets when it took the event past the limit. */
-export function includesEarlierTickets(qty: number, platformFeeINR: number): boolean {
-  return platformFeeINR > qty * PER_TICKET_FEE_INR;
+/** 7.5 -> "7.5%", 8 -> "8%". */
+export function formatPercent(percent: number): string {
+  return `${Number(percent.toFixed(2))}%`;
 }

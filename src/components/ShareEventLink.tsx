@@ -1,19 +1,21 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { eventShareUrl } from '@/lib/eventLink';
+import { eventLink } from '@/lib/eventLink';
 
 /** Copy and WhatsApp buttons for a published event's link. */
 export function ShareEventLink({
   eventId,
+  slug,
   title,
   compact = false,
 }: {
   eventId: string;
+  slug?: string | null;
   title: string;
   compact?: boolean;
 }) {
-  const url = eventShareUrl(eventId);
+  const url = eventLink({ id: eventId, slug });
   const [copied, setCopied] = useState(false);
   const [copyFailed, setCopyFailed] = useState(false);
   const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -50,9 +52,11 @@ export function ShareEventLink({
   return (
     <div className="card flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
-        <div className="font-display text-lg text-ink">Share this event</div>
+        <div className="font-display text-lg text-ink">Registration link</div>
         <p className="mt-0.5 break-all text-sm text-mute">{url}</p>
-        <p className="mt-1 text-xs text-mute">Opens in the Rhoddo app for anyone who has it.</p>
+        <p className="mt-1 text-xs text-mute">
+          Anyone can register and pay on this page. Android users with the Rhoddo app can open it there.
+        </p>
       </div>
       <div className="flex shrink-0 flex-wrap gap-3">
         {copyButton}

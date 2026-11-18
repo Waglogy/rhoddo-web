@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from 'react';
-import { PER_TICKET_FEE_INR, SMALL_EVENT_MAX_TICKETS } from '@/lib/pricing';
 import { useRouter } from 'next/navigation';
 import { clientApi } from '@/lib/client-api';
 import { FieldLabel } from './FieldLabel';
 import { ImageUpload } from './ImageUpload';
 import { toDateInput } from '@/lib/format';
+import { slugify, registrationUrl } from '@/lib/eventLink';
 
 type Tier = {
   id?: string;
@@ -19,6 +19,7 @@ type Tier = {
 type EventInitial = {
   id: string;
   title: string;
+  slug?: string | null;
   tagline: string;
   category: string;
   district: string;
@@ -33,7 +34,7 @@ type EventInitial = {
   about: string;
   tags: string[];
   published: boolean;
-  culturalStatus?: 'pending' | 'approved' | 'rejected';
+  reviewStatus?: 'pending' | 'approved' | 'rejected';
   categoryLocked?: boolean;
   tiers: Tier[];
 };
@@ -61,6 +62,8 @@ export function EventForm({
 
   const [title, setTitle] = useState(initial?.title || '');
   const [tagline, setTagline] = useState(initial?.tagline || '');
+  // Empty means "make one from the title" (new events, and older events without one).
+  const [slug, setSlug] = useState(initial?.slug || '');
   const [category, setCategory] = useState(initial?.category || categories[0]?.key || '');
   const [district, setDistrict] = useState(initial?.district || 'Gangtok');
   const [date, setDate] = useState(toDateInput(initial?.date) || '');
@@ -105,11 +108,12 @@ export function EventForm({
     }
     setSaving(true);
     setError(null);
-    const publishNow = (e.nativeEvent as SubmitEvent).submitter?.getAttribute('value') === 'publish';
     try {
       const payload = {
         title,
         tagline,
+        // Only sent when set or changed, so saving never renames a link people already have.
+        slug: slug.trim() && slug.trim() !== initial?.slug ? slug.trim() : undefined,
         category,
         district,
         date: new Date(date).toISOString(),
@@ -121,8 +125,9 @@ export function EventForm({
         priceFromINR: Number(priceFromINR),
         about,
         tags: tags.split(',').map((s) => s.trim()).filter(Boolean),
-        // Hosts publish with a button, so editing never changes whether an event is live.
-        published: mode === 'host' ? (isEdit ? undefined : publishNow && !draftOnly) : published,
+        // Host events go live after Rhoddo's review, then with the Publish button, so
+        // the form never changes whether a host's event is live.
+        published: mode === 'host' ? (isEdit ? undefined : false) : published,
         tiers: tiers.map((t) => ({
           id: t.id,
           name: t.name,
@@ -134,7 +139,13 @@ export function EventForm({
       if (isEdit) {
         await clientApi(`${apiBase}/${initial!.id}`, { method: 'PUT', body: payload });
       } else {
-        await clientApi(apiBase, { method: 'POST', body: payload });
+        const created = await clientApi<{ event: { id: string } }>(apiBase, { method: 'POST', body: payload });
+        // Hosts land on the new event, where they can add a registration form.
+        if (mode === 'host') {
+          router.push(`/host/events/${created.event.id}?created=1`);
+          router.refresh();
+          return;
+        }
       }
       router.push(listPath);
       router.refresh();
@@ -159,15 +170,14 @@ export function EventForm({
 
   return (
     <form onSubmit={onSubmit} className="space-y-10">
-      {mode === 'host' && initial?.category === 'cultural' && initial.culturalStatus === 'pending' && (
+      {mode === 'host' && initial?.reviewStatus === 'pending' && (
         <div className="rounded-xl border border-gold/40 bg-gold/10 px-4 py-3 text-sm text-ink">
-          Rhoddo is reviewing this as a cultural event. It goes live once approved.
+          Rhoddo is reviewing this event and will set its commission. It goes live once approved.
         </div>
       )}
-      {mode === 'host' && initial?.category === 'cultural' && initial.culturalStatus === 'rejected' && (
+      {mode === 'host' && initial?.reviewStatus === 'rejected' && (
         <div className="rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm text-ink">
-          This wasn&apos;t approved as a cultural event. Choose another category to publish it, or
-          edit and save to send it for review again.
+          Rhoddo didn&apos;t approve this event. Edit it and save to send it for review again.
         </div>
       )}
       <section className="card p-6">
@@ -180,6 +190,27 @@ export function EventForm({
           <div className="md:col-span-2">
             <label className="label mb-1 block">Tagline</label>
             <input className="input" value={tagline} onChange={(e) => setTagline(e.target.value)} required />
+          </div>
+          <div className="md:col-span-2">
+            <label className="label mb-1 block">Registration link</label>
+            <div className="flex items-stretch overflow-hidden rounded-xl border border-line bg-bg focus-within:border-gold">
+              <span className="flex items-center whitespace-nowrap border-r border-line bg-panel px-3 text-sm text-mute">
+                rhoddo.com/r/
+              </span>
+              <input
+                className="min-w-0 flex-1 bg-transparent px-3 py-2.5 text-sm text-ink outline-none"
+                value={slug}
+                onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/\s+/g, '-'))}
+                onBlur={() => setSlug((s) => slugify(s))}
+                placeholder={slugify(title) || 'gangtok-half-marathon'}
+                maxLength={60}
+              />
+            </div>
+            <p className="mt-1 text-xs text-mute">
+              {initial?.slug && slug !== initial.slug
+                ? `Links already shared as ${registrationUrl(initial.slug)} will stop working.`
+                : 'Letters, numbers and dashes. Leave it empty to use the title.'}
+            </p>
           </div>
           <div>
             <label className="label mb-1 block">Category</label>
@@ -195,7 +226,7 @@ export function EventForm({
               )}
               {categories.map((c) => <option key={c.key} value={c.key}>{c.label}</option>)}
             </select>
-            {mode === 'host' && <CategoryNote category={category} locked={!!initial?.categoryLocked} />}
+            {mode === 'host' && <CategoryNote locked={!!initial?.categoryLocked} />}
           </div>
           <div>
             <label className="label mb-1 block">District</label>
@@ -265,7 +296,8 @@ export function EventForm({
           </div>
           {draftOnly && (
             <p className="md:col-span-2 text-sm text-mute">
-              This will be saved as a draft. You can publish it once your account is approved.
+              This will be saved and sent to Rhoddo for review. You can publish it once your
+              account and the event are approved.
             </p>
           )}
           {mode === 'admin' && (
@@ -378,35 +410,26 @@ export function EventForm({
           <button type="button" onClick={() => router.back()} className="btn-ghost">
             Cancel
           </button>
-          {mode === 'host' && !isEdit && !draftOnly ? (
-            <>
-              {category !== 'cultural' && (
-                <button type="submit" value="draft" disabled={saving} className="btn-ghost">
-                  Save draft
-                </button>
-              )}
-              <button type="submit" value="publish" disabled={saving} className="btn-primary">
-                {saving ? 'Saving…' : category === 'cultural' ? 'Submit for review' : 'Publish event'}
-              </button>
-            </>
-          ) : (
-            <button type="submit" disabled={saving} className="btn-primary">
-              {saving ? 'Saving…' : draftOnly ? 'Save draft' : isEdit ? 'Save changes' : 'Create event'}
-            </button>
-          )}
+          <button type="submit" disabled={saving} className="btn-primary">
+            {saving
+              ? 'Saving…'
+              : isEdit
+                ? 'Save changes'
+                : mode === 'host'
+                  ? 'Submit for review'
+                  : 'Create event'}
+          </button>
         </div>
       </div>
     </form>
   );
 }
 
-function CategoryNote({ category, locked }: { category: string; locked: boolean }) {
+function CategoryNote({ locked }: { locked: boolean }) {
   return (
     <p className="mt-1 text-[11px] text-mute">
       {locked && "The category can't change once tickets are sold. "}
-      {category === 'cultural'
-        ? 'Cultural events are free for hosts. Rhoddo reviews each one before it goes live.'
-        : `After your free tickets, events with more than ${SMALL_EVENT_MAX_TICKETS} attendees cost ₹${PER_TICKET_FEE_INR} per ticket.`}
+      Rhoddo reviews each new event once and sets its commission, a share of each booking.
     </p>
   );
 }

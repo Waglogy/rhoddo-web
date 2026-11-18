@@ -68,6 +68,11 @@ export async function api<T = any>(path: string, init: ApiInit = {}): Promise<T>
   const text = await res.text();
   const data = text ? JSON.parse(text) : null;
 
+  // A host who hasn't accepted the current Host Terms is sent to accept them first.
+  if (res.status === 403 && data?.code === 'TERMS_REQUIRED' && as === 'host') {
+    redirect('/host/accept-terms');
+  }
+
   if (!res.ok) {
     const msg = data?.error || `Request failed (${res.status})`;
     throw new Error(msg);
