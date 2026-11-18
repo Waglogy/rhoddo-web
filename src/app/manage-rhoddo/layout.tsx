@@ -1,6 +1,9 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { requireAdminToken } from '@/lib/auth';
 import { LogoutButton } from '@/components/LogoutButton';
+
+export const metadata: Metadata = { title: 'Rhoddo Admin' };
 
 const NAV = [
   { href: '/manage-rhoddo', label: 'Overview' },

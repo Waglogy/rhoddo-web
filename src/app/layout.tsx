@@ -17,9 +17,11 @@ const sans = localFont({
   display: 'swap',
 });
 
+// Pages without their own title show "Rhoddo". The host and admin areas set
+// "Rhoddo Host" and "Rhoddo Admin" in their layouts.
 export const metadata: Metadata = {
-  title: 'Rhoddo Admin',
-  description: 'Manage Rhoddo events, venues, bookings.',
+  title: 'Rhoddo',
+  description: 'Register for marathons, runs and races, and book events across Sikkim.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

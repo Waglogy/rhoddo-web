@@ -1,3 +1,7 @@
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = { title: 'Rhoddo Host' };
+
 // Everything under /host uses the site theme. `isolate` keeps the login page's
 // background glows above this wrapper's background.
 export default function HostThemeLayout({ children }: { children: React.ReactNode }) {
