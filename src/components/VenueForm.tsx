@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { clientApi } from '@/lib/client-api';
 import { ImageUpload } from './ImageUpload';
+import { districtOptions } from '@/lib/districts';
 
 type VenueInitial = {
   id: string;
@@ -18,7 +19,6 @@ type VenueInitial = {
 };
 
 const KINDS = ['restaurant', 'resort', 'hall', 'monastery', 'outdoor'];
-const DISTRICTS = ['Gangtok', 'Pelling', 'Lachung', 'Yuksom', 'Namchi', 'Ravangla'];
 
 export function VenueForm({
   initial,
@@ -111,7 +111,7 @@ export function VenueForm({
           <div>
             <label className="label mb-1 block">District</label>
             <select className="input" value={district} onChange={(e) => setDistrict(e.target.value)}>
-              {DISTRICTS.map((d) => <option key={d} value={d}>{d}</option>)}
+              {districtOptions(initial?.district).map((d) => <option key={d} value={d}>{d}</option>)}
             </select>
           </div>
           <div className="md:col-span-2">

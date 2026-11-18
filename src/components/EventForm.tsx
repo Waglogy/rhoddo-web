@@ -7,6 +7,7 @@ import { FieldLabel } from './FieldLabel';
 import { ImageUpload } from './ImageUpload';
 import { toDateInput } from '@/lib/format';
 import { slugify, registrationUrl } from '@/lib/eventLink';
+import { districtOptions } from '@/lib/districts';
 
 type Tier = {
   id?: string;
@@ -39,7 +40,6 @@ type EventInitial = {
   tiers: Tier[];
 };
 
-const DISTRICTS = ['Gangtok', 'Pelling', 'Lachung', 'Yuksom', 'Namchi', 'Ravangla'];
 
 export function EventForm({
   venues,
@@ -231,7 +231,7 @@ export function EventForm({
           <div>
             <label className="label mb-1 block">District</label>
             <select className="input" value={district} onChange={(e) => setDistrict(e.target.value)}>
-              {DISTRICTS.map((d) => <option key={d} value={d}>{d}</option>)}
+              {districtOptions(initial?.district).map((d) => <option key={d} value={d}>{d}</option>)}
             </select>
           </div>
           <div>
