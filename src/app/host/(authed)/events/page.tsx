@@ -67,7 +67,14 @@ export default async function HostEventsPage() {
               <div className="text-right">
                 <div className="font-display text-base text-gold">{formatINR(e.priceFromINR)}</div>
                 <div className="text-[11px] text-mute">
-                  {e.bookingCount} {e.bookingCount === 1 ? eventWords(e.category).booking : eventWords(e.category).bookings} · {formatINR(e.fees.feeINR)} fee
+                  {e.bookingCount > 0 ? (
+                    <Link href={`/host/events/${e.id}/registrations`} className="underline decoration-line underline-offset-2 hover:text-ink">
+                      {e.bookingCount} {e.bookingCount === 1 ? eventWords(e.category).booking : eventWords(e.category).bookings}
+                    </Link>
+                  ) : (
+                    <>0 {eventWords(e.category).bookings}</>
+                  )}{' '}
+                  · {formatINR(e.fees.feeINR)} fee
                   {e.reviewStatus === 'approved' && ` · ${formatPercent(e.fees.commissionPercent)}`}
                 </div>
               </div>
