@@ -113,7 +113,7 @@ async function EventBody({ event, isAndroid }: { event: Extract<EventLookup, { e
             </div>
           ) : (
             <RegisterPanel
-              event={{ id: event.id, title: event.title, tiers: event.tiers, form: event.form ?? null }}
+              event={{ id: event.id, title: event.title, category: event.category, tiers: event.tiers, form: event.form ?? null }}
               initialUser={user}
             />
           )}

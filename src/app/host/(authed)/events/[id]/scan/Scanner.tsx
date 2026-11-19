@@ -270,7 +270,7 @@ export function Scanner({ eventId, initialStats }: Props) {
       {/* Manual entry fallback */}
       <details className="card p-5">
         <summary className="cursor-pointer text-sm text-mute hover:text-gold">
-          Can&apos;t scan? Enter ticket code manually
+          Can&apos;t scan? Enter the code manually
         </summary>
         <form onSubmit={submitManual} className="mt-4 flex gap-2">
           <input
@@ -361,11 +361,11 @@ function labelForReason(reason: string): string {
     case 'wrong_event':
       return 'Wrong event';
     case 'cancelled_or_refunded':
-      return 'Booking invalid';
+      return 'Cancelled or refunded';
     case 'not_your_event':
       return 'Not your event';
     case 'invalid_code':
-      return 'Invalid ticket';
+      return 'Invalid code';
     case 'unauthorized':
       return 'Not logged in';
     case 'network':

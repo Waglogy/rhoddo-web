@@ -13,7 +13,8 @@ export type FormFieldType =
   | 'email'
   | 'select'
   | 'multi_select'
-  | 'checkbox';
+  | 'checkbox'
+  | 'image';
 
 export type FormField = {
   id: string;
@@ -41,6 +42,7 @@ const TYPE_LABELS: Record<FormFieldType, string> = {
   select: 'Choose one',
   multi_select: 'Choose several',
   checkbox: 'Tick box (yes / no)',
+  image: 'Photo upload (ID, photo, certificate)',
 };
 
 const isChoice = (t: FormFieldType) => t === 'select' || t === 'multi_select';

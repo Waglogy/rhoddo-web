@@ -4,6 +4,8 @@ import { formatDate, formatINR } from '@/lib/format';
 import { formatPercent } from '@/lib/pricing';
 import { EventPublishButton, EventStatusBadge } from '@/components/EventStatus';
 import { ShareEventLink } from '@/components/ShareEventLink';
+import { getHostMe } from '@/lib/hostMe';
+import { eventWords } from '@/lib/eventWords';
 
 type EventRow = {
   id: string;
@@ -24,7 +26,7 @@ type EventRow = {
 export default async function HostEventsPage() {
   const [data, me] = await Promise.all([
     hostApi<{ events: EventRow[] }>('/organizer/events'),
-    hostApi<{ organizer: { status: string } }>('/organizer/me'),
+    getHostMe(),
   ]);
   const hostApproved = me.organizer.status === 'approved';
 
@@ -65,14 +67,14 @@ export default async function HostEventsPage() {
               <div className="text-right">
                 <div className="font-display text-base text-gold">{formatINR(e.priceFromINR)}</div>
                 <div className="text-[11px] text-mute">
-                  {e.bookingCount} bookings · {formatINR(e.fees.feeINR)} fee
+                  {e.bookingCount} {e.bookingCount === 1 ? eventWords(e.category).booking : eventWords(e.category).bookings} · {formatINR(e.fees.feeINR)} fee
                   {e.reviewStatus === 'approved' && ` · ${formatPercent(e.fees.commissionPercent)}`}
                 </div>
               </div>
               {e.published && <ShareEventLink eventId={e.id} slug={e.slug} title={e.title} compact />}
               {e.published && (
                 <Link href={`/host/events/${e.id}/scan`} className="btn-ghost whitespace-nowrap">
-                  Scan tickets
+                  Scan {eventWords(e.category).tickets}
                 </Link>
               )}
               <EventPublishButton event={e} hostApproved={hostApproved} />

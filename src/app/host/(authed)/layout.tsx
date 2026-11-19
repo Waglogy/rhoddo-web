@@ -1,39 +1,30 @@
 import Link from 'next/link';
 import { requireHostToken } from '@/lib/auth';
-import { hostApi } from '@/lib/api';
+import { getHostMe } from '@/lib/hostMe';
+import { hostWords } from '@/lib/eventWords';
 import { HostLogoutButton } from '@/components/HostLogoutButton';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { HostPhoneVerify } from '@/components/HostPhoneVerify';
 import { redirect } from 'next/navigation';
 
-const NAV = [
-  { href: '/host', label: 'Dashboard' },
-  { href: '/host/venues', label: 'Venues' },
-  { href: '/host/events', label: 'Events' },
-  { href: '/host/bookings', label: 'Bookings' },
-  { href: '/host/scanner', label: 'Scanner' },
-  { href: '/host/account', label: 'Account' },
-];
-
-type Me = {
-  organizer: {
-    businessName: string;
-    name: string;
-    email: string;
-    phone: string | null;
-    phoneVerified: boolean;
-    status: 'pending' | 'approved' | 'suspended';
-    commissionPercent: number | null;
-    termsAccepted: boolean;
-    payments: { connected: boolean };
-  };
-};
+function navFor(bookingsLabel: string) {
+  return [
+    { href: '/host', label: 'Dashboard' },
+    { href: '/host/venues', label: 'Venues' },
+    { href: '/host/events', label: 'Events' },
+    { href: '/host/bookings', label: bookingsLabel },
+    { href: '/host/scanner', label: 'Scanner' },
+    { href: '/host/account', label: 'Account' },
+  ];
+}
 
 export default async function HostLayout({ children }: { children: React.ReactNode }) {
   await requireHostToken();
-  const me = await hostApi<Me>('/organizer/me');
+  const me = await getHostMe();
   if (!me.organizer.termsAccepted) redirect('/host/accept-terms');
   const suspended = me.organizer.status === 'suspended';
+  const words = hostWords(me.organizer.wording);
+  const NAV = navFor(words.Bookings);
 
   return (
     <div className="flex min-h-screen">
@@ -100,8 +91,8 @@ export default async function HostLayout({ children }: { children: React.ReactNo
         ) : (
           <>
             {!me.organizer.phoneVerified && <HostPhoneVerify initialPhone={me.organizer.phone} />}
-            {me.organizer.status === 'pending' && me.organizer.phoneVerified && <PendingBanner />}
-            {me.organizer.status === 'approved' && !me.organizer.payments.connected && <ConnectPaymentsBanner />}
+            {me.organizer.status === 'pending' && me.organizer.phoneVerified && <PendingBanner sellTickets={words.sellTickets} />}
+            {me.organizer.status === 'approved' && !me.organizer.payments.connected && <ConnectPaymentsBanner sell={words.sell} />}
             {children}
           </>
         )}
@@ -126,12 +117,12 @@ function StatusPill({ status }: { status: 'pending' | 'approved' | 'suspended' }
   );
 }
 
-function ConnectPaymentsBanner() {
+function ConnectPaymentsBanner({ sell }: { sell: string }) {
   return (
     <div className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-gold/40 bg-gold/10 p-5">
       <div>
-        <div className="text-sm font-medium text-ink">Connect Razorpay to sell paid tickets</div>
-        <p className="mt-1 text-sm text-mute">Buyers pay directly into your own account. Free events work without it.</p>
+        <div className="text-sm font-medium text-ink">Connect Razorpay to {sell}</div>
+        <p className="mt-1 text-sm text-mute">People pay directly into your own account. Free events work without it.</p>
       </div>
       <Link href="/host/account#payments" className="btn-primary whitespace-nowrap">
         Add your keys
@@ -140,7 +131,7 @@ function ConnectPaymentsBanner() {
   );
 }
 
-function PendingBanner() {
+function PendingBanner({ sellTickets }: { sellTickets: string }) {
   return (
     <div className="mb-8 rounded-2xl border border-gold/40 bg-gold/10 p-5">
       <div className="text-[11px] uppercase tracking-wider text-gold">Awaiting approval</div>
@@ -149,7 +140,7 @@ function PendingBanner() {
       </div>
       <p className="mt-1 text-sm text-mute">
         You can add venues and events as drafts now. Once a Rhoddo admin approves your
-        account, you can publish them and sell tickets. We usually review within two
+        account, you can publish them and {sellTickets}. We usually review within two
         working days.
       </p>
     </div>

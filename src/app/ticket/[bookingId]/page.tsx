@@ -9,7 +9,7 @@ import { formatINR } from '@/lib/format';
 import { formatPlace, formatWhen } from '@/lib/publicEvent';
 
 // A buyer's passes after registering on the website. The same passes are in the
-// app's Tickets tab and the confirmation email; the QR codes are the ticket codes
+// app's Passes tab and the confirmation email; the QR codes are the ticket codes
 // hosts scan, exactly as the app shows them.
 
 export const metadata: Metadata = { title: 'Your pass · Rhoddo', robots: { index: false } };
@@ -134,7 +134,7 @@ async function Passes({ booking }: { booking: Booking }) {
 function Problem({ problem }: { problem: 'signed-out' | 'missing' | 'unavailable' }) {
   const text = {
     'signed-out': 'Open this page in the browser you registered with, or find your pass in your email.',
-    missing: 'We couldn’t find this booking on your account.',
+    missing: 'We couldn’t find this pass on your account.',
     unavailable: 'We couldn’t load your pass. Please try again in a moment.',
   }[problem];
   return (

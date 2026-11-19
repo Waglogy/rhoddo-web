@@ -3,6 +3,8 @@ import { hostApi } from '@/lib/api';
 import { formatINR, formatDate } from '@/lib/format';
 import { formatPercent } from '@/lib/pricing';
 import { HostGuideVideo } from '@/components/HostGuideVideo';
+import { getHostMe } from '@/lib/hostMe';
+import { eventWords, hostWords } from '@/lib/eventWords';
 
 type Stats = {
   stats: {
@@ -27,7 +29,7 @@ type Stats = {
     platformFeeINR: number;
     commissionPercent: number | null;
     createdAt: string;
-    event: { title: string };
+    event: { title: string; category?: string };
   }>;
 };
 
@@ -37,8 +39,9 @@ export default async function HostDashboard({
   searchParams: Promise<{ welcome?: string }>;
 }) {
   const { welcome } = await searchParams;
-  const data = await hostApi<Stats>('/organizer/stats');
+  const [data, me] = await Promise.all([hostApi<Stats>('/organizer/stats'), getHostMe()]);
   const s = data.stats;
+  const words = hostWords(me.organizer.wording);
 
   return (
     <div>
@@ -49,7 +52,7 @@ export default async function HostDashboard({
           <p className="mt-1 text-sm text-mute">Here&apos;s how your events are doing.</p>
         </div>
         <Link href="/host/scanner" className="btn-primary w-full text-center sm:w-auto">
-          Scan tickets
+          {words.scan}
         </Link>
       </div>
 
@@ -59,7 +62,7 @@ export default async function HostDashboard({
       <div className="mt-6 grid gap-4 md:grid-cols-[2fr_1fr]">
         <div className="card relative overflow-hidden p-7">
           <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-gold/12 blur-3xl" />
-          <div className="label">Ticket sales</div>
+          <div className="label">{words.Sales}</div>
           <div className="mt-2 font-display text-5xl text-gold">
             {formatINR(s.grossSalesINR)}
           </div>
@@ -105,7 +108,7 @@ export default async function HostDashboard({
             )}
             <div>
               <div className="text-[11px] uppercase tracking-wider text-mute">
-                Buyer fees
+                {me.organizer.wording === 'registration' ? 'Participant fees' : 'Buyer fees'}
               </div>
               <div className="mt-1 font-display text-lg text-pine">₹0 · always</div>
             </div>
@@ -120,8 +123,8 @@ export default async function HostDashboard({
           <p className="mt-3 text-xs text-mute">
             {s.commissionPercent === null
               ? 'Rhoddo sets your commission when it approves your account.'
-              : 'Rhoddo’s share of each booking. Each event is reviewed once, and its rate is shown on the event.'}{' '}
-            Buyers never pay a fee.
+              : `Rhoddo’s share of each ${words.booking}. Each event is reviewed once, and its rate is shown on the event.`}{' '}
+            {me.organizer.wording === 'registration' ? 'Participants never pay a fee.' : 'Buyers never pay a fee.'}
           </p>
         </div>
       </div>
@@ -131,17 +134,17 @@ export default async function HostDashboard({
         <Counter label="Venues" value={s.venues} href="/host/venues" />
         <Counter label="Events" value={s.events} href="/host/events" />
         <Counter label="Upcoming" value={s.upcomingEvents} href="/host/events" />
-        <Counter label="Bookings" value={s.bookings} href="/host/bookings" />
+        <Counter label={words.Bookings} value={s.bookings} href="/host/bookings" />
       </div>
 
       {/* Recent bookings */}
       <div className="mt-12">
-        <div className="label">Recent bookings</div>
+        <div className="label">Recent {words.bookings}</div>
         <div className="card mt-3 divide-y divide-line">
           {data.recentBookings.length === 0 && (
             <div className="p-6 text-sm text-mute">
-              No bookings yet. Once buyers book your events, they&apos;ll show up here
-              with any Rhoddo fee.
+              No {words.bookings} yet. Once people sign up for your events, they&apos;ll show up
+              here with any Rhoddo fee.
             </div>
           )}
           {data.recentBookings.map((b) => (
@@ -149,7 +152,7 @@ export default async function HostDashboard({
               <div>
                 <div className="text-sm text-ink">{b.event.title}</div>
                 <div className="mt-0.5 text-xs text-mute">
-                  {b.orderNo} · {b.qty} ticket{b.qty > 1 ? 's' : ''} ·{' '}
+                  {b.orderNo} · {qtyText(b.qty, b.event.category)} ·{' '}
                   {formatDate(b.createdAt)}
                 </div>
               </div>
@@ -185,4 +188,10 @@ function Counter({
       <div className="mt-2 font-display text-2xl text-ink">{value}</div>
     </Link>
   );
+}
+
+/** "2 tickets", or "2 passes" for sports events. */
+function qtyText(qty: number, category?: string) {
+  const w = eventWords(category);
+  return `${qty} ${qty === 1 ? w.ticket : w.tickets}`;
 }

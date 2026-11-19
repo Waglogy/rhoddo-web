@@ -345,7 +345,7 @@ function RaceRows() {
 function TabBar() {
   const tabs = [
     { label: 'Search', icon: 'search' },
-    { label: 'Tickets', icon: 'ticket' },
+    { label: 'Passes', icon: 'ticket' },
     { label: 'Profile', icon: 'person' },
   ];
   const labelClass = 'mt-[2px] text-[7.5px] font-medium tracking-[0.05em]';

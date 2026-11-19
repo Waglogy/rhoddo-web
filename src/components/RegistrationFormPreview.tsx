@@ -10,6 +10,7 @@ const TYPE_LABELS: Record<FormFieldType, string> = {
   select: 'Choose one',
   multi_select: 'Choose several',
   checkbox: 'Tick box',
+  image: 'Photo upload',
 };
 
 /** Read-only view of an event's registration form, for admins reviewing the event. */

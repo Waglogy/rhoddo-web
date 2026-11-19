@@ -183,7 +183,7 @@ export default function Landing() {
           <div className="mt-14 grid gap-10 md:grid-cols-3">
             {[
               { n: '01', t: 'Find', b: 'Open the app and pick a race, a district or a mood. See what\'s on this weekend and this season.' },
-              { n: '02', t: 'Register', b: 'Choose your race category, fill in your runner details and pay in INR. Your pass is ready instantly in your Tickets tab.' },
+              { n: '02', t: 'Register', b: 'Choose your race category, fill in your runner details and pay in INR. Your pass is ready instantly in your Passes tab.' },
               { n: '03', t: 'Show up', b: 'Show your QR at the start or the gate. The organiser scans it and you\'re in. No paper, no faff.' },
             ].map((s) => (
               <div key={s.n}>

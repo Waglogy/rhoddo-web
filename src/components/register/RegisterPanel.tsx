@@ -17,6 +17,8 @@ import {
   type EventForm,
   type FormAnswers,
 } from './RegistrationFields';
+import { eventWords } from '@/lib/eventWords';
+import { uploadPickedImages } from './formImages';
 
 export type RegisterTier = {
   id: string;
@@ -29,6 +31,7 @@ export type RegisterTier = {
 export type RegisterEvent = {
   id: string;
   title: string;
+  category?: string;
   tiers: RegisterTier[];
   form: EventForm | null;
 };
@@ -93,6 +96,8 @@ export function RegisterPanel({ event, initialUser }: { event: RegisterEvent; in
   }
   const maxQty = Math.max(1, Math.min(10, tier.left));
   const soldOut = event.tiers.every((t) => t.left <= 0);
+  const w = eventWords(event.category);
+  const fullText = w.registration ? 'Registration full' : 'Sold out';
   const subtotal = tier.priceINR * qty;
   const total = preview?.total ?? subtotal;
   const needsName = !user || user.name === PLACEHOLDER_NAME || !user.name.trim();
@@ -108,7 +113,7 @@ export function RegisterPanel({ event, initialUser }: { event: RegisterEvent; in
   const formAnswers = form ? resizeAnswers(answers, answerSetsNeeded(form, qty)) : undefined;
 
   function continueFromTickets() {
-    if (tier.left <= 0) return setError('This pass is sold out. Choose another one.');
+    if (tier.left <= 0) return setError(w.registration ? 'This pass is full. Choose another one.' : 'This pass is sold out. Choose another one.');
     // A changed pass or quantity changes the price, so any promo is checked again.
     setPreview(null);
     if (form) setAnswers((a) => resizeAnswers(a, answerSetsNeeded(form, qty)));
@@ -228,15 +233,17 @@ export function RegisterPanel({ event, initialUser }: { event: RegisterEvent; in
     if (!user || busy) return;
     setBusy(true);
     setError(null);
-    const input = {
-      eventId: event.id,
-      tierId: tier.id,
-      qty,
-      promoCode: preview?.promoStatus === 'applied' ? promoInput.trim() : undefined,
-      ...(formAnswers && { formAnswers }),
-      phone: `+91${mobileDigits(phone) ?? ''}`,
-    };
     try {
+      // Photos for Image questions are uploaded now that the buyer is signed in.
+      const savedAnswers = formAnswers && (await uploadPickedImages(formAnswers));
+      const input = {
+        eventId: event.id,
+        tierId: tier.id,
+        qty,
+        promoCode: preview?.promoStatus === 'applied' ? promoInput.trim() : undefined,
+        ...(savedAnswers && { formAnswers: savedAnswers }),
+        phone: `+91${mobileDigits(phone) ?? ''}`,
+      };
       if (total <= 0) {
         const { booking } = await buyerApi<{ booking: Booking }>('/bookings', { body: input });
         router.push(`/ticket/${booking.id}`);
@@ -370,7 +377,7 @@ export function RegisterPanel({ event, initialUser }: { event: RegisterEvent; in
                       <span className="min-w-0 flex-1">
                         <span className="block font-medium text-ink">{t.name}</span>
                         <span className="block text-xs text-mute">
-                          {out ? 'Sold out' : [...t.perks, t.left <= 20 ? `${t.left} left` : ''].filter(Boolean).join(' · ')}
+                          {out ? (w.registration ? 'Full' : 'Sold out') : [...t.perks, t.left <= 20 ? `${t.left} left` : ''].filter(Boolean).join(' · ')}
                         </span>
                       </span>
                       <span className="font-display text-lg text-gold">{t.priceINR > 0 ? formatINR(t.priceINR) : 'Free'}</span>
@@ -383,7 +390,7 @@ export function RegisterPanel({ event, initialUser }: { event: RegisterEvent; in
             <div className="flex items-center justify-between rounded-2xl border border-line p-4">
               <div>
                 <div className="font-medium text-ink">How many?</div>
-                <div className="text-xs text-mute">Up to {maxQty} in one booking</div>
+                <div className="text-xs text-mute">Up to {maxQty} in one {w.booking}</div>
               </div>
               <div className="flex items-center gap-3">
                 <button
@@ -600,7 +607,7 @@ export function RegisterPanel({ event, initialUser }: { event: RegisterEvent; in
             <span className="font-display text-2xl text-ink">{total > 0 ? formatINR(total) : 'Free'}</span>
           </div>
           {step === 'pay' && total > 0 && (
-            <p className="text-xs text-mute">No booking fee. Pay by UPI, card or net banking, secured by Razorpay.</p>
+            <p className="text-xs text-mute">{w.registration ? 'No extra fees.' : 'No booking fee.'} Pay by UPI, card or net banking, secured by Razorpay.</p>
           )}
         </div>
 
@@ -612,7 +619,7 @@ export function RegisterPanel({ event, initialUser }: { event: RegisterEvent; in
 
         <button type="submit" className="btn-primary w-full py-3.5 text-base" disabled={busy || soldOut}>
           {soldOut
-            ? 'Sold out'
+            ? fullText
             : busy
               ? 'Please wait…'
               : step === 'account' && !user
@@ -621,8 +628,12 @@ export function RegisterPanel({ event, initialUser }: { event: RegisterEvent; in
                   : 'Send code'
                 : step === 'pay'
                   ? total > 0
-                    ? `Pay ${formatINR(total)}`
-                    : 'Get my pass'
+                    ? w.registration
+                      ? `Pay ${formatINR(total)} & register`
+                      : `Pay ${formatINR(total)}`
+                    : w.registration
+                      ? 'Complete registration'
+                      : 'Get my pass'
                   : 'Continue'}
         </button>
       </form>

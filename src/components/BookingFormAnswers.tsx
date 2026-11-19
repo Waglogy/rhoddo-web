@@ -14,8 +14,11 @@ function show(v: string | number | boolean | string[] | undefined): string {
   return String(v);
 }
 
-/** A buyer's registration-form answers, folded away until the host opens them. */
-export function BookingFormAnswers({ data }: { data: BookingFormAnswersData }) {
+/**
+ * A buyer's registration-form answers, folded away until the host opens them.
+ * `fileUrls` links each uploaded photo to a private link that works for an hour.
+ */
+export function BookingFormAnswers({ data, fileUrls = {} }: { data: BookingFormAnswersData; fileUrls?: Record<string, string> }) {
   return (
     <details className="mt-2 text-xs">
       <summary className="cursor-pointer text-gold hover:underline">
@@ -29,7 +32,25 @@ export function BookingFormAnswers({ data }: { data: BookingFormAnswersData }) {
               {data.fields.map((f) => (
                 <div key={f.id} className="contents">
                   <dt className="text-mute">{f.label}</dt>
-                  <dd className="break-words text-ink">{show(set[f.id])}</dd>
+                  <dd className="break-words text-ink">
+                    {f.type === 'image' && typeof set[f.id] === 'string' && set[f.id] ? (
+                      fileUrls[set[f.id] as string] ? (
+                        <a href={fileUrls[set[f.id] as string]} target="_blank" rel="noopener noreferrer" className="inline-block">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={fileUrls[set[f.id] as string]}
+                            alt={f.label}
+                            className="h-20 w-20 rounded-lg border border-line object-cover"
+                          />
+                          <span className="mt-0.5 block text-[11px] text-gold underline">Open photo</span>
+                        </a>
+                      ) : (
+                        'Photo uploaded'
+                      )
+                    ) : (
+                      show(set[f.id])
+                    )}
+                  </dd>
                 </div>
               ))}
             </dl>

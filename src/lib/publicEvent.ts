@@ -11,6 +11,7 @@ export type PublicEvent = {
   id: string;
   slug: string | null;
   title: string;
+  category?: string;
   tagline: string;
   about: string;
   district: string;

@@ -26,7 +26,7 @@ export default async function HostScanEventPage({ params }: Props) {
       <div className="label mt-4">Gate scanner</div>
       <h1 className="font-display text-4xl text-ink">{event.title}</h1>
       <p className="mt-1 text-sm text-mute">
-        Point your camera at the attendee&apos;s QR. Validation is done by the server —
+        Point your camera at the person&apos;s QR. Validation is done by the server —
         the scanner only displays the result.
       </p>
 

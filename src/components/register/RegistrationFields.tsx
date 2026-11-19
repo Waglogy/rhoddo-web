@@ -3,6 +3,9 @@
 // A host's registration form, filled in by buyers before paying. Same rules as the
 // app's src/components/RegistrationForm.tsx and the API's lib/eventForms.ts.
 
+import { useState } from 'react';
+import { localImagePreview, pickImage } from './formImages';
+
 export type FormFieldType =
   | 'short_text'
   | 'long_text'
@@ -12,7 +15,8 @@ export type FormFieldType =
   | 'email'
   | 'select'
   | 'multi_select'
-  | 'checkbox';
+  | 'checkbox'
+  | 'image';
 
 export type FormField = {
   id: string;
@@ -118,6 +122,10 @@ function FieldInput({
   const required = field.required && <span className="text-primary"> *</span>;
   const help = field.help && <p className="mt-1 text-xs text-mute">{field.help}</p>;
 
+  if (field.type === 'image') {
+    return <ImageInput id={id} field={field} value={value} onChange={onChange} required={required} help={help} />;
+  }
+
   if (field.type === 'checkbox') {
     return (
       <div>
@@ -210,6 +218,83 @@ function FieldInput({
         />
       )}
       {help}
+    </div>
+  );
+}
+
+function ImageInput({
+  id,
+  field,
+  value,
+  onChange,
+  required,
+  help,
+}: {
+  id: string;
+  field: FormField;
+  value: AnswerValue | undefined;
+  onChange: (value: AnswerValue) => void;
+  required: React.ReactNode;
+  help: React.ReactNode;
+}) {
+  const [problem, setProblem] = useState<string | null>(null);
+  const [working, setWorking] = useState(false);
+  const preview = localImagePreview(value);
+  const chosen = typeof value === 'string' && value !== '';
+
+  async function choose(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // lets the same photo be chosen again
+    if (!file) return;
+    setProblem(null);
+    setWorking(true);
+    try {
+      onChange(await pickImage(file));
+    } catch (err) {
+      setProblem(err instanceof Error ? err.message : 'Could not use that photo');
+    } finally {
+      setWorking(false);
+    }
+  }
+
+  return (
+    <div>
+      <div id={`${id}-label`} className="mb-1.5 text-sm font-medium text-ink">
+        {field.label}
+        {required}
+      </div>
+      <div className="flex items-center gap-3">
+        {chosen && (
+          <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-line bg-panel">
+            {preview ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={preview} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <div className="flex h-full items-center justify-center text-[10px] text-mute">Photo</div>
+            )}
+          </div>
+        )}
+        <label className="btn-ghost cursor-pointer whitespace-nowrap">
+          {working ? 'Preparing…' : chosen ? 'Change photo' : 'Choose photo'}
+          <input
+            id={id}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+            className="sr-only"
+            aria-labelledby={`${id}-label`}
+            onChange={choose}
+            disabled={working}
+          />
+        </label>
+        {chosen && !working && (
+          <button type="button" className="text-xs text-mute underline hover:text-ink" onClick={() => onChange('')}>
+            Remove
+          </button>
+        )}
+      </div>
+      {problem && <p role="alert" className="mt-1 text-xs text-primary">{problem}</p>}
+      {help}
+      <p className="mt-1 text-[11px] text-mute">Only the organiser can see this photo.</p>
     </div>
   );
 }

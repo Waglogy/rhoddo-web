@@ -8,6 +8,7 @@ import { ImageUpload } from './ImageUpload';
 import { toDateInput } from '@/lib/format';
 import { slugify, registrationUrl } from '@/lib/eventLink';
 import { districtOptions } from '@/lib/districts';
+import { eventWords, isRegistrationEvent } from '@/lib/eventWords';
 
 type Tier = {
   id?: string;
@@ -226,7 +227,7 @@ export function EventForm({
               )}
               {categories.map((c) => <option key={c.key} value={c.key}>{c.label}</option>)}
             </select>
-            {mode === 'host' && <CategoryNote locked={!!initial?.categoryLocked} />}
+            {mode === 'host' && <CategoryNote locked={!!initial?.categoryLocked} category={category} />}
           </div>
           <div>
             <label className="label mb-1 block">District</label>
@@ -324,8 +325,8 @@ export function EventForm({
 
       <section className="card p-6">
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-xl text-ink">Ticket tiers</h2>
-          <button type="button" onClick={addTier} className="btn-ghost">+ Add tier</button>
+          <h2 className="font-display text-xl text-ink">{isRegistrationEvent(category) ? 'Registration passes' : 'Ticket tiers'}</h2>
+          <button type="button" onClick={addTier} className="btn-ghost">{isRegistrationEvent(category) ? '+ Add pass' : '+ Add tier'}</button>
         </div>
         <div className="mt-6 space-y-4">
           {tiers.map((t, i) => (
@@ -365,7 +366,11 @@ export function EventForm({
                 <div className="md:col-span-4">
                   <FieldLabel
                     label="Perks (comma-separated)"
-                    info="What this ticket includes, separated by commas, like Welcome drink, Reserved seat. Buyers see these on the event page and at checkout in the app."
+                    info={
+                      isRegistrationEvent(category)
+                        ? 'What this pass includes, separated by commas, like Timing chip, Finisher medal, T-shirt. People see these on the event page and when they register.'
+                        : 'What this ticket includes, separated by commas, like Welcome drink, Reserved seat. Buyers see these on the event page and at checkout in the app.'
+                    }
                   />
                   <input
                     className="input"
@@ -425,11 +430,13 @@ export function EventForm({
   );
 }
 
-function CategoryNote({ locked }: { locked: boolean }) {
+function CategoryNote({ locked, category }: { locked: boolean; category: string }) {
+  const w = eventWords(category);
   return (
     <p className="mt-1 text-[11px] text-mute">
-      {locked && "The category can't change once tickets are sold. "}
-      Rhoddo reviews each new event once and sets its commission, a share of each booking.
+      {locked && "The category can't change once people have signed up. "}
+      Rhoddo reviews each new event once and sets its commission, a share of each {w.booking}.
+      {w.registration && ' Sports events use registration wording: people register and get a pass.'}
     </p>
   );
 }

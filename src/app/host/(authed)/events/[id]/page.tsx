@@ -46,7 +46,7 @@ export default async function HostEditEventPage({ params, searchParams }: Props)
 
       {created && (
         <div className="mt-6 rounded-xl border border-pine/40 bg-pine/10 px-4 py-3 text-sm text-ink">
-          Event sent to Rhoddo for review. If you need details from buyers, like runner names or
+          Event sent to Rhoddo for review. If you need details from people, like runner names or
           T-shirt sizes, add a registration form below.
         </div>
       )}

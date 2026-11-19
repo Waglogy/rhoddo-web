@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { hostApi } from '@/lib/api';
 import { formatDate } from '@/lib/format';
+import { eventWords } from '@/lib/eventWords';
 
 type EventRow = {
   id: string;
@@ -9,6 +10,7 @@ type EventRow = {
   date: string;
   endDate?: string | null;
   district: string;
+  category?: string;
   published: boolean;
   venue: { name: string };
 };
@@ -63,7 +65,7 @@ export default async function HostScannerPage() {
               {stats[i].total} checked in
             </div>
             <Link href={`/host/events/${e.id}/scan`} className="btn-primary whitespace-nowrap">
-              Scan tickets
+              Scan {eventWords(e.category).tickets}
             </Link>
           </div>
         ))}
