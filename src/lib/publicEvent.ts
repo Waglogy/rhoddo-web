@@ -18,6 +18,8 @@ export type PublicEvent = {
   date: string;
   endDate: string | null;
   image: string;
+  /** Up to 4 extra photos. */
+  gallery?: string[];
   hostName: string;
   priceFromINR: number;
   venue?: { name: string; address?: string | null } | null;

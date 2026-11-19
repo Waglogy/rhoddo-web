@@ -12,7 +12,10 @@ import {
   loadSignedInBuyer,
   type EventLookup,
 } from '@/lib/publicEvent';
-import { RegisterPanel } from './RegisterPanel';
+import { RegisterButton, RegisterLauncher } from './RegisterLauncher';
+import { EventGallery } from './EventGallery';
+import { AboutText } from './AboutText';
+import { eventWords } from '@/lib/eventWords';
 
 const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.rhoddo.app';
 
@@ -67,9 +70,16 @@ async function EventBody({ event, isAndroid }: { event: Extract<EventLookup, { e
   const prices = event.tiers.length ? event.tiers.map((t) => t.priceINR) : [event.priceFromINR];
   const [lowest, highest] = [Math.min(...prices), Math.max(...prices)];
   const entry = highest <= 0 ? 'Free' : lowest <= 0 ? `Free – ${formatINR(highest)}` : `From ${formatINR(lowest)}`;
+  const w = eventWords(event.category);
+  const soldOut = event.tiers.length > 0 && event.tiers.every((t) => t.left <= 0);
+  const action = w.registration ? 'Register now' : 'Book now';
+  const fullLabel = w.registration ? 'Registration full' : 'Sold out';
+  const status = ended ? 'Event ended' : soldOut ? fullLabel : w.registration ? 'Registration open' : 'Booking open';
+  const images = [event.image, ...(event.gallery ?? [])].filter(Boolean);
+  const registerEvent = { id: event.id, title: event.title, category: event.category, tiers: event.tiers, form: event.form ?? null };
 
   return (
-    <>
+    <div className="pb-24 lg:pb-0">
       {isAndroid && !ended && (
         <a
           href={openInApp}
@@ -80,67 +90,166 @@ async function EventBody({ event, isAndroid }: { event: Extract<EventLookup, { e
         </a>
       )}
 
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start">
-        <div className="min-w-0 space-y-6">
-          {event.image && (
-            // A plain image, because event photos can come from any host.
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={event.image} alt="" className="aspect-[16/9] w-full rounded-3xl object-cover" />
-          )}
-          <div>
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
+        <div className="min-w-0 space-y-8">
+          <EventGallery images={images} title={event.title} />
+
+          <div className="space-y-4">
+            <div className="flex flex-wrap gap-2">
+              <span
+                className={`rounded-full px-3 py-1 text-xs font-medium ${
+                  ended || soldOut ? 'bg-line text-mute' : 'bg-pine/15 text-pine'
+                }`}
+              >
+                {!ended && !soldOut && <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-pine align-middle" />}
+                {status}
+              </span>
+              {event.category && (
+                <span className="rounded-full border border-line px-3 py-1 text-xs capitalize text-mute">{event.category}</span>
+              )}
+            </div>
             <h1 className="font-display text-3xl leading-tight text-ink sm:text-5xl">{event.title}</h1>
-            {event.tagline && <p className="mt-2 text-base text-mute sm:text-lg">{event.tagline}</p>}
+            {event.tagline && <p className="text-base text-mute sm:text-lg">{event.tagline}</p>}
           </div>
+
           <dl className="grid gap-3 sm:grid-cols-3">
-            <Fact label="When" value={formatWhen(event.date)} />
-            <Fact label="Where" value={formatPlace(event)} />
-            <Fact label="Entry" value={entry} />
+            <Fact icon="calendar" label="When" value={formatWhen(event.date)} />
+            <Fact icon="pin" label="Where" value={formatPlace(event)} />
+            <Fact icon="ticket" label="Entry" value={entry} />
           </dl>
-          {event.about && (
-            <section className="hidden lg:block">
-              <h2 className="label mb-2">About</h2>
-              <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink/90">{event.about}</p>
+
+          {event.tiers.length > 0 && (
+            <section aria-labelledby="passes-title" className="space-y-3">
+              <h2 id="passes-title" className="font-display text-2xl text-ink">
+                {w.registration ? 'Race passes' : 'Tickets'}
+              </h2>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {event.tiers.map((t) => {
+                  const out = t.left <= 0;
+                  return (
+                    <div key={t.id} className={`flex flex-col rounded-2xl border border-line bg-panel p-4 ${out ? 'opacity-60' : ''}`}>
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="font-medium leading-snug text-ink">{t.name}</div>
+                        <div className="shrink-0 font-display text-xl text-gold">{t.priceINR > 0 ? formatINR(t.priceINR) : 'Free'}</div>
+                      </div>
+                      {t.perks.length > 0 && (
+                        <ul className="mt-3 flex flex-wrap gap-1.5">
+                          {t.perks.map((perk) => (
+                            <li
+                              key={perk}
+                              className={`rounded-full px-2.5 py-1 text-xs ${
+                                /prize|cash|₹/i.test(perk) ? 'bg-gold/15 font-medium text-gold' : 'bg-bg text-ink/80'
+                              }`}
+                            >
+                              {/prize|cash/i.test(perk) ? '🏆 ' : ''}
+                              {perk}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      <div className="mt-auto flex items-center justify-between gap-3 pt-4">
+                        <span className="text-xs text-mute">
+                          {out ? (w.registration ? 'Full' : 'Sold out') : t.left <= 20 ? `Only ${t.left} left` : ''}
+                        </span>
+                        {!ended && (
+                          <RegisterButton
+                            tierId={t.id}
+                            disabled={out}
+                            className="btn-ghost px-4 py-2 text-sm disabled:cursor-not-allowed"
+                          >
+                            {out ? (w.registration ? 'Full' : 'Sold out') : w.registration ? 'Register' : 'Book'}
+                          </RegisterButton>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </section>
           )}
-          {event.hostName && <p className="hidden text-sm text-mute lg:block">Hosted by {event.hostName}</p>}
+
+          {event.about && (
+            <section aria-labelledby="about-title" className="space-y-3">
+              <h2 id="about-title" className="font-display text-2xl text-ink">About this event</h2>
+              <AboutText text={event.about} />
+            </section>
+          )}
+
+          {event.hostName && (
+            <section className="flex items-center gap-4 rounded-2xl border border-line bg-panel p-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10 font-display text-xl text-primary">
+                {event.hostName.trim().charAt(0).toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <div className="label">Organised by</div>
+                <div className="truncate font-medium text-ink">{event.hostName}</div>
+              </div>
+            </section>
+          )}
         </div>
 
-        <aside className="card p-5 sm:p-6 lg:sticky lg:top-6">
-          {ended ? (
+        {/* Desktop: a summary that stays in view */}
+        <aside className="hidden lg:sticky lg:top-6 lg:block">
+          <div className="card space-y-5 p-6">
             <div>
-              <h2 className="font-display text-2xl text-ink">Registration closed</h2>
-              <p className="mt-2 text-sm text-mute">This event has already taken place.</p>
+              <div className="label">Entry</div>
+              <div className="font-display text-3xl text-ink">{entry}</div>
             </div>
-          ) : (
-            <RegisterPanel
-              event={{ id: event.id, title: event.title, category: event.category, tiers: event.tiers, form: event.form ?? null }}
-              initialUser={user}
-            />
-          )}
-        </aside>
-
-        {/* On phones, the details come after registration so the form is near the top. */}
-        {(event.about || event.hostName) && (
-          <section className="space-y-3 lg:hidden">
-            {event.about && (
-              <>
-                <h2 className="label">About</h2>
-                <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink/90">{event.about}</p>
-              </>
+            <div className="space-y-2 text-sm">
+              <div className="flex gap-3"><Icon name="calendar" /><span className="text-ink">{formatWhen(event.date)}</span></div>
+              <div className="flex gap-3"><Icon name="pin" /><span className="text-ink">{formatPlace(event)}</span></div>
+            </div>
+            {ended ? (
+              <div className="rounded-xl bg-bg px-4 py-3 text-sm text-mute">This event has already taken place.</div>
+            ) : (
+              <RegisterButton disabled={soldOut}>{soldOut ? fullLabel : action}</RegisterButton>
             )}
-            {event.hostName && <p className="text-sm text-mute">Hosted by {event.hostName}</p>}
-          </section>
-        )}
+            {!ended && (
+              <ul className="space-y-1.5 border-t border-line pt-4 text-xs text-mute">
+                <li>✓ Passes sent to your email</li>
+                <li>✓ Register up to 5 people at once</li>
+                <li>✓ Secure payment by Razorpay, no extra fees</li>
+              </ul>
+            )}
+          </div>
+        </aside>
       </div>
-    </>
+
+      {!ended && (
+        <RegisterLauncher
+          event={registerEvent}
+          initialUser={user}
+          priceLabel={entry}
+          actionLabel={action}
+          soldOutLabel={fullLabel}
+        />
+      )}
+    </div>
   );
 }
 
-function Fact({ label, value }: { label: string; value: string }) {
+const ICONS = {
+  calendar: 'M7 3v3M17 3v3M4 9h16M5 6h14a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z',
+  pin: 'M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z',
+  ticket: 'M4 8a2 2 0 0 0 0 4v4h16v-4a2 2 0 0 0 0-4V4H4v4zM14 4v16',
+} as const;
+
+function Icon({ name }: { name: keyof typeof ICONS }) {
   return (
-    <div className="rounded-2xl border border-line bg-panel px-4 py-3">
-      <dt className="label">{label}</dt>
-      <dd className="mt-1 text-sm font-medium text-ink">{value}</dd>
+    <svg width="18" height="18" viewBox="0 0 24 24" className="mt-0.5 shrink-0 text-primary" aria-hidden>
+      <path d={ICONS[name]} fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function Fact({ icon, label, value }: { icon: keyof typeof ICONS; label: string; value: string }) {
+  return (
+    <div className="flex gap-3 rounded-2xl border border-line bg-panel px-4 py-3">
+      <Icon name={icon} />
+      <div className="min-w-0">
+        <dt className="label">{label}</dt>
+        <dd className="mt-0.5 text-sm font-medium text-ink">{value}</dd>
+      </div>
     </div>
   );
 }

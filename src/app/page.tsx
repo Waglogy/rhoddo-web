@@ -3,6 +3,7 @@ import { Logo } from '@/components/Logo';
 import type { Metadata } from 'next';
 import { AppHomeMock } from '@/components/AppHomeMock';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { FeaturedEvent } from '@/components/FeaturedEvent';
 
 export const metadata: Metadata = {
   title: 'Rhoddo — Races & events across Sikkim',
@@ -133,6 +134,9 @@ export default function Landing() {
         </div>
 
       </section>
+
+      {/* The next upcoming event, when there is one */}
+      <FeaturedEvent />
 
       {/* FEATURES */}
       <section id="features" className="border-t border-line bg-panel/40">

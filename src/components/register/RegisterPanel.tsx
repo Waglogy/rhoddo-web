@@ -61,7 +61,16 @@ function mobileDigits(raw: string): string | null {
   return /^[6-9]\d{9}$/.test(d) ? d : null;
 }
 
-export function RegisterPanel({ event, initialUser }: { event: RegisterEvent; initialUser: Buyer | null }) {
+export function RegisterPanel({
+  event,
+  initialUser,
+  preferredTierId,
+}: {
+  event: RegisterEvent;
+  initialUser: Buyer | null;
+  /** A pass picked on the event page, selected when the popup opens. */
+  preferredTierId?: string | null;
+}) {
   const router = useRouter();
   const form = event.form;
   // The email is verified before the runner details, so every registration starts from a real inbox.
@@ -88,11 +97,21 @@ export function RegisterPanel({ event, initialUser }: { event: RegisterEvent; in
   const [promoInput, setPromoInput] = useState('');
   const [preview, setPreview] = useState<Preview | null>(null);
 
-  const panelRef = useRef<HTMLDivElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    // Keeps the step in view on phones, where the panel sits below the event details.
-    if (step !== 'tickets') panelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Each step starts at its top.
+    bodyRef.current?.scrollTo({ top: 0 });
   }, [step]);
+
+  useEffect(() => {
+    const t = preferredTierId && event.tiers.find((x) => x.id === preferredTierId && x.left > 0);
+    if (t && step === 'tickets') {
+      setTierId(t.id);
+      setQty((q) => Math.max(1, Math.min(q, MAX_PER_REGISTRATION, t.left)));
+    }
+    // Only when a different pass is picked on the page.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preferredTierId]);
 
   const tier = event.tiers.find((t) => t.id === tierId) ?? event.tiers[0];
   if (!tier) {
@@ -312,26 +331,36 @@ export function RegisterPanel({ event, initialUser }: { event: RegisterEvent; in
 
   if (notice) {
     return (
-      <div ref={panelRef} className="rounded-2xl border border-pine/30 bg-pine/10 p-5 text-sm text-ink">
-        {notice}
+      <div className="p-5 sm:p-6">
+        <div className="rounded-2xl border border-pine/30 bg-pine/10 p-5 text-sm text-ink">{notice}</div>
       </div>
     );
   }
 
-  const stepNumber = steps.indexOf(step) + 1;
+  const stepIndex = steps.indexOf(step);
   const back = stepBefore(step);
+  const STEP_NAMES: Record<Step, string> = {
+    tickets: 'Pass',
+    account: 'Email',
+    details: w.registration ? 'Runners' : 'Details',
+    pay: total > 0 ? 'Pay' : 'Confirm',
+  };
 
   return (
-    <div ref={panelRef} className="scroll-mt-6">
-      <div className="mb-5 flex items-center justify-between">
-        <div className="label">
-          Step {stepNumber} of {steps.length}
-        </div>
-        {back && (
-          <button type="button" className="text-sm text-mute hover:text-ink" onClick={() => go(back)} disabled={busy}>
-            ← Back
-          </button>
-        )}
+    <div className="flex h-full min-h-0 flex-col">
+      {/* Progress */}
+      <div className="border-b border-line px-5 pb-4 pt-1 sm:px-6">
+        <ol className="flex gap-2" aria-label="Registration steps">
+          {steps.map((s, i) => (
+            <li key={s} className="min-w-0 flex-1" aria-current={i === stepIndex ? 'step' : undefined}>
+              <div className={`h-1.5 rounded-full transition-colors ${i <= stepIndex ? 'bg-primary' : 'bg-line'}`} />
+              <div className={`mt-1.5 truncate text-[11px] font-medium uppercase tracking-wider ${i === stepIndex ? 'text-ink' : 'text-mute'}`}>
+                {i < stepIndex ? '✓ ' : ''}
+                {STEP_NAMES[s]}
+              </div>
+            </li>
+          ))}
+        </ol>
       </div>
 
       <form
@@ -346,8 +375,9 @@ export function RegisterPanel({ event, initialUser }: { event: RegisterEvent; in
             else void continueFromAccount();
           } else void pay();
         }}
-        className="space-y-6"
+        className="flex min-h-0 flex-1 flex-col"
       >
+        <div ref={bodyRef} className="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-5 py-5 sm:px-6">
         {step === 'tickets' && (
           <>
             <div>
@@ -592,8 +622,8 @@ export function RegisterPanel({ event, initialUser }: { event: RegisterEvent; in
           </div>
         )}
 
-        {/* Running total */}
-        <div className="space-y-2 rounded-2xl bg-bg/60 p-4 text-sm">
+        {step === 'pay' && (
+        <div className="space-y-2 rounded-2xl border border-line bg-bg/60 p-4 text-sm">
           <div className="flex justify-between text-mute">
             <span>
               {tier.name} × {qty}
@@ -610,18 +640,34 @@ export function RegisterPanel({ event, initialUser }: { event: RegisterEvent; in
             <span className="font-medium text-ink">Total</span>
             <span className="font-display text-2xl text-ink">{total > 0 ? formatINR(total) : 'Free'}</span>
           </div>
-          {step === 'pay' && total > 0 && (
+          {total > 0 && (
             <p className="text-xs text-mute">{w.registration ? 'No extra fees.' : 'No booking fee.'} Pay by UPI, card or net banking, secured by Razorpay.</p>
           )}
         </div>
+        )}
+        </div>
 
+        {/* Footer: always visible */}
+        <div className="space-y-3 border-t border-line bg-panel px-5 py-4 sm:px-6">
         {error && (
           <p role="alert" className="rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 text-sm text-ink">
             {error}
           </p>
         )}
 
-        <button type="submit" className="btn-primary w-full py-3.5 text-base" disabled={busy || soldOut}>
+        <div className="flex items-center gap-3">
+          {back && (
+            <button type="button" className="btn-ghost px-4 py-3.5" onClick={() => go(back)} disabled={busy} aria-label="Back">
+              ←
+            </button>
+          )}
+          <div className="min-w-0 shrink-0">
+            <div className="text-[11px] uppercase tracking-wider text-mute">
+              {qty} × {tier.name.length > 14 ? 'pass' : tier.name}
+            </div>
+            <div className="font-display text-xl leading-tight text-ink">{total > 0 ? formatINR(total) : 'Free'}</div>
+          </div>
+        <button type="submit" className="btn-primary flex-1 py-3.5 text-base" disabled={busy || soldOut}>
           {soldOut
             ? fullText
             : busy
@@ -640,6 +686,8 @@ export function RegisterPanel({ event, initialUser }: { event: RegisterEvent; in
                       : 'Get my pass'
                   : 'Continue'}
         </button>
+        </div>
+        </div>
       </form>
     </div>
   );

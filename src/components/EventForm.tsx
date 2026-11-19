@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { clientApi } from '@/lib/client-api';
 import { FieldLabel } from './FieldLabel';
 import { ImageUpload } from './ImageUpload';
+import { GalleryUpload } from './GalleryUpload';
 import { toDateInput } from '@/lib/format';
 import { slugify, registrationUrl } from '@/lib/eventLink';
 import { districtOptions } from '@/lib/districts';
@@ -71,6 +72,7 @@ export function EventForm({
   const [venueId, setVenueId] = useState(initial?.venueId || venues[0]?.id || '');
   const [hostName, setHostName] = useState(initial?.hostName || '');
   const [image, setImage] = useState(initial?.image || '');
+  const [gallery, setGallery] = useState<string[]>(initial?.gallery ?? []);
   const [colorHint, setColorHint] = useState(initial?.colorHint || '#C8402B');
   const [priceFromINR, setPriceFromINR] = useState(initial?.priceFromINR ?? 0);
   const [about, setAbout] = useState(initial?.about || '');
@@ -121,7 +123,7 @@ export function EventForm({
         venueId,
         hostName,
         image,
-        gallery: [],
+        gallery,
         colorHint,
         priceFromINR: Number(priceFromINR),
         about,
@@ -320,6 +322,10 @@ export function EventForm({
         <h2 className="font-display text-xl text-ink">Cover image</h2>
         <div className="mt-6">
           <ImageUpload value={image} onChange={setImage} mode={mode} />
+        </div>
+        <h3 className="mt-8 font-display text-lg text-ink">More photos</h3>
+        <div className="mt-3">
+          <GalleryUpload value={gallery} onChange={setGallery} mode={mode} />
         </div>
       </section>
 
