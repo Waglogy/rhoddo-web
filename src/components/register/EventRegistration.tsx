@@ -112,7 +112,7 @@ async function EventBody({ event, isAndroid }: { event: Extract<EventLookup, { e
             {event.tagline && <p className="text-base text-mute sm:text-lg">{event.tagline}</p>}
           </div>
 
-          <dl className="grid gap-3 sm:grid-cols-3">
+          <dl className="divide-y divide-line rounded-2xl border border-line bg-panel lg:hidden">
             <Fact icon="calendar" label="When" value={formatWhen(event.date)} />
             <Fact icon="pin" label="Where" value={formatPlace(event)} />
             <Fact icon="ticket" label="Entry" value={entry} />
@@ -123,48 +123,44 @@ async function EventBody({ event, isAndroid }: { event: Extract<EventLookup, { e
               <h2 id="passes-title" className="font-display text-2xl text-ink">
                 {w.registration ? 'Race passes' : 'Tickets'}
               </h2>
-              <div className="grid gap-3 sm:grid-cols-2">
+              <ul className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-panel">
                 {event.tiers.map((t) => {
                   const out = t.left <= 0;
+                  const prize = t.perks.find((perk) => /prize|cash/i.test(perk));
+                  const others = t.perks.filter((perk) => perk !== prize);
+                  const row = (
+                    <>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                          <span className="font-medium text-ink">{t.name}</span>
+                          {out ? (
+                            <span className="rounded-full bg-line px-2 py-0.5 text-[11px] text-mute">{w.registration ? 'Full' : 'Sold out'}</span>
+                          ) : (
+                            t.left <= 20 && <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] text-primary">Only {t.left} left</span>
+                          )}
+                        </div>
+                        {prize && <p className="mt-1 text-sm text-gold">🏆 {prize.replace(/^cash prizes?\s*/i, '')}</p>}
+                        {others.length > 0 && <p className="mt-0.5 text-sm text-mute">Includes {others.join(', ').toLowerCase()}</p>}
+                      </div>
+                      <div className="flex shrink-0 items-center gap-2">
+                        <span className="font-display text-xl text-ink">{t.priceINR > 0 ? formatINR(t.priceINR) : 'Free'}</span>
+                        {!ended && !out && <span className="text-xl text-mute" aria-hidden>›</span>}
+                      </div>
+                    </>
+                  );
                   return (
-                    <div key={t.id} className={`flex flex-col rounded-2xl border border-line bg-panel p-4 ${out ? 'opacity-60' : ''}`}>
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="font-medium leading-snug text-ink">{t.name}</div>
-                        <div className="shrink-0 font-display text-xl text-gold">{t.priceINR > 0 ? formatINR(t.priceINR) : 'Free'}</div>
-                      </div>
-                      {t.perks.length > 0 && (
-                        <ul className="mt-3 flex flex-wrap gap-1.5">
-                          {t.perks.map((perk) => (
-                            <li
-                              key={perk}
-                              className={`rounded-full px-2.5 py-1 text-xs ${
-                                /prize|cash|₹/i.test(perk) ? 'bg-gold/15 font-medium text-gold' : 'bg-bg text-ink/80'
-                              }`}
-                            >
-                              {/prize|cash/i.test(perk) ? '🏆 ' : ''}
-                              {perk}
-                            </li>
-                          ))}
-                        </ul>
+                    <li key={t.id}>
+                      {ended || out ? (
+                        <div className="flex items-start gap-4 px-4 py-4 opacity-60 sm:px-5">{row}</div>
+                      ) : (
+                        <RegisterButton tierId={t.id} className="flex w-full items-start gap-4 px-4 py-4 text-left transition hover:bg-bg sm:px-5">
+                          {row}
+                        </RegisterButton>
                       )}
-                      <div className="mt-auto flex items-center justify-between gap-3 pt-4">
-                        <span className="text-xs text-mute">
-                          {out ? (w.registration ? 'Full' : 'Sold out') : t.left <= 20 ? `Only ${t.left} left` : ''}
-                        </span>
-                        {!ended && (
-                          <RegisterButton
-                            tierId={t.id}
-                            disabled={out}
-                            className="btn-ghost px-4 py-2 text-sm disabled:cursor-not-allowed"
-                          >
-                            {out ? (w.registration ? 'Full' : 'Sold out') : w.registration ? 'Register' : 'Book'}
-                          </RegisterButton>
-                        )}
-                      </div>
-                    </div>
+                    </li>
                   );
                 })}
-              </div>
+              </ul>
             </section>
           )}
 
@@ -244,12 +240,10 @@ function Icon({ name }: { name: keyof typeof ICONS }) {
 
 function Fact({ icon, label, value }: { icon: keyof typeof ICONS; label: string; value: string }) {
   return (
-    <div className="flex gap-3 rounded-2xl border border-line bg-panel px-4 py-3">
+    <div className="flex items-center gap-3 px-4 py-3">
       <Icon name={icon} />
-      <div className="min-w-0">
-        <dt className="label">{label}</dt>
-        <dd className="mt-0.5 text-sm font-medium text-ink">{value}</dd>
-      </div>
+      <dt className="sr-only">{label}</dt>
+      <dd className="text-sm text-ink">{value}</dd>
     </div>
   );
 }

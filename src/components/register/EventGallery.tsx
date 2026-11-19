@@ -35,16 +35,20 @@ export function EventGallery({ images, title }: { images: string[]; title: strin
       <button
         type="button"
         onClick={() => setViewer(true)}
-        className="group relative block aspect-[4/3] w-full overflow-hidden rounded-3xl bg-panel sm:aspect-[16/10]"
+        className="group relative flex w-full justify-center overflow-hidden rounded-3xl border border-line bg-panel"
         aria-label={`View ${count > 1 ? `photo ${index + 1} of ${count}` : 'photo'} full screen`}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={current} alt="" aria-hidden className="absolute inset-0 h-full w-full scale-110 object-cover opacity-60 blur-2xl" />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={current} alt={index === 0 ? title : `${title}, photo ${index + 1}`} className="relative h-full w-full object-contain" />
-        <span className="absolute bottom-3 right-3 rounded-full bg-black/55 px-3 py-1 text-xs text-white opacity-90 transition group-hover:opacity-100">
-          {count > 1 ? `${index + 1} / ${count} · ` : ''}Tap to enlarge
-        </span>
+        <img
+          src={current}
+          alt={index === 0 ? title : `${title}, photo ${index + 1}`}
+          className="block max-h-[70vh] w-auto max-w-full object-contain"
+        />
+        {count > 1 && (
+          <span className="absolute bottom-3 right-3 rounded-full bg-black/55 px-2.5 py-0.5 text-xs text-white">
+            {index + 1} / {count}
+          </span>
+        )}
       </button>
 
       {count > 1 && (

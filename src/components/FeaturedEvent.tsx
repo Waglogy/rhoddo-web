@@ -46,9 +46,7 @@ export async function FeaturedEvent() {
               <>
                 {/* Posters are often tall, so the image is never cropped. */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={event.image} alt="" aria-hidden className="absolute inset-0 h-full w-full scale-110 object-cover opacity-60 blur-2xl" />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={event.image} alt="" className="relative h-full w-full object-contain" />
+                <img src={event.image} alt="" className="absolute inset-0 h-full w-full object-contain p-4" />
               </>
             )}
           </Link>
