@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { api, fetchCategoryOptions } from '@/lib/api';
 import { EventForm } from '@/components/EventForm';
 import { RegistrationFormPreview } from '@/components/RegistrationFormPreview';
@@ -17,6 +18,9 @@ export default async function EditEventPage({ params }: Props) {
       <div className="label">Catalog · Edit</div>
       <h1 className="font-display text-4xl text-ink">{eventData.event.title}</h1>
       <p className="mt-1 text-sm text-mute">Update or unpublish.</p>
+      <Link href={`/manage-rhoddo/events/${id}/registrations`} className="btn-ghost mt-4 inline-flex">
+        View all registrations (table)
+      </Link>
 
       {eventData.event.form && (
         <div className="mt-10">

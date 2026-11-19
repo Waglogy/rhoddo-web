@@ -72,6 +72,11 @@ export default async function HostEventsPage() {
                 </div>
               </div>
               {e.published && <ShareEventLink eventId={e.id} slug={e.slug} title={e.title} compact />}
+              {e.bookingCount > 0 && (
+                <Link href={`/host/events/${e.id}/registrations`} className="btn-ghost whitespace-nowrap">
+                  View {e.bookingCount === 1 ? eventWords(e.category).booking : eventWords(e.category).bookings}
+                </Link>
+              )}
               {e.published && (
                 <Link href={`/host/events/${e.id}/scan`} className="btn-ghost whitespace-nowrap">
                   Scan {eventWords(e.category).tickets}

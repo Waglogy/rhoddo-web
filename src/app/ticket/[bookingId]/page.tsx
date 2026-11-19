@@ -7,6 +7,7 @@ import { API_URL } from '@/lib/api';
 import { USER_COOKIE } from '@/lib/auth';
 import { formatINR } from '@/lib/format';
 import { formatPlace, formatWhen } from '@/lib/publicEvent';
+import { SupportNote } from '@/components/SupportNote';
 
 // A buyer's passes after registering on the website. The same passes are in the
 // app's Passes tab and the confirmation email; the QR codes are the ticket codes
@@ -63,6 +64,7 @@ export default async function TicketPage({ params }: Props) {
           <Logo className="h-8 w-auto" />
         </Link>
         {'booking' in result ? <Passes booking={result.booking} /> : <Problem problem={result.problem} />}
+        <SupportNote context="my Rhoddo pass" className="mt-6" />
       </div>
     </div>
   );

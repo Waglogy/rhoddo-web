@@ -18,6 +18,7 @@ import {
   type FormAnswers,
 } from './RegistrationFields';
 import { eventWords } from '@/lib/eventWords';
+import { SupportNote } from '@/components/SupportNote';
 import { uploadPickedImages } from './formImages';
 
 export type RegisterTier = {
@@ -645,6 +646,7 @@ export function RegisterPanel({
           )}
         </div>
         )}
+        <SupportNote context={`registering for ${event.title}`} />
         </div>
 
         {/* Footer: always visible */}

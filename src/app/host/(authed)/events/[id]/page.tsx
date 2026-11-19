@@ -35,6 +35,9 @@ export default async function HostEditEventPage({ params, searchParams }: Props)
         </div>
         <div className="flex flex-wrap items-start gap-3">
           <EventPublishButton event={eventData.event as any} hostApproved={!draftOnly} />
+          <Link href={`/host/events/${id}/registrations`} className="btn-ghost inline-flex items-center gap-2 whitespace-nowrap">
+            View registrations
+          </Link>
           <Link
             href={`/host/events/${id}/scan`}
             className="btn-ghost inline-flex items-center gap-2 whitespace-nowrap"

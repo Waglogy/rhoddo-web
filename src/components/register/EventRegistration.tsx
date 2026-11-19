@@ -16,6 +16,7 @@ import { RegisterButton, RegisterLauncher } from './RegisterLauncher';
 import { EventGallery } from './EventGallery';
 import { AboutText } from './AboutText';
 import { eventWords } from '@/lib/eventWords';
+import { SupportNote } from '@/components/SupportNote';
 
 const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.rhoddo.app';
 
@@ -182,6 +183,8 @@ async function EventBody({ event, isAndroid }: { event: Extract<EventLookup, { e
               </div>
             </section>
           )}
+
+          {!ended && <SupportNote context={`registering for ${event.title}`} />}
         </div>
 
         {/* Desktop: a summary that stays in view */}

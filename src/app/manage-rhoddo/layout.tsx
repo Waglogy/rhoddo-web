@@ -13,6 +13,7 @@ const NAV = [
   { href: '/manage-rhoddo/categories', label: 'Categories' },
   { href: '/manage-rhoddo/venues', label: 'Venues' },
   { href: '/manage-rhoddo/bookings', label: 'Bookings' },
+  { href: '/manage-rhoddo/payments', label: 'Payments' },
   { href: '/manage-rhoddo/users', label: 'Users' },
   { href: '/manage-rhoddo/notifications', label: 'Notifications' },
 ];
@@ -45,7 +46,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </div>
       </aside>
 
-      <main className="flex-1 px-6 py-10 md:px-12">{children}</main>
+      <main className="min-w-0 flex-1 px-6 py-10 md:px-12">{children}</main>
     </div>
   );
 }
