@@ -23,6 +23,8 @@ export type FormField = {
   required: boolean;
   help?: string;
   options?: string[];
+  /** Offer "Same as Person 1" for this question in group registrations. */
+  copyable?: boolean;
 };
 
 export type EventFormDef = {
@@ -60,8 +62,8 @@ const RUNNER_TEMPLATE: EventFormDef = {
     { id: newId(), label: 'Date of birth', type: 'date', required: true },
     { id: newId(), label: 'Gender', type: 'select', required: true, options: ['Female', 'Male', 'Other'] },
     { id: newId(), label: 'T-shirt size', type: 'select', required: true, options: ['XS', 'S', 'M', 'L', 'XL', 'XXL'] },
-    { id: newId(), label: 'Emergency contact name', type: 'short_text', required: true },
-    { id: newId(), label: 'Emergency contact phone', type: 'phone', required: true },
+    { id: newId(), label: 'Emergency contact name', type: 'short_text', required: true, copyable: true },
+    { id: newId(), label: 'Emergency contact phone', type: 'phone', required: true, copyable: true },
     { id: newId(), label: 'Medical conditions we should know about', type: 'long_text', required: false },
     {
       id: newId(),
@@ -128,6 +130,7 @@ export function RegistrationFormEditor({
             ...f,
             help: f.help?.trim() || undefined,
             options: isChoice(f.type) ? (f.options ?? []).map((o) => o.trim()).filter(Boolean) : undefined,
+            copyable: form.perTicket && f.type !== 'image' && f.copyable ? true : undefined,
           })),
         };
         const res = await clientApi<{ form: EventFormDef }>(`/organizer/events/${eventId}/form`, {
@@ -319,6 +322,23 @@ export function RegistrationFormEditor({
                     placeholder="Shown under the question"
                   />
                 </div>
+                {form.perTicket && f.type !== 'image' && (
+                  <label className="flex items-start gap-2 text-sm text-ink md:col-span-6">
+                    <input
+                      type="checkbox"
+                      className="mt-0.5"
+                      checked={!!f.copyable}
+                      onChange={(e) => updateField(i, { copyable: e.target.checked })}
+                    />
+                    <span>
+                      Usually the same for the whole group
+                      <span className="block text-xs text-mute">
+                        People registering a group can copy this answer from Person 1 in one tap. Good for emergency
+                        contact, town or club; not for name or date of birth.
+                      </span>
+                    </span>
+                  </label>
+                )}
               </div>
               <div className="mt-3 flex flex-wrap gap-4 text-xs text-mute">
                 <button type="button" className="hover:text-ink disabled:opacity-40" disabled={i === 0} onClick={() => moveField(i, -1)}>

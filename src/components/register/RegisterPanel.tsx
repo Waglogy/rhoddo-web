@@ -48,6 +48,9 @@ type Order = {
 };
 type Preview = { subtotal: number; discount: number; total: number; promoStatus: 'none' | 'applied' | 'invalid'; message?: string };
 
+/** Most people one registration can cover. Same limit as the API and the app. */
+const MAX_PER_REGISTRATION = 5;
+
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /** The 10-digit Indian mobile number in what was typed, or null. Same rule as the API. */
@@ -61,7 +64,8 @@ function mobileDigits(raw: string): string | null {
 export function RegisterPanel({ event, initialUser }: { event: RegisterEvent; initialUser: Buyer | null }) {
   const router = useRouter();
   const form = event.form;
-  const steps: Step[] = form ? ['tickets', 'details', 'account', 'pay'] : ['tickets', 'account', 'pay'];
+  // The email is verified before the runner details, so every registration starts from a real inbox.
+  const steps: Step[] = form ? ['tickets', 'account', 'details', 'pay'] : ['tickets', 'account', 'pay'];
 
   const [step, setStep] = useState<Step>('tickets');
   const [tierId, setTierId] = useState(() => (event.tiers.find((t) => t.left > 0) ?? event.tiers[0])?.id);
@@ -94,7 +98,7 @@ export function RegisterPanel({ event, initialUser }: { event: RegisterEvent; in
   if (!tier) {
     return <p className="text-sm text-mute">Registration isn&apos;t open for this event yet.</p>;
   }
-  const maxQty = Math.max(1, Math.min(10, tier.left));
+  const maxQty = Math.max(1, Math.min(MAX_PER_REGISTRATION, tier.left));
   const soldOut = event.tiers.every((t) => t.left <= 0);
   const w = eventWords(event.category);
   const fullText = w.registration ? 'Registration full' : 'Sold out';
@@ -123,7 +127,7 @@ export function RegisterPanel({ event, initialUser }: { event: RegisterEvent; in
   function continueFromDetails() {
     const problem = form && formAnswers ? firstFormError(form, formAnswers) : null;
     if (problem) return setError(problem);
-    go('account');
+    go('pay');
   }
 
   async function sendCode() {
@@ -183,7 +187,7 @@ export function RegisterPanel({ event, initialUser }: { event: RegisterEvent; in
         await buyerApi('/me/accept-terms', { body: {} });
         setUser((u) => (u ? { ...u, termsAccepted: true } : u));
       }
-      go('pay');
+      go(stepAfter('account'));
     } catch (err) {
       handleError(err);
     } finally {
@@ -361,7 +365,7 @@ export function RegisterPanel({ event, initialUser }: { event: RegisterEvent; in
                       disabled={out}
                       onClick={() => {
                         setTierId(t.id);
-                        setQty((q) => Math.max(1, Math.min(q, 10, t.left)));
+                        setQty((q) => Math.max(1, Math.min(q, MAX_PER_REGISTRATION, t.left)));
                       }}
                       className={`flex w-full items-center gap-3 rounded-2xl border p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-50 ${
                         selected ? 'border-primary bg-primary/5' : 'border-line hover:border-ink/30'

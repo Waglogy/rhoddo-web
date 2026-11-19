@@ -25,6 +25,7 @@ export type FormField = {
   required: boolean;
   help?: string;
   options?: string[];
+  copyable?: boolean;
 };
 
 export type EventForm = {
@@ -89,6 +90,14 @@ export function RegistrationFields({
   const setAnswer = (index: number, fieldId: string, value: AnswerValue) => {
     onChange(answers.map((a, i) => (i === index ? { ...a, [fieldId]: value } : a)));
   };
+  // Questions the host marked "usually the same for the whole group".
+  const copyable = form.fields.filter((f) => f.copyable && f.type !== 'image');
+  const copyFromFirst = (index: number) => {
+    const first = answers[0] ?? {};
+    const copied: FormAnswers = {};
+    for (const f of copyable) if (first[f.id] !== undefined) copied[f.id] = first[f.id];
+    onChange(answers.map((a, i) => (i === index ? { ...a, ...copied } : a)));
+  };
 
   return (
     <div className="space-y-5">
@@ -99,6 +108,16 @@ export function RegistrationFields({
       {answers.map((set, i) => (
         <fieldset key={i} className="space-y-4 rounded-2xl border border-line p-4" disabled={disabled}>
           {answers.length > 1 && <legend className="px-1 text-sm font-medium text-gold">Person {i + 1}</legend>}
+          {i > 0 && copyable.length > 0 && (
+            <button
+              type="button"
+              className="btn-ghost w-full text-sm"
+              onClick={() => copyFromFirst(i)}
+              title={`Copies: ${copyable.map((f) => f.label).join(', ')}`}
+            >
+              Same as Person 1 ({copyable.map((f) => f.label).join(', ')})
+            </button>
+          )}
           {form.fields.map((f) => (
             <FieldInput key={f.id} id={`${i}-${f.id}`} field={f} value={set[f.id]} onChange={(v) => setAnswer(i, f.id, v)} />
           ))}
