@@ -13,6 +13,7 @@ function navFor(bookingsLabel: string) {
     { href: '/host/venues', label: 'Venues' },
     { href: '/host/events', label: 'Events' },
     { href: '/host/bookings', label: bookingsLabel },
+    { href: '/host/payments', label: 'Payments' },
     { href: '/host/scanner', label: 'Scanner' },
     { href: '/host/account', label: 'Account' },
   ];

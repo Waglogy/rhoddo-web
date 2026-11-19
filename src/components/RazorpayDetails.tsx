@@ -23,7 +23,8 @@ type Details = {
 const METHOD: Record<string, string> = { upi: 'UPI', card: 'Card', netbanking: 'Net banking', wallet: 'Wallet', emi: 'EMI', paylater: 'Pay later' };
 
 /** Asks Razorpay (with the host's keys) how this payment was made. Nothing is stored. */
-export function RazorpayDetails({ bookingId }: { bookingId: string }) {
+/** `area` is whose API to ask: 'admin' (any payment) or 'organizer' (the host's own). */
+export function RazorpayDetails({ bookingId, area = 'admin' }: { bookingId: string; area?: 'admin' | 'organizer' }) {
   const [state, setState] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
   const [data, setData] = useState<Details | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -31,7 +32,7 @@ export function RazorpayDetails({ bookingId }: { bookingId: string }) {
   async function load() {
     setState('loading');
     try {
-      const res = await fetch(`/api/backend/admin/payments/${encodeURIComponent(bookingId)}/razorpay`);
+      const res = await fetch(`/api/backend/${area}/payments/${encodeURIComponent(bookingId)}/razorpay`);
       const body = await res.json().catch(() => null);
       if (!res.ok) throw new Error(body?.error || `Failed (${res.status})`);
       setData(body.razorpay);

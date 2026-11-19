@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { api } from '@/lib/api';
 import { formatDateTime, formatINR } from '@/lib/format';
-import { RazorpayDetails } from './RazorpayDetails';
+import { RazorpayDetails } from '@/components/RazorpayDetails';
 
 type Payment = {
   id: string;
