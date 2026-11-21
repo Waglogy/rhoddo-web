@@ -71,9 +71,9 @@ export default function DeleteAccount() {
           Delete Your Account
         </h1>
         <p className="mt-4 max-w-2xl text-sm leading-relaxed text-mute">
-          We&apos;re sorry to see you go. If you&apos;d like to permanently
-          delete your Rhoddo account and all associated data, please submit a
-          request below.
+          We&apos;re sorry to see you go. Enter the email address of your Rhoddo
+          account below. We&apos;ll email you a 6-digit code to confirm it&apos;s
+          you, and your account is deleted as soon as you enter it.
         </p>
 
         {submitted ? (
