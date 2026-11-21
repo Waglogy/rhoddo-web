@@ -16,6 +16,7 @@ import { RegisterButton, RegisterLauncher } from './RegisterLauncher';
 import { EventGallery } from './EventGallery';
 import { AboutText } from './AboutText';
 import { eventWords } from '@/lib/eventWords';
+import { LEGAL_LINKS } from '@/components/LegalShell';
 import { SupportNote } from '@/components/SupportNote';
 
 const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.rhoddo.app';
@@ -58,6 +59,15 @@ export async function EventRegistration({ result }: { result: EventLookup }) {
       <main className="mx-auto max-w-6xl px-4 pb-20 sm:px-6">
         {'event' in result ? <EventBody event={result.event} isAndroid={isAndroid} /> : <Unavailable problem={result.problem} />}
       </main>
+      <footer className="border-t border-line">
+        <nav className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-6 gap-y-2 px-4 py-6 pb-28 text-xs text-mute sm:px-6 lg:pb-6">
+          {LEGAL_LINKS.map((l) => (
+            <Link key={l.href} href={l.href} className="hover:text-ink">
+              {l.label}
+            </Link>
+          ))}
+        </nav>
+      </footer>
     </div>
   );
 }

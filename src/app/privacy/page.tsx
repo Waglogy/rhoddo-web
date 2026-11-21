@@ -36,210 +36,163 @@ export default function PrivacyPolicy() {
         <h1 className="mt-2 font-display text-4xl text-ink md:text-5xl">
           Privacy Policy
         </h1>
-        <p className="mt-4 text-sm text-mute">
-          Last updated: 13 June 2025
-        </p>
+        <p className="mt-4 text-sm text-mute">Last updated: 21 November 2026</p>
 
         <div className="mt-12 space-y-10 text-sm leading-relaxed text-mute">
-          <section>
-            <h2 className="font-display text-xl text-ink">1. Introduction</h2>
-            <p className="mt-3">
-              Rhoddo (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) is
-              operated by Waglogy. This Privacy Policy explains how we collect,
-              use, disclose, and safeguard your information when you use our
-              mobile application and website (collectively, the
-              &quot;Service&quot;). By using Rhoddo, you agree to the practices
-              described in this policy.
+          <Section n={1} title="Who we are">
+            <p>
+              Rhoddo is a platform for registering for races, runs and other events in Sikkim, run by
+              Waglogy (&quot;we&quot;, &quot;us&quot;). This policy explains what personal data we collect
+              through the Rhoddo app and website (the &quot;Service&quot;), why, who can see it, how long we
+              keep it, and your rights under India&apos;s Digital Personal Data Protection Act, 2023.
             </p>
-          </section>
-
-          <section>
-            <h2 className="font-display text-xl text-ink">
-              2. Information We Collect
-            </h2>
-            <h3 className="mt-4 text-base font-semibold text-ink">
-              a) Information you provide
-            </h3>
-            <ul className="mt-2 list-disc space-y-1 pl-5">
-              <li>
-                Account information: name, email address, phone number when you
-                register.
-              </li>
-              <li>
-                Booking details: event selections, ticket preferences, and
-                transaction history.
-              </li>
-              <li>
-                Communications: messages you send to us through support or
-                feedback channels.
-              </li>
-            </ul>
-
-            <h3 className="mt-4 text-base font-semibold text-ink">
-              b) Information collected automatically
-            </h3>
-            <ul className="mt-2 list-disc space-y-1 pl-5">
-              <li>
-                Device information: device model, operating system, unique device
-                identifiers.
-              </li>
-              <li>
-                Usage data: pages visited, features used, time spent on the app,
-                crash logs.
-              </li>
-              <li>
-                Location data: approximate location based on IP address; precise
-                location only with your explicit consent to help discover nearby
-                events.
-              </li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="font-display text-xl text-ink">
-              3. How We Use Your Information
-            </h2>
-            <ul className="mt-3 list-disc space-y-1 pl-5">
-              <li>To create and manage your account.</li>
-              <li>To process event bookings and generate QR passes.</li>
-              <li>To show you relevant events in your district or area.</li>
-              <li>
-                To send booking confirmations, event reminders, and important
-                service updates.
-              </li>
-              <li>To improve our app, fix bugs, and enhance user experience.</li>
-              <li>To comply with legal obligations.</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="font-display text-xl text-ink">
-              4. Sharing of Information
-            </h2>
             <p className="mt-3">
-              We do not sell your personal information. We may share data with:
+              Events on Rhoddo are run by independent organisers (&quot;hosts&quot;). For the details you
+              give when registering for an event, the host decides what to ask and uses the answers to run
+              the event; Rhoddo stores and processes them for the host as described below.
             </p>
-            <ul className="mt-2 list-disc space-y-1 pl-5">
-              <li>
-                <strong className="text-ink">Event hosts</strong> — limited
-                booking information necessary for event entry and management.
-              </li>
-              <li>
-                <strong className="text-ink">Payment processors</strong> — to
-                process your transactions securely. We do not store your payment
-                card details.
-              </li>
-              <li>
-                <strong className="text-ink">Service providers</strong> —
-                trusted third parties that help us operate the Service (hosting,
-                analytics, notifications).
-              </li>
-              <li>
-                <strong className="text-ink">Legal authorities</strong> — when
-                required by law or to protect our rights and safety.
-              </li>
-            </ul>
-          </section>
+          </Section>
 
-          <section>
-            <h2 className="font-display text-xl text-ink">
-              5. Data Storage and Security
-            </h2>
-            <p className="mt-3">
-              Your data is stored on secure servers. We implement
-              industry-standard security measures including encryption in transit
-              (TLS) and at rest to protect your personal information. However, no
-              method of electronic storage is 100% secure, and we cannot
-              guarantee absolute security.
+          <Section n={2} title="What we collect">
+            <h3 className="mt-1 text-base font-semibold text-ink">Your account</h3>
+            <List
+              items={[
+                'Name, email address and mobile number, and whether you have verified them with a one-time code.',
+                'If you sign in with Google: your Google name, email and profile picture.',
+                'When you accepted our Terms and this policy (with the IP address and device used), as a record of consent.',
+              ]}
+            />
+            <h3 className="mt-4 text-base font-semibold text-ink">Your registrations and bookings</h3>
+            <List
+              items={[
+                'The event, pass, number of people, amount paid, promo code, and the email and mobile number you give for the registration.',
+                'Payment references from Razorpay (order and payment IDs). Card, UPI and bank details are handled by Razorpay; we never see or store them.',
+                'Your QR passes and when they were scanned at the event.',
+              ]}
+            />
+            <h3 className="mt-4 text-base font-semibold text-ink">Answers to an event&apos;s registration form</h3>
+            <p className="mt-2">
+              Hosts can ask questions for each person registered, for example full name, date of birth,
+              gender, T-shirt size, blood group, emergency contact, medical conditions, and a{' '}
+              <strong className="text-ink">photo of an identity document</strong> to confirm age category.
+              Some of this is sensitive. Only give what the form asks for. If you register other people, make
+              sure they (or, for under-18s, their parent or guardian) agree to you sharing their details.
             </p>
-          </section>
+            <h3 className="mt-4 text-base font-semibold text-ink">Collected automatically</h3>
+            <List
+              items={[
+                'Device and app information needed to run the Service and send notifications (device type, app version, notification token).',
+                'Basic technical logs (IP address, time, errors) to keep the Service secure and fix problems.',
+              ]}
+            />
+          </Section>
 
-          <section>
-            <h2 className="font-display text-xl text-ink">
-              6. Data Retention
-            </h2>
-            <p className="mt-3">
-              We retain your personal data for as long as your account is active
-              or as needed to provide the Service. Booking records may be
-              retained for up to 3 years for legal and accounting purposes. You
-              may request deletion of your account and associated data at any
-              time.
-            </p>
-          </section>
+          <Section n={3} title="Why we use it">
+            <List
+              items={[
+                'To create your account, sign you in, and verify your email or phone.',
+                'To register you for events, take payment on the host\'s behalf, issue QR passes and check you in.',
+                'To send confirmations, passes and important updates about events you registered for.',
+                'To give hosts the details they need to run their event and keep participants safe.',
+                'To prevent fraud and misuse, and to meet legal and accounting obligations.',
+              ]}
+            />
+            <p className="mt-3">We do not sell your data or use registration-form answers for advertising.</p>
+          </Section>
 
-          <section>
-            <h2 className="font-display text-xl text-ink">7. Your Rights</h2>
-            <p className="mt-3">You have the right to:</p>
-            <ul className="mt-2 list-disc space-y-1 pl-5">
-              <li>Access the personal data we hold about you.</li>
-              <li>Correct inaccurate or incomplete data.</li>
-              <li>Request deletion of your account and personal data.</li>
-              <li>Withdraw consent for location tracking at any time.</li>
-              <li>Opt out of promotional communications.</li>
-            </ul>
+          <Section n={4} title="Who can see it">
+            <List
+              items={[
+                <><strong className="text-ink">The event&apos;s host</strong>: your registration, contact details and form answers, including uploaded photos, for their own events only. Hosts must use them only to run that event (see our Host Terms).</>,
+                <><strong className="text-ink">Rhoddo staff</strong>: only when needed to support you, the host, or keep the Service safe.</>,
+                <><strong className="text-ink">Service providers</strong> who process data for us: Razorpay (payments, paid directly into the host&apos;s Razorpay account), cloud hosting and storage (our servers and Cloudflare), Brevo (emails), Google (Google sign-in) and Expo/Google (app notifications).</>,
+                <><strong className="text-ink">Authorities</strong>, when the law requires it.</>,
+              ]}
+            />
             <p className="mt-3">
-              To exercise any of these rights, contact us at the email below.
+              Uploaded identity photos are stored privately: they are never public, and hosts open them
+              through links that stop working after a short time.
             </p>
-          </section>
+          </Section>
 
-          <section>
-            <h2 className="font-display text-xl text-ink">
-              8. Children&apos;s Privacy
-            </h2>
+          <Section n={5} title="How long we keep it">
+            <div className="mt-1 overflow-hidden rounded-xl border border-line">
+              <table className="w-full text-left text-sm">
+                <tbody className="divide-y divide-line">
+                  <Row what="Registration-form answers and uploaded photos (ID cards etc.)" how="Deleted automatically 30 days after the event ends" />
+                  <Row what="Answers and photos from checkouts that were never paid" how="Deleted after 7 days" />
+                  <Row what="Booking records (who, which event and pass, amount paid)" how="Up to 3 years, for accounting and legal reasons" />
+                  <Row what="Your account" how="Until you delete it" />
+                  <Row what="Encrypted database backups" how="Older copies are kept for up to 6 months, then removed" />
+                </tbody>
+              </table>
+            </div>
             <p className="mt-3">
-              Rhoddo is not intended for children under the age of 13. We do not
-              knowingly collect personal information from children under 13. If
-              you believe a child has provided us with personal data, please
-              contact us and we will delete it promptly.
+              Hosts may download their participant list before deletion and are responsible for keeping
+              and deleting their copy as our Host Terms require.
             </p>
-          </section>
+          </Section>
 
-          <section>
-            <h2 className="font-display text-xl text-ink">
-              9. Third-Party Links
-            </h2>
-            <p className="mt-3">
-              The Service may contain links to third-party websites or services.
-              We are not responsible for the privacy practices of these external
-              sites. We encourage you to read their privacy policies before
-              providing any personal information.
+          <Section n={6} title="Children">
+            <p>
+              Some events, such as fun runs, are open to people under 18. Anyone under 18 must be registered
+              by a parent or guardian, who gives consent for their details to be collected and shared with
+              the host as described here. We do not knowingly create accounts for children under 13.
             </p>
-          </section>
+          </Section>
 
-          <section>
-            <h2 className="font-display text-xl text-ink">
-              10. Changes to This Policy
-            </h2>
-            <p className="mt-3">
-              We may update this Privacy Policy from time to time. Changes will
-              be posted on this page with an updated &quot;Last updated&quot;
-              date. Continued use of the Service after changes constitutes
-              acceptance of the updated policy.
+          <Section n={7} title="Security">
+            <p>
+              Data is sent over encrypted connections (HTTPS), stored on access-controlled servers, and
+              backed up in encrypted form. Access is limited to the people who need it. No system is
+              perfectly secure; if a breach affects your data, we will inform you and the authorities as
+              the law requires.
             </p>
-          </section>
+          </Section>
 
-          <section>
-            <h2 className="font-display text-xl text-ink">11. Contact Us</h2>
-            <p className="mt-3">
-              If you have questions about this Privacy Policy or your personal
-              data, please contact us:
+          <Section n={8} title="Your rights">
+            <p>You can:</p>
+            <List
+              items={[
+                'Ask what personal data we hold about you and get a copy.',
+                'Correct or update inaccurate details.',
+                'Delete your account in the app (Profile → Delete account) or by asking us. This deletes your account, your registrations and your uploaded photos. Deleting your account also cancels your place in upcoming events, so contact the host first if you still want to take part.',
+                'Withdraw consent: we will stop processing data that relies on it, though this may mean you cannot take part in an event that needs it.',
+                'Nominate someone to exercise these rights for you if you are unable to.',
+                'Complain to us, and if not resolved, to the Data Protection Board of India.',
+              ]}
+            />
+          </Section>
+
+          <Section n={9} title="Changes to this policy">
+            <p>
+              We will post any changes here with a new &quot;Last updated&quot; date, and tell you in the app
+              or by email if the change is significant.
             </p>
+          </Section>
+
+          <Section n={10} title="Contact and grievances">
+            <p>For questions, requests about your data, or complaints, contact our grievance officer:</p>
             <div className="mt-3 rounded-xl border border-line bg-panel p-5">
               <p>
-                <strong className="text-ink">Waglogy</strong>
+                <strong className="text-ink">Grievance Officer, Rhoddo (Waglogy)</strong>
               </p>
               <p className="mt-1">
                 Email:{' '}
-                <a
-                  href="mailto:support@rhoddo.com"
-                  className="text-gold hover:underline"
-                >
+                <a href="mailto:support@rhoddo.com" className="text-gold hover:underline">
                   support@rhoddo.com
+                </a>
+              </p>
+              <p className="mt-1">
+                Phone / WhatsApp:{' '}
+                <a href="tel:+919733814168" className="text-gold hover:underline">
+                  +91 97338 14168
                 </a>
               </p>
               <p className="mt-1">Sikkim, India</p>
             </div>
-          </section>
+            <p className="mt-3">We acknowledge requests within 7 days and aim to resolve them within 30 days.</p>
+          </Section>
         </div>
       </main>
 
@@ -254,6 +207,8 @@ export default function PrivacyPolicy() {
           </div>
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-mute md:justify-start">
             <Link href="/privacy" className="text-ink">Privacy</Link>
+            <Link href="/refund-policy" className="hover:text-ink">Refunds</Link>
+            <Link href="/contact" className="hover:text-ink">Contact</Link>
             <Link href="/terms" className="hover:text-ink">Terms</Link>
             <Link href="/" className="hover:text-ink">Home</Link>
           </div>
@@ -263,5 +218,35 @@ export default function PrivacyPolicy() {
         </div>
       </footer>
     </div>
+  );
+}
+
+function Section({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
+  return (
+    <section>
+      <h2 className="font-display text-xl text-ink">
+        {n}. {title}
+      </h2>
+      <div className="mt-3">{children}</div>
+    </section>
+  );
+}
+
+function List({ items }: { items: React.ReactNode[] }) {
+  return (
+    <ul className="mt-2 list-disc space-y-1 pl-5">
+      {items.map((item, i) => (
+        <li key={i}>{item}</li>
+      ))}
+    </ul>
+  );
+}
+
+function Row({ what, how }: { what: string; how: string }) {
+  return (
+    <tr>
+      <td className="w-1/2 px-4 py-3 text-ink">{what}</td>
+      <td className="px-4 py-3">{how}</td>
+    </tr>
   );
 }

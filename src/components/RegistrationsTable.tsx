@@ -263,6 +263,16 @@ export function RegistrationsTable({ data, csvHref }: { data: RegistrationsData;
         </div>
       )}
 
+      {data.event.date && data.rows.length > 0 && (
+        <p className="mt-3 rounded-xl border border-gold/40 bg-gold/10 px-4 py-2.5 text-sm text-ink">
+          🔒 For privacy, form answers and photos are deleted on{' '}
+          <strong>
+            {new Date(new Date(data.event.date).getTime() + 30 * 864e5).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata' })}
+          </strong>{' '}
+          (30 days after the event). Download the CSV before then if you need to keep anything, and delete it when you&apos;re done.
+        </p>
+      )}
+
       <p className="mt-3 text-sm text-mute">
         {rows.length === data.rows.length ? `${data.rows.length} people` : `${rows.length} of ${data.rows.length} people`} ·{' '}
         {confirmedPeople} confirmed. Photo links work for an hour; reload the page for fresh ones.

@@ -71,6 +71,18 @@ const RUNNER_TEMPLATE: EventFormDef = {
       type: 'checkbox',
       required: true,
     },
+    {
+      id: newId(),
+      label: 'If the runner is under 18: parent or guardian name',
+      type: 'short_text',
+      required: false,
+    },
+    {
+      id: newId(),
+      label: 'Under 18? I am their parent/guardian and consent to them taking part and to sharing these details with the organiser',
+      type: 'checkbox',
+      required: false,
+    },
   ],
 };
 

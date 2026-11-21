@@ -286,6 +286,8 @@ export default function Landing() {
           </div>
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-mute md:justify-start">
             <Link href="/privacy" className="hover:text-ink">Privacy</Link>
+            <Link href="/refund-policy" className="hover:text-ink">Refunds</Link>
+            <Link href="/contact" className="hover:text-ink">Contact</Link>
             <Link href="/terms" className="hover:text-ink">Terms</Link>
             <Link href="/host-terms" className="hover:text-ink">Host Terms</Link>
             <a href="#" className="hover:text-ink">Contact</a>

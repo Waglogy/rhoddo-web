@@ -10,6 +10,9 @@ export default function DeleteAccount() {
   const [reason, setReason] = useState('');
   const [confirmed, setConfirmed] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  // Step 2: the 6-digit code we emailed, proving the email is theirs.
+  const [codeSent, setCodeSent] = useState(false);
+  const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -22,13 +25,18 @@ export default function DeleteAccount() {
       const res = await fetch('/api/me/delete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim().toLowerCase() }),
+        body: JSON.stringify(
+          codeSent
+            ? { step: 'confirm', email: email.trim().toLowerCase(), code: code.trim() }
+            : { step: 'request', email: email.trim().toLowerCase() },
+        ),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || 'Something went wrong. Please try again.');
       }
-      setSubmitted(true);
+      if (codeSent) setSubmitted(true);
+      else setCodeSent(true);
     } catch (err: any) {
       setError(err.message || 'Something went wrong. Please try again.');
     } finally {
@@ -71,14 +79,11 @@ export default function DeleteAccount() {
         {submitted ? (
           <div className="mt-12 rounded-xl border border-pine/40 bg-pine/10 p-8">
             <h2 className="font-display text-2xl text-ink">
-              Request Received
+              Account deleted
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-mute">
-              We&apos;ve received your account deletion request for{' '}
-              <strong className="text-ink">{email}</strong>. Our team will
-              process your request within <strong className="text-ink">7 business days</strong>.
-              You&apos;ll receive a confirmation email once your account and data
-              have been permanently deleted.
+              The Rhoddo account for <strong className="text-ink">{email}</strong> has been deleted,
+              and you&apos;ve been signed out of the app on every device.
             </p>
             <Link href="/" className="btn-ghost mt-6 inline-block">
               Return to home
@@ -108,7 +113,8 @@ export default function DeleteAccount() {
                 <div className="flex items-start gap-3">
                   <span className="mt-0.5 text-primary">&#10005;</span>
                   <span>
-                    Your booking history and QR passes will be deactivated.
+                    Your answers to registration forms and any photos you uploaded (such as ID cards)
+                    will be deleted.
                   </span>
                 </div>
                 <div className="flex items-start gap-3">
@@ -121,7 +127,8 @@ export default function DeleteAccount() {
                 <div className="flex items-start gap-3">
                   <span className="mt-0.5 text-mute">&#8226;</span>
                   <span>
-                    Booking transaction records may be retained for up to 3 years
+                    Registrations you paid for stay with the event host as a paid place, with your
+                    name and contact details removed, and payment records are kept for up to 3 years
                     for legal and accounting purposes, as described in our{' '}
                     <Link href="/privacy" className="text-gold hover:underline">
                       Privacy Policy
@@ -135,8 +142,18 @@ export default function DeleteAccount() {
             {/* Deletion request form */}
             <form onSubmit={handleSubmit} className="mt-12 max-w-lg">
               <h2 className="font-display text-xl text-ink">
-                Request Account Deletion
+                {codeSent ? 'Enter the code we emailed you' : 'Delete your account'}
               </h2>
+              {codeSent && (
+                <p className="mt-2 text-sm text-mute">
+                  If <strong className="text-ink">{email}</strong> has a Rhoddo account, we&apos;ve sent it a
+                  6-digit code. Enter it below to delete the account. Didn&apos;t get it? Check spam, or{' '}
+                  <button type="button" className="text-gold hover:underline" onClick={() => { setCodeSent(false); setCode(''); }}>
+                    try again
+                  </button>
+                  .
+                </p>
+              )}
 
               <label className="mt-6 block">
                 <span className="text-xs uppercase tracking-wider text-mute">
@@ -149,8 +166,26 @@ export default function DeleteAccount() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   className="input mt-2 w-full"
+                  disabled={codeSent}
                 />
               </label>
+
+              {codeSent && (
+                <label className="mt-5 block">
+                  <span className="text-xs uppercase tracking-wider text-mute">6-digit code</span>
+                  <input
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={6}
+                    required
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    placeholder="123456"
+                    className="input mt-2 w-full tracking-[0.4em]"
+                    autoFocus
+                  />
+                </label>
+              )}
 
               <label className="mt-5 block">
                 <span className="text-xs uppercase tracking-wider text-mute">
@@ -175,7 +210,7 @@ export default function DeleteAccount() {
                 <span className="text-sm text-mute">
                   I understand that this action is{' '}
                   <strong className="text-ink">permanent and irreversible</strong>.
-                  All my data will be deleted and cannot be recovered.
+                  My account and personal data will be deleted and cannot be recovered.
                 </span>
               </label>
 
@@ -187,15 +222,15 @@ export default function DeleteAccount() {
 
               <button
                 type="submit"
-                disabled={!confirmed || !email || loading}
+                disabled={!confirmed || !email || loading || (codeSent && code.length !== 6)}
                 className="btn-primary mt-8 w-full disabled:cursor-not-allowed disabled:opacity-40"
               >
-                {loading ? 'Processing...' : 'Submit Deletion Request'}
+                {loading ? 'Please wait…' : codeSent ? 'Delete my account' : 'Email me a code'}
               </button>
 
               <p className="mt-4 text-xs text-mute">
                 You can also request deletion from within the app under{' '}
-                <strong className="text-ink">Profile &rarr; Settings &rarr; Delete Account</strong>,
+                <strong className="text-ink">Profile &rarr; Delete account</strong>,
                 or by emailing{' '}
                 <a
                   href="mailto:support@rhoddo.com"
@@ -221,6 +256,8 @@ export default function DeleteAccount() {
           </div>
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-mute md:justify-start">
             <Link href="/privacy" className="hover:text-ink">Privacy</Link>
+            <Link href="/refund-policy" className="hover:text-ink">Refunds</Link>
+            <Link href="/contact" className="hover:text-ink">Contact</Link>
             <Link href="/terms" className="hover:text-ink">Terms</Link>
             <Link href="/" className="hover:text-ink">Home</Link>
           </div>

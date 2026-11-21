@@ -104,6 +104,13 @@ export function RegistrationFields({
       <div>
         <div className="font-display text-xl text-ink">{form.name}</div>
         {!!form.description && <p className="mt-1 whitespace-pre-line text-sm text-mute">{form.description}</p>}
+        <p className="mt-2 text-xs text-mute">
+          🔒 Only the organiser and Rhoddo can see these answers and photos. They&apos;re deleted 30 days after the
+          event.{' '}
+          <a href="/privacy" target="_blank" className="underline hover:text-ink">
+            Privacy policy
+          </a>
+        </p>
       </div>
       {answers.map((set, i) => (
         <fieldset key={i} className="space-y-4 rounded-2xl border border-line p-4" disabled={disabled}>
