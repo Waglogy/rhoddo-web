@@ -157,10 +157,10 @@ export function RegistrationsTable({ data, csvHref }: { data: RegistrationsData;
   const confirmedPeople = data.rows.filter((r) => r[statusCol] === 'confirmed').length;
 
   // On screen, each runner's own details come first; order and buyer info move to the end.
-  // The API's order is: Order, Registered at, Status, Pass, People, Person, Registered by, Email, Phone, ...form answers.
+  // The API's order is: Order, Registered at, Status, Pass, People, Person, Registered by, Email, Phone, User ID, ...form answers.
   const order = useMemo(() => {
     const formCols = data.columns.map((_, i) => i).filter((i) => i >= FIRST_FORM_COL);
-    return [3, 2, ...formCols, 5, 6, 7, 8, 0, 1, 4].filter((i) => i < data.columns.length);
+    return [3, 2, ...formCols, 5, 6, 9, 7, 8, 0, 1, 4].filter((i) => i < data.columns.length);
   }, [data.columns]);
 
   return (
