@@ -21,7 +21,7 @@ type Payment = {
   tierName: string;
   event: { id: string; title: string };
   host: { id: string; name: string } | null;
-  buyer: { id: string; name: string; email: string | null; phone: string | null };
+  buyer: { id: string; name: string; accountEmail?: string | null; email: string | null; phone: string | null };
 };
 
 type Data = {
@@ -102,7 +102,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
 
       {/* Filters (a plain form, so they live in the URL and can be shared) */}
       <form className="card mt-6 grid min-w-0 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-6" method="get">
-        <input name="q" defaultValue={sp.q} placeholder="Order, payment ID, email, phone, name" className="input min-w-0 lg:col-span-2" />
+        <input name="q" defaultValue={sp.q} placeholder="Order, payment ID, email, phone, name, user ID" className="input min-w-0 lg:col-span-2" />
         <select name="status" defaultValue={sp.status ?? ''} className="input min-w-0">
           <option value="">All statuses</option>
           {Object.entries(STATUS).map(([k, v]) => (
@@ -159,8 +159,17 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
               </div>
 
               <div className="min-w-0 text-sm">
-                <div className="truncate text-ink">{p.buyer.name}</div>
+                <div className="truncate text-ink" title="Account name">{p.buyer.name}</div>
                 <div className="truncate text-xs text-mute">{[p.buyer.email, p.buyer.phone].filter(Boolean).join(' · ') || '—'}</div>
+                {p.buyer.accountEmail && p.buyer.accountEmail !== p.buyer.email && (
+                  <div className="truncate text-xs text-mute">Account: {p.buyer.accountEmail}</div>
+                )}
+                <div className="mt-0.5 truncate text-[11px] text-mute">
+                  User ID:{' '}
+                  <Link href={`/manage-rhoddo/payments?q=${encodeURIComponent(p.buyer.id)}`} className="select-all font-mono text-gold hover:underline" title="All payments by this user">
+                    {p.buyer.id}
+                  </Link>
+                </div>
                 <div className="mt-1 font-mono text-[11px] text-mute">
                   {p.orderNo}
                   {p.razorpayPaymentId && <> · {p.razorpayPaymentId}</>}
