@@ -3,6 +3,7 @@ import { Logo } from '@/components/Logo';
 import type { Metadata } from 'next';
 import { AppHomeMock } from '@/components/AppHomeMock';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { AccountLink } from '@/components/account/AccountLink';
 import { FeaturedEvent } from '@/components/FeaturedEvent';
 
 export const metadata: Metadata = {
@@ -32,6 +33,7 @@ export default function Landing() {
             </Link>
           </nav>
           <div className="flex items-center gap-2 sm:gap-3">
+            <AccountLink />
             <ThemeToggle />
             <Link
               href="/host/login"

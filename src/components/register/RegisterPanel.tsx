@@ -208,11 +208,10 @@ export function RegisterPanel({
 
   async function signOut() {
     await buyerApi('/api/buyer/logout', { body: {} }).catch(() => {});
-    setUser(null);
-    setName('');
-    setPhone('');
-    setPreview(null);
-    router.refresh();
+    // Registering needs an account, so this goes back through sign-in.
+    const back = new URL(window.location.href);
+    back.hash = 'register';
+    window.location.assign(`/signin?next=${encodeURIComponent(back.pathname + back.search + back.hash)}`);
   }
 
   async function continueFromAccount() {
@@ -370,7 +369,7 @@ export function RegisterPanel({
   const STEP_NAMES: Record<Step, string> = {
     terms: 'Terms',
     tickets: 'Pass',
-    account: 'Email',
+    account: 'Contact',
     details: w.registration ? 'Runners' : 'Details',
     pay: total > 0 ? 'Pay' : 'Confirm',
   };

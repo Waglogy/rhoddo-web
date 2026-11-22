@@ -63,7 +63,12 @@ export default async function TicketPage({ params }: Props) {
         <Link href="/" className="inline-block" aria-label="Rhoddo home">
           <Logo className="h-8 w-auto" />
         </Link>
-        {'booking' in result ? <Passes booking={result.booking} /> : <Problem problem={result.problem} />}
+        {'booking' in result ? <Passes booking={result.booking} /> : <Problem problem={result.problem} bookingId={bookingId} />}
+        {'booking' in result && (
+          <Link href="/account" className="mt-6 block text-center text-sm text-mute underline hover:text-ink">
+            All my registrations and payments
+          </Link>
+        )}
         <SupportNote context="my Rhoddo pass" className="mt-6" />
       </div>
     </div>
@@ -133,9 +138,9 @@ async function Passes({ booking }: { booking: Booking }) {
   );
 }
 
-function Problem({ problem }: { problem: 'signed-out' | 'missing' | 'unavailable' }) {
+function Problem({ problem, bookingId }: { problem: 'signed-out' | 'missing' | 'unavailable'; bookingId: string }) {
   const text = {
-    'signed-out': 'Open this page in the browser you registered with, or find your pass in your email.',
+    'signed-out': 'Sign in with the account you registered with to see your pass. It is also in your email.',
     missing: 'We couldn’t find this pass on your account.',
     unavailable: 'We couldn’t load your pass. Please try again in a moment.',
   }[problem];
@@ -143,6 +148,11 @@ function Problem({ problem }: { problem: 'signed-out' | 'missing' | 'unavailable
     <div className="card mt-6 p-6">
       <h1 className="font-display text-2xl text-ink">Your pass</h1>
       <p className="mt-2 text-sm text-mute">{text}</p>
+      {problem === 'signed-out' && (
+        <Link href={`/signin?next=${encodeURIComponent(`/ticket/${bookingId}`)}`} className="btn-primary mt-4 inline-block">
+          Sign in
+        </Link>
+      )}
     </div>
   );
 }

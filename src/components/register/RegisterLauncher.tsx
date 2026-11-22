@@ -61,16 +61,34 @@ export function RegisterLauncher({
   }, []);
 
   useEffect(() => {
+    // Registering needs a Rhoddo account: signed-out visitors sign in or sign up first,
+    // then come back here with the popup open and their pass still picked.
+    const signInFirst = (pass?: string | null) => {
+      const back = new URL(window.location.href);
+      back.hash = 'register';
+      if (pass) back.searchParams.set('pass', pass);
+      else back.searchParams.delete('pass');
+      window.location.assign(`/signin?next=${encodeURIComponent(back.pathname + back.search + back.hash)}`);
+    };
     const onOpen = (e: Event) => {
+      const pass = (e as CustomEvent<{ tierId?: string }>).detail?.tierId ?? null;
+      if (!initialUser) return signInFirst(pass);
       openerRef.current = document.activeElement as HTMLElement | null;
-      setTierId((e as CustomEvent<{ tierId?: string }>).detail?.tierId ?? null);
+      setTierId(pass);
       setOpen(true);
     };
     window.addEventListener(OPEN_EVENT, onOpen);
     // Links shared as rhoddo.com/r/<name>#register open straight into registration.
-    if (window.location.hash === '#register' && !soldOut) setOpen(true);
+    if (window.location.hash === '#register' && !soldOut) {
+      const pass = new URLSearchParams(window.location.search).get('pass');
+      if (!initialUser) signInFirst(pass);
+      else {
+        setTierId(pass);
+        setOpen(true);
+      }
+    }
     return () => window.removeEventListener(OPEN_EVENT, onOpen);
-  }, [soldOut]);
+  }, [soldOut, initialUser]);
 
   useEffect(() => {
     if (!open) return;

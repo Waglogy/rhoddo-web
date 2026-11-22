@@ -19,6 +19,7 @@ import { AboutText } from './AboutText';
 import { eventWords } from '@/lib/eventWords';
 import { LEGAL_LINKS } from '@/components/LegalShell';
 import { SupportNote } from '@/components/SupportNote';
+import { AccountLink } from '@/components/account/AccountLink';
 
 const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.rhoddo.app';
 
@@ -55,7 +56,10 @@ export async function EventRegistration({ result }: { result: EventLookup }) {
         <Link href="/" aria-label="Rhoddo home">
           <Logo className="h-8 w-auto" />
         </Link>
-        <ThemeToggle />
+        <div className="flex items-center gap-2">
+          <AccountLink />
+          <ThemeToggle />
+        </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 pb-20 sm:px-6">
         {'event' in result ? <EventBody event={result.event} isAndroid={isAndroid} /> : <Unavailable problem={result.problem} />}
