@@ -4,7 +4,7 @@
 // app's src/components/RegistrationForm.tsx and the API's lib/eventForms.ts.
 
 import { useState } from 'react';
-import { localImagePreview, pickImage } from './formImages';
+import { localFileName, localImagePreview, pickFile, pickImage } from './formImages';
 
 export type FormFieldType =
   | 'short_text'
@@ -16,7 +16,8 @@ export type FormFieldType =
   | 'select'
   | 'multi_select'
   | 'checkbox'
-  | 'image';
+  | 'image'
+  | 'file';
 
 export type FormField = {
   id: string;
@@ -26,6 +27,10 @@ export type FormField = {
   help?: string;
   options?: string[];
   copyable?: boolean;
+  /** The date of birth question, used for age rules. */
+  dob?: boolean;
+  /** Only asked to people under 18, or 18 and over, on the event day. */
+  showIf?: 'under18' | 'adult';
 };
 
 export type EventForm = {
@@ -48,15 +53,69 @@ export function resizeAnswers(answers: FormAnswers[], count: number): FormAnswer
   return Array.from({ length: count }, (_, i) => answers[i] ?? {});
 }
 
+/** Age rules for one registration: the event day and the chosen pass's minimum age. */
+export type AgeRules = { eventDate?: string; minAge?: number | null; passName?: string };
+
+const ADULT_AGE = 18;
+const isUpload = (t: FormFieldType) => t === 'image' || t === 'file';
+
+/** Age in whole years on the event day (in India), from a YYYY-MM-DD date of birth. Same as the API. */
+export function ageOn(dob: unknown, eventDate: string | undefined): number | null {
+  if (!eventDate || typeof dob !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(dob)) return null;
+  const [by, bm, bd] = dob.split('-').map(Number);
+  const day = new Date(new Date(eventDate).getTime() + 330 * 60 * 1000).toISOString().slice(0, 10);
+  const [y, m, d] = day.split('-').map(Number);
+  let age = y - by;
+  if (m < bm || (m === bm && d < bd)) age -= 1;
+  return age;
+}
+
+/** This person's age on the event day, from the form's date of birth question. */
+export function personAge(form: EventForm, set: FormAnswers, eventDate?: string): number | null {
+  const dob = form.fields.find((f) => f.dob);
+  return dob ? ageOn(set[dob.id], eventDate) : null;
+}
+
+/** Whether a question is asked to someone of this age. Age questions wait for the date of birth. */
+export function fieldApplies(field: FormField, age: number | null): boolean {
+  if (!field.showIf) return true;
+  if (age === null) return false;
+  return field.showIf === 'under18' ? age < ADULT_AGE : age >= ADULT_AGE;
+}
+
+/** The answers without questions this person isn't asked (e.g. under-18 consent for an adult). */
+export function applicableAnswers(form: EventForm, answers: FormAnswers[], eventDate?: string): FormAnswers[] {
+  return answers.map((set) => {
+    const age = personAge(form, set, eventDate);
+    const out: FormAnswers = {};
+    for (const f of form.fields) if (fieldApplies(f, age) && set[f.id] !== undefined) out[f.id] = set[f.id];
+    return out;
+  });
+}
+
+/** A problem with a date of birth for this pass, or null. */
+function ageProblem(age: number | null, rules: AgeRules): string | null {
+  if (age === null) return null;
+  if (age < 0 || age > 110) return 'enter a real date of birth';
+  if (rules.minAge && age < rules.minAge) {
+    return `${rules.passName ? `the ${rules.passName} pass` : 'this pass'} is for ages ${rules.minAge}+ on the event day (this person will be ${age})`;
+  }
+  return null;
+}
+
 function isEmpty(v: AnswerValue | undefined): boolean {
   return v === undefined || v === false || (typeof v === 'string' && !v.trim()) || (Array.isArray(v) && !v.length);
 }
 
 /** The first problem with the answers, worded for the buyer, or null when they're ready. */
-export function firstFormError(form: EventForm, answers: FormAnswers[]): string | null {
+export function firstFormError(form: EventForm, answers: FormAnswers[], rules: AgeRules = {}): string | null {
   for (let i = 0; i < answers.length; i++) {
     const who = answers.length > 1 ? `Person ${i + 1}: ` : '';
+    const age = personAge(form, answers[i], rules.eventDate);
+    const tooYoung = ageProblem(age, rules);
+    if (tooYoung) return `${who}${tooYoung}`;
     for (const f of form.fields) {
+      if (!fieldApplies(f, age)) continue;
       const v = answers[i][f.id];
       if (isEmpty(v)) {
         if (f.required) return `${who}${f.type === 'checkbox' ? 'please tick' : 'fill in'} "${f.label}"`;
@@ -81,17 +140,24 @@ export function RegistrationFields({
   answers,
   onChange,
   disabled,
+  rules = {},
+  consentFormUrl,
 }: {
   form: EventForm;
   answers: FormAnswers[];
   onChange: (answers: FormAnswers[]) => void;
   disabled?: boolean;
+  /** Event day and the pass's minimum age, for questions that depend on age. */
+  rules?: AgeRules;
+  /** The host's printable consent form, offered to under-18s. */
+  consentFormUrl?: string | null;
 }) {
   const setAnswer = (index: number, fieldId: string, value: AnswerValue) => {
     onChange(answers.map((a, i) => (i === index ? { ...a, [fieldId]: value } : a)));
   };
   // Questions the host marked "usually the same for the whole group".
-  const copyable = form.fields.filter((f) => f.copyable && f.type !== 'image');
+  const copyable = form.fields.filter((f) => f.copyable && !isUpload(f.type));
+  const hasAgeQuestions = form.fields.some((f) => f.showIf);
   const copyFromFirst = (index: number) => {
     const first = answers[0] ?? {};
     const copied: FormAnswers = {};
@@ -104,6 +170,13 @@ export function RegistrationFields({
       <div>
         <div className="font-display text-xl text-ink">{form.name}</div>
         {!!form.description && <p className="mt-1 whitespace-pre-line text-sm text-mute">{form.description}</p>}
+        <p className="mt-2 text-xs text-mute">
+          🔒 Only the organiser and Rhoddo can see these answers and photos. They&apos;re deleted 30 days after the
+          event.{' '}
+          <a href="/privacy" target="_blank" className="underline hover:text-ink">
+            Privacy policy
+          </a>
+        </p>
       </div>
       {answers.map((set, i) => (
         <fieldset key={i} className="space-y-4 rounded-2xl border border-line p-4" disabled={disabled}>
@@ -118,12 +191,85 @@ export function RegistrationFields({
               Same as Person 1 ({copyable.map((f) => f.label).join(', ')})
             </button>
           )}
-          {form.fields.map((f) => (
-            <FieldInput key={f.id} id={`${i}-${f.id}`} field={f} value={set[f.id]} onChange={(v) => setAnswer(i, f.id, v)} />
-          ))}
+          <PersonFields
+            form={form}
+            set={set}
+            index={i}
+            rules={rules}
+            consentFormUrl={consentFormUrl}
+            hasAgeQuestions={hasAgeQuestions}
+            onAnswer={(fieldId, v) => setAnswer(i, fieldId, v)}
+          />
         </fieldset>
       ))}
     </div>
+  );
+}
+
+/** One person's questions. Under-18 questions appear once their date of birth shows they're under 18. */
+function PersonFields({
+  form,
+  set,
+  index,
+  rules,
+  consentFormUrl,
+  hasAgeQuestions,
+  onAnswer,
+}: {
+  form: EventForm;
+  set: FormAnswers;
+  index: number;
+  rules: AgeRules;
+  consentFormUrl?: string | null;
+  hasAgeQuestions: boolean;
+  onAnswer: (fieldId: string, value: AnswerValue) => void;
+}) {
+  const age = personAge(form, set, rules.eventDate);
+  const problem = ageProblem(age, rules);
+  const minor = age !== null && age >= 0 && age < ADULT_AGE;
+  const firstMinorField = form.fields.find((f) => f.showIf === 'under18');
+  return (
+    <>
+      {form.fields.map((f) => {
+        if (!fieldApplies(f, age)) return null;
+        return (
+          <div key={f.id} className="space-y-3">
+            {minor && f === firstMinorField && (
+              <div className="rounded-xl border border-gold/40 bg-gold/10 p-4 text-sm text-ink">
+                <div className="font-medium">This runner is under 18 ({age} on the event day)</div>
+                <p className="mt-1 text-mute">
+                  A parent or guardian must give consent.
+                  {consentFormUrl ? ' Download the consent form, have it signed, then upload a photo or PDF of it below.' : ''}
+                </p>
+                {consentFormUrl && (
+                  <a
+                    href={consentFormUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    download
+                    className="btn-ghost mt-3 inline-flex items-center gap-2 text-sm"
+                  >
+                    ⬇ Download consent form (PDF)
+                  </a>
+                )}
+              </div>
+            )}
+            <FieldInput id={`${index}-${f.id}`} field={f} value={set[f.id]} onChange={(v) => onAnswer(f.id, v)} />
+            {f.dob && problem && (
+              <p role="alert" className="-mt-1 text-xs text-primary">
+                {problem.charAt(0).toUpperCase() + problem.slice(1)}. Go back and choose another pass.
+              </p>
+            )}
+            {f.dob && !problem && age !== null && (
+              <p className="-mt-1 text-xs text-mute">
+                Age on the event day: {age}
+                {hasAgeQuestions && minor ? ' · parent or guardian consent needed' : ''}
+              </p>
+            )}
+          </div>
+        );
+      })}
+    </>
   );
 }
 
@@ -141,7 +287,7 @@ function FieldInput({
   const required = field.required && <span className="text-primary"> *</span>;
   const help = field.help && <p className="mt-1 text-xs text-mute">{field.help}</p>;
 
-  if (field.type === 'image') {
+  if (isUpload(field.type)) {
     return <ImageInput id={id} field={field} value={value} onChange={onChange} required={required} help={help} />;
   }
 
@@ -259,7 +405,10 @@ function ImageInput({
   const [problem, setProblem] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
   const preview = localImagePreview(value);
+  const fileName = localFileName(value);
   const chosen = typeof value === 'string' && value !== '';
+  const allowPdf = field.type === 'file';
+  const isPdf = chosen && !preview && /\.pdf$/i.test(fileName ?? '');
 
   async function choose(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -268,7 +417,7 @@ function ImageInput({
     setProblem(null);
     setWorking(true);
     try {
-      onChange(await pickImage(file));
+      onChange(await (allowPdf ? pickFile(file) : pickImage(file)));
     } catch (err) {
       setProblem(err instanceof Error ? err.message : 'Could not use that photo');
     } finally {
@@ -289,16 +438,16 @@ function ImageInput({
               // eslint-disable-next-line @next/next/no-img-element
               <img src={preview} alt="" className="h-full w-full object-cover" />
             ) : (
-              <div className="flex h-full items-center justify-center text-[10px] text-mute">Photo</div>
+              <div className="flex h-full items-center justify-center text-[10px] text-mute">{isPdf ? '📄 PDF' : 'Photo'}</div>
             )}
           </div>
         )}
         <label className="btn-ghost cursor-pointer whitespace-nowrap">
-          {working ? 'Preparing…' : chosen ? 'Change photo' : 'Choose photo'}
+          {working ? 'Preparing…' : chosen ? (allowPdf ? 'Change file' : 'Change photo') : allowPdf ? 'Choose photo or PDF' : 'Choose photo'}
           <input
             id={id}
             type="file"
-            accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+            accept={`image/jpeg,image/png,image/webp,image/heic,image/heif${allowPdf ? ',application/pdf' : ''}`}
             className="sr-only"
             aria-labelledby={`${id}-label`}
             onChange={choose}
@@ -311,9 +460,10 @@ function ImageInput({
           </button>
         )}
       </div>
+      {chosen && fileName && <p className="mt-1 truncate text-xs text-mute">{fileName}</p>}
       {problem && <p role="alert" className="mt-1 text-xs text-primary">{problem}</p>}
       {help}
-      <p className="mt-1 text-[11px] text-mute">Only the organiser can see this photo.</p>
+      <p className="mt-1 text-[11px] text-mute">Only the organiser can see this {allowPdf ? 'file' : 'photo'}.</p>
     </div>
   );
 }

@@ -96,7 +96,10 @@ const SECTIONS: Array<{ title: string; body: React.ReactNode }> = [
         for the event. Use them only to run that event and keep participants safe, keep them secure,
         never sell them or use them for unrelated marketing without consent, and delete them when no
         longer needed. You must comply with India&apos;s Digital Personal Data Protection Act, 2023 and
-        other applicable law.
+        other applicable law. Treat identity documents and medical details with particular care. Rhoddo
+        deletes registration-form answers and uploaded photos 30 days after your event ends; download
+        anything you are required to keep before then, and delete your downloaded copies when you no
+        longer need them.
       </>
     ),
   },
@@ -191,6 +194,8 @@ export default function HostTerms() {
       <footer className="border-t border-line">
         <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-x-6 gap-y-2 px-6 py-12 text-xs text-mute">
           <Link href="/privacy" className="hover:text-ink">Privacy</Link>
+            <Link href="/refund-policy" className="hover:text-ink">Refunds</Link>
+            <Link href="/contact" className="hover:text-ink">Contact</Link>
           <Link href="/terms" className="hover:text-ink">Terms</Link>
           <Link href="/host-terms" className="text-ink">Host Terms</Link>
           <Link href="/" className="hover:text-ink">Home</Link>

@@ -37,7 +37,7 @@ export default function TermsAndConditions() {
           Terms &amp; Conditions
         </h1>
         <p className="mt-4 text-sm text-mute">
-          Last updated: 13 June 2025
+          Last updated: 21 November 2026
         </p>
 
         <div className="mt-12 space-y-10 text-sm leading-relaxed text-mute">
@@ -61,8 +61,11 @@ export default function TermsAndConditions() {
             <p className="mt-3">
               You must be at least 13 years of age to use Rhoddo. If you are
               under 18, you may use the Service only with the involvement of a
-              parent or guardian. By using the Service, you represent that you
-              meet these requirements.
+              parent or guardian. A participant under 18 must be registered for an
+              event by their parent or guardian, who consents to the participant
+              taking part and to their details being shared with the host. Each
+              event may also set its own minimum age. By using the Service, you
+              represent that you meet these requirements.
             </p>
           </section>
 
@@ -327,6 +330,8 @@ export default function TermsAndConditions() {
           </div>
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-mute md:justify-start">
             <Link href="/privacy" className="hover:text-ink">Privacy</Link>
+            <Link href="/refund-policy" className="hover:text-ink">Refunds</Link>
+            <Link href="/contact" className="hover:text-ink">Contact</Link>
             <Link href="/terms" className="text-ink">Terms</Link>
             <Link href="/" className="hover:text-ink">Home</Link>
           </div>

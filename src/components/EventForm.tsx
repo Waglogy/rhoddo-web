@@ -6,6 +6,7 @@ import { clientApi } from '@/lib/client-api';
 import { FieldLabel } from './FieldLabel';
 import { ImageUpload } from './ImageUpload';
 import { GalleryUpload } from './GalleryUpload';
+import { PdfUpload } from './PdfUpload';
 import { toDateInput } from '@/lib/format';
 import { slugify, registrationUrl } from '@/lib/eventLink';
 import { districtOptions } from '@/lib/districts';
@@ -17,6 +18,8 @@ type Tier = {
   priceINR: number;
   perks: string[];
   capacity: number;
+  /** Youngest age allowed on the event day; null = any age. */
+  minAge?: number | null;
 };
 
 type EventInitial = {
@@ -40,6 +43,10 @@ type EventInitial = {
   reviewStatus?: 'pending' | 'approved' | 'rejected';
   categoryLocked?: boolean;
   tiers: Tier[];
+  termsText?: string;
+  termsPdfUrl?: string | null;
+  consentFormUrl?: string | null;
+  registrationClosesAt?: string | null;
 };
 
 
@@ -86,9 +93,15 @@ export function EventForm({
           priceINR: t.priceINR,
           perks: t.perks,
           capacity: t.capacity,
+          minAge: t.minAge ?? null,
         }))
       : [{ name: 'General', priceINR: 0, perks: [], capacity: 100 }]
   );
+
+  const [termsText, setTermsText] = useState(initial?.termsText || '');
+  const [termsPdfUrl, setTermsPdfUrl] = useState<string | null>(initial?.termsPdfUrl ?? null);
+  const [consentFormUrl, setConsentFormUrl] = useState<string | null>(initial?.consentFormUrl ?? null);
+  const [closesAt, setClosesAt] = useState(toDateInput(initial?.registrationClosesAt) || '');
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -107,6 +120,10 @@ export function EventForm({
     e.preventDefault();
     if (!image) {
       setError('Please upload a cover image');
+      return;
+    }
+    if (closesAt && date && new Date(closesAt) > new Date(date)) {
+      setError(`${isRegistrationEvent(category) ? 'Registration' : 'Booking'} must close before the event starts`);
       return;
     }
     setSaving(true);
@@ -128,6 +145,10 @@ export function EventForm({
         priceFromINR: Number(priceFromINR),
         about,
         tags: tags.split(',').map((s) => s.trim()).filter(Boolean),
+        termsText,
+        termsPdfUrl,
+        consentFormUrl,
+        registrationClosesAt: closesAt ? new Date(closesAt).toISOString() : null,
         // Host events go live after Rhoddo's review, then with the Publish button, so
         // the form never changes whether a host's event is live.
         published: mode === 'host' ? (isEdit ? undefined : false) : published,
@@ -137,6 +158,7 @@ export function EventForm({
           priceINR: Number(t.priceINR),
           perks: t.perks,
           capacity: Number(t.capacity),
+          minAge: t.minAge ? Number(t.minAge) : null,
         })),
       };
       if (isEdit) {
@@ -337,7 +359,7 @@ export function EventForm({
         <div className="mt-6 space-y-4">
           {tiers.map((t, i) => (
             <div key={i} className="rounded-xl border border-line bg-bg p-5">
-              <div className="grid gap-4 md:grid-cols-4">
+              <div className="grid gap-4 md:grid-cols-5">
                 <div className="md:col-span-2">
                   <label className="label mb-1 block">Name</label>
                   <input
@@ -369,7 +391,22 @@ export function EventForm({
                     required
                   />
                 </div>
-                <div className="md:col-span-4">
+                <div>
+                  <FieldLabel
+                    label="Minimum age"
+                    info="The youngest age allowed on the event day, e.g. 16 for a 10 km run. Leave empty for any age. It's checked against the Date of birth question in your registration form, so mark that question as the date of birth."
+                  />
+                  <input
+                    type="number"
+                    className="input"
+                    value={t.minAge ?? ''}
+                    placeholder="Any"
+                    onChange={(e) => updateTier(i, { minAge: e.target.value ? Number(e.target.value) : null })}
+                    min={1}
+                    max={100}
+                  />
+                </div>
+                <div className="md:col-span-5">
                   <FieldLabel
                     label="Perks (comma-separated)"
                     info={
@@ -400,6 +437,55 @@ export function EventForm({
               )}
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className="card p-6">
+        <h2 className="font-display text-xl text-ink">Terms, consent & closing date</h2>
+        <p className="mt-1 text-sm text-mute">
+          If you add terms, people must read and accept them before they can {isRegistrationEvent(category) ? 'register' : 'book'}.
+        </p>
+        <div className="mt-6 grid gap-6">
+          <div>
+            <FieldLabel
+              label="Terms and conditions"
+              info="Shown in full before registration starts, in a box people scroll through and accept. Use a new line for each rule. Leave empty if your event has no terms of its own."
+            />
+            <textarea
+              className="input min-h-[200px] font-[inherit]"
+              value={termsText}
+              onChange={(e) => setTermsText(e.target.value)}
+              maxLength={30000}
+              placeholder={'1. Registration fees are non-refundable and non-transferable.\n2. Participants must carry a valid age proof on race day.\n…'}
+            />
+            <p className="mt-1 text-xs text-mute">{termsText.length.toLocaleString('en-IN')} / 30,000 characters</p>
+          </div>
+          <div>
+            <FieldLabel
+              label="Terms as a PDF (optional)"
+              info="Your full terms document, for people who want to download or print it. People can open it before accepting."
+            />
+            <PdfUpload value={termsPdfUrl} onChange={setTermsPdfUrl} mode={mode} />
+          </div>
+          <div>
+            <FieldLabel
+              label="Consent form to download (optional)"
+              info="A form people download, sign and upload back, such as a parent or guardian's consent for runners under 18. Add a File question to your registration form, asked only to under-18s, so they can upload the signed copy."
+            />
+            <PdfUpload value={consentFormUrl} onChange={setConsentFormUrl} mode={mode} />
+          </div>
+          <div className="max-w-sm">
+            <FieldLabel
+              label={isRegistrationEvent(category) ? 'Registration closes' : 'Booking closes'}
+              info="After this time nobody can sign up. Leave empty to stay open until the event starts."
+            />
+            <input type="datetime-local" className="input" value={closesAt} onChange={(e) => setClosesAt(e.target.value)} />
+            {closesAt && (
+              <button type="button" className="mt-1 text-xs text-mute hover:text-primary" onClick={() => setClosesAt('')}>
+                Clear
+              </button>
+            )}
+          </div>
         </div>
       </section>
 

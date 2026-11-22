@@ -14,7 +14,8 @@ export type FormFieldType =
   | 'select'
   | 'multi_select'
   | 'checkbox'
-  | 'image';
+  | 'image'
+  | 'file';
 
 export type FormField = {
   id: string;
@@ -25,6 +26,10 @@ export type FormField = {
   options?: string[];
   /** Offer "Same as Person 1" for this question in group registrations. */
   copyable?: boolean;
+  /** This date question is the person's date of birth, used for age rules. */
+  dob?: boolean;
+  /** Only ask people under 18, or only 18 and over, on the event day. */
+  showIf?: 'under18' | 'adult';
 };
 
 export type EventFormDef = {
@@ -45,9 +50,11 @@ const TYPE_LABELS: Record<FormFieldType, string> = {
   multi_select: 'Choose several',
   checkbox: 'Tick box (yes / no)',
   image: 'Photo upload (ID, photo, certificate)',
+  file: 'File upload: photo or PDF (signed form)',
 };
 
 const isChoice = (t: FormFieldType) => t === 'select' || t === 'multi_select';
+export const isUpload = (t: FormFieldType) => t === 'image' || t === 'file';
 
 function newId() {
   return `f_${Math.random().toString(36).slice(2, 10)}`;
@@ -59,7 +66,7 @@ const RUNNER_TEMPLATE: EventFormDef = {
   perTicket: true,
   fields: [
     { id: newId(), label: 'Full name', type: 'short_text', required: true },
-    { id: newId(), label: 'Date of birth', type: 'date', required: true },
+    { id: newId(), label: 'Date of birth', type: 'date', required: true, dob: true, help: 'Your age on race day decides which races you can enter.' },
     { id: newId(), label: 'Gender', type: 'select', required: true, options: ['Female', 'Male', 'Other'] },
     { id: newId(), label: 'T-shirt size', type: 'select', required: true, options: ['XS', 'S', 'M', 'L', 'XL', 'XXL'] },
     { id: newId(), label: 'Emergency contact name', type: 'short_text', required: true, copyable: true },
@@ -67,9 +74,35 @@ const RUNNER_TEMPLATE: EventFormDef = {
     { id: newId(), label: 'Medical conditions we should know about', type: 'long_text', required: false },
     {
       id: newId(),
-      label: 'I am fit to take part and accept the event rules',
+      label: 'I am medically fit to take part and take part at my own risk',
       type: 'checkbox',
       required: true,
+    },
+    // Asked only when the runner is under 18 on race day.
+    { id: newId(), label: 'Parent or guardian full name', type: 'short_text', required: true, showIf: 'under18' },
+    {
+      id: newId(),
+      label: 'Relationship to the runner',
+      type: 'select',
+      required: true,
+      options: ['Father', 'Mother', 'Legal guardian'],
+      showIf: 'under18',
+    },
+    { id: newId(), label: 'Parent or guardian phone', type: 'phone', required: true, showIf: 'under18' },
+    {
+      id: newId(),
+      label: 'Signed parent or guardian consent form',
+      type: 'file',
+      required: true,
+      showIf: 'under18',
+      help: 'Download the consent form, have the parent or guardian sign it, then upload a photo or PDF of it.',
+    },
+    {
+      id: newId(),
+      label: 'I am the parent or guardian, and I consent to this runner taking part and to sharing these details with the organiser',
+      type: 'checkbox',
+      required: true,
+      showIf: 'under18',
     },
   ],
 };
@@ -130,7 +163,9 @@ export function RegistrationFormEditor({
             ...f,
             help: f.help?.trim() || undefined,
             options: isChoice(f.type) ? (f.options ?? []).map((o) => o.trim()).filter(Boolean) : undefined,
-            copyable: form.perTicket && f.type !== 'image' && f.copyable ? true : undefined,
+            copyable: form.perTicket && !isUpload(f.type) && f.copyable ? true : undefined,
+            dob: f.type === 'date' && f.dob ? true : undefined,
+            showIf: f.dob ? undefined : f.showIf || undefined,
           })),
         };
         const res = await clientApi<{ form: EventFormDef }>(`/organizer/events/${eventId}/form`, {
@@ -322,7 +357,48 @@ export function RegistrationFormEditor({
                     placeholder="Shown under the question"
                   />
                 </div>
-                {form.perTicket && f.type !== 'image' && (
+                {f.type === 'date' && (
+                  <label className="flex items-start gap-2 text-sm text-ink md:col-span-6">
+                    <input
+                      type="checkbox"
+                      className="mt-0.5"
+                      checked={!!f.dob}
+                      // Only one date of birth per form.
+                      onChange={(e) =>
+                        update({
+                          fields: form.fields.map((g, j) =>
+                            j === i ? { ...g, dob: e.target.checked || undefined, showIf: undefined } : e.target.checked ? { ...g, dob: undefined } : g,
+                          ),
+                        })
+                      }
+                    />
+                    <span>
+                      This is the date of birth
+                      <span className="block text-xs text-mute">
+                        Used to work out each person&apos;s age on the event day: for each pass&apos;s minimum age, and to
+                        show questions only to under-18s or adults.
+                      </span>
+                    </span>
+                  </label>
+                )}
+                {!f.dob && (
+                  <div className="md:col-span-3">
+                    <label className="label mb-1 block">Who is asked</label>
+                    <select
+                      className="input"
+                      value={f.showIf ?? ''}
+                      onChange={(e) => updateField(i, { showIf: (e.target.value || undefined) as FormField['showIf'] })}
+                    >
+                      <option value="">Everyone</option>
+                      <option value="under18">Only people under 18 on the event day</option>
+                      <option value="adult">Only people 18 or over on the event day</option>
+                    </select>
+                    {f.showIf && !form.fields.some((g) => g.dob) && (
+                      <p className="mt-1 text-xs text-primary">Mark a required date question as the date of birth for this to work.</p>
+                    )}
+                  </div>
+                )}
+                {form.perTicket && !isUpload(f.type) && (
                   <label className="flex items-start gap-2 text-sm text-ink md:col-span-6">
                     <input
                       type="checkbox"

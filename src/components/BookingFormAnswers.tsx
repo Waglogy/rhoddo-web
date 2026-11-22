@@ -29,11 +29,20 @@ export function BookingFormAnswers({ data, fileUrls = {} }: { data: BookingFormA
           <div key={i} className="rounded-lg border border-line bg-bg p-3">
             {data.answers.length > 1 && <div className="mb-1 text-[10px] uppercase tracking-wider text-mute">Person {i + 1}</div>}
             <dl className="grid gap-x-4 gap-y-1 sm:grid-cols-[minmax(0,14rem)_1fr]">
-              {data.fields.map((f) => (
+              {/* Age-only questions this person wasn't asked are left out. */}
+              {data.fields.filter((f) => !f.showIf || set[f.id] !== undefined).map((f) => (
                 <div key={f.id} className="contents">
                   <dt className="text-mute">{f.label}</dt>
                   <dd className="break-words text-ink">
-                    {f.type === 'image' && typeof set[f.id] === 'string' && set[f.id] ? (
+                    {(f.type === 'image' || f.type === 'file') && typeof set[f.id] === 'string' && (set[f.id] as string).endsWith('.pdf') ? (
+                      fileUrls[set[f.id] as string] ? (
+                        <a href={fileUrls[set[f.id] as string]} target="_blank" rel="noopener noreferrer" className="text-gold underline">
+                          📄 Open PDF
+                        </a>
+                      ) : (
+                        'PDF uploaded'
+                      )
+                    ) : (f.type === 'image' || f.type === 'file') && typeof set[f.id] === 'string' && set[f.id] ? (
                       fileUrls[set[f.id] as string] ? (
                         <a href={fileUrls[set[f.id] as string]} target="_blank" rel="noopener noreferrer" className="inline-block">
                           {/* eslint-disable-next-line @next/next/no-img-element */}

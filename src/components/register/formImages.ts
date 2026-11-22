@@ -13,8 +13,23 @@ const picked = new Map<string, Picked>();
 
 export const isLocalImage = (v: unknown): v is string => typeof v === 'string' && v.startsWith('local:');
 
-/** The preview for a chosen photo, for showing it back in the form. */
-export const localImagePreview = (v: unknown) => (isLocalImage(v) ? picked.get(v)?.preview : undefined);
+/** The preview for a chosen photo, for showing it back in the form. None for a PDF. */
+export const localImagePreview = (v: unknown) => (isLocalImage(v) ? picked.get(v)?.preview || undefined : undefined);
+
+/** The name of a chosen file, e.g. "consent-signed.pdf". */
+export const localFileName = (v: unknown) => (isLocalImage(v) ? picked.get(v)?.name : undefined);
+
+/** Like pickImage, but a PDF is also accepted (for File questions such as a signed consent form). */
+export async function pickFile(file: File): Promise<string> {
+  if (file.type !== 'application/pdf') {
+    if (!file.type.startsWith('image/')) throw new Error('Choose a photo or a PDF');
+    return pickImage(file);
+  }
+  if (file.size > MAX_BYTES) throw new Error('That PDF is too big. Choose one under 8 MB.');
+  const id = `local:${crypto.randomUUID()}`;
+  picked.set(id, { file, name: file.name, preview: '' });
+  return id;
+}
 
 const MAX_SIDE = 2000;
 const MAX_BYTES = 8 * 1024 * 1024;
@@ -59,7 +74,7 @@ async function shrink(file: File): Promise<Blob> {
 
 async function upload(item: Picked): Promise<string> {
   const body = new FormData();
-  body.append('file', item.file, 'photo'); // the API names the file itself, from its type
+  body.append('file', item.file, item.file.type === 'application/pdf' ? 'file.pdf' : 'photo'); // the API names the file itself, from its type
   let res: Response;
   try {
     res = await fetch('/api/backend/me/form-uploads', { method: 'POST', body });
