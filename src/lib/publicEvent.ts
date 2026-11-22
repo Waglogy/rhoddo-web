@@ -23,9 +23,20 @@ export type PublicEvent = {
   hostName: string;
   priceFromINR: number;
   venue?: { name: string; address?: string | null } | null;
-  tiers: Array<{ id: string; name: string; priceINR: number; perks: string[]; capacity: number; left: number }>;
+  tiers: Array<{ id: string; name: string; priceINR: number; perks: string[]; capacity: number; left: number; minAge?: number | null }>;
   form?: EventForm | null;
+  /** The host's own terms; when set, people accept them before registering. */
+  termsText?: string;
+  termsPdfUrl?: string | null;
+  /** A form to download, sign and upload (e.g. parent consent for under-18s). */
+  consentFormUrl?: string | null;
+  registrationClosesAt?: string | null;
 };
+
+/** True once the host's closing time for new registrations has passed. */
+export function registrationClosed(event: Pick<PublicEvent, 'registrationClosesAt'>): boolean {
+  return Boolean(event.registrationClosesAt && new Date(event.registrationClosesAt).getTime() <= Date.now());
+}
 
 export type EventLookup = { event: PublicEvent } | { problem: 'missing' | 'unavailable' };
 

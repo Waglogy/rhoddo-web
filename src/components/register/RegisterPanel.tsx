@@ -12,6 +12,7 @@ import { CheckoutClosed, openRazorpay } from '@/lib/razorpayWeb';
 import {
   RegistrationFields,
   answerSetsNeeded,
+  applicableAnswers,
   firstFormError,
   resizeAnswers,
   type EventForm,
@@ -27,6 +28,8 @@ export type RegisterTier = {
   priceINR: number;
   perks: string[];
   left: number;
+  /** Youngest age allowed on the event day. */
+  minAge?: number | null;
 };
 
 export type RegisterEvent = {
@@ -35,9 +38,14 @@ export type RegisterEvent = {
   category?: string;
   tiers: RegisterTier[];
   form: EventForm | null;
+  /** The event day, for age rules. */
+  date?: string;
+  termsText?: string;
+  termsPdfUrl?: string | null;
+  consentFormUrl?: string | null;
 };
 
-type Step = 'tickets' | 'details' | 'account' | 'pay';
+type Step = 'terms' | 'tickets' | 'details' | 'account' | 'pay';
 type Booking = { id: string };
 type Order = {
   orderId: string;
@@ -75,9 +83,18 @@ export function RegisterPanel({
   const router = useRouter();
   const form = event.form;
   // The email is verified before the runner details, so every registration starts from a real inbox.
-  const steps: Step[] = form ? ['tickets', 'account', 'details', 'pay'] : ['tickets', 'account', 'pay'];
+  // The event's own terms come first: nobody starts registering without accepting them.
+  const hasTerms = Boolean(event.termsText?.trim() || event.termsPdfUrl);
+  const steps: Step[] = [
+    ...(hasTerms ? (['terms'] as const) : []),
+    'tickets',
+    'account',
+    ...(form ? (['details'] as const) : []),
+    'pay',
+  ];
 
-  const [step, setStep] = useState<Step>('tickets');
+  const [step, setStep] = useState<Step>(steps[0]);
+  const [acceptedEventTerms, setAcceptedEventTerms] = useState(false);
   const [tierId, setTierId] = useState(() => (event.tiers.find((t) => t.left > 0) ?? event.tiers[0])?.id);
   const [qty, setQty] = useState(1);
   const [answers, setAnswers] = useState<FormAnswers[]>([]);
@@ -106,7 +123,7 @@ export function RegisterPanel({
 
   useEffect(() => {
     const t = preferredTierId && event.tiers.find((x) => x.id === preferredTierId && x.left > 0);
-    if (t && step === 'tickets') {
+    if (t && (step === 'tickets' || step === 'terms')) {
       setTierId(t.id);
       setQty((q) => Math.max(1, Math.min(q, MAX_PER_REGISTRATION, t.left)));
     }
@@ -144,8 +161,15 @@ export function RegisterPanel({
     go(stepAfter('tickets'));
   }
 
+  const ageRules = { eventDate: event.date, minAge: tier.minAge, passName: tier.name };
+
+  function continueFromTerms() {
+    if (!acceptedEventTerms) return setError('Please read and accept the terms and conditions to continue');
+    go('tickets');
+  }
+
   function continueFromDetails() {
-    const problem = form && formAnswers ? firstFormError(form, formAnswers) : null;
+    const problem = form && formAnswers ? firstFormError(form, formAnswers, ageRules) : null;
     if (problem) return setError(problem);
     go('pay');
   }
@@ -259,7 +283,9 @@ export function RegisterPanel({
     setError(null);
     try {
       // Photos for Image questions are uploaded now that the buyer is signed in.
-      const savedAnswers = formAnswers && (await uploadPickedImages(formAnswers));
+      // Answers to questions this person isn't asked (by age) are left out, so their files aren't uploaded.
+      const savedAnswers =
+        form && formAnswers && (await uploadPickedImages(applicableAnswers(form, formAnswers, event.date)));
       const input = {
         eventId: event.id,
         tierId: tier.id,
@@ -267,6 +293,7 @@ export function RegisterPanel({
         promoCode: preview?.promoStatus === 'applied' ? promoInput.trim() : undefined,
         ...(savedAnswers && { formAnswers: savedAnswers }),
         phone: `+91${mobileDigits(phone) ?? ''}`,
+        ...(hasTerms && { acceptEventTerms: acceptedEventTerms }),
       };
       if (total <= 0) {
         const { booking } = await buyerApi<{ booking: Booking }>('/bookings', { body: input });
@@ -341,6 +368,7 @@ export function RegisterPanel({
   const stepIndex = steps.indexOf(step);
   const back = stepBefore(step);
   const STEP_NAMES: Record<Step, string> = {
+    terms: 'Terms',
     tickets: 'Pass',
     account: 'Email',
     details: w.registration ? 'Runners' : 'Details',
@@ -369,7 +397,8 @@ export function RegisterPanel({
         onSubmit={(e) => {
           e.preventDefault();
           if (busy) return;
-          if (step === 'tickets') continueFromTickets();
+          if (step === 'terms') continueFromTerms();
+          else if (step === 'tickets') continueFromTickets();
           else if (step === 'details') continueFromDetails();
           else if (step === 'account') {
             if (!user) void (codeSentTo ? verifyCode() : sendCode());
@@ -379,6 +408,57 @@ export function RegisterPanel({
         className="flex min-h-0 flex-1 flex-col"
       >
         <div ref={bodyRef} className="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-5 py-5 sm:px-6">
+        {step === 'terms' && (
+          <div className="space-y-4">
+            <div>
+              <h2 className="font-display text-2xl text-ink">Terms and conditions</h2>
+              <p className="mt-1 text-sm text-mute">Please read the organiser&apos;s terms before you {w.registration ? 'register' : 'book'}.</p>
+            </div>
+            {event.termsText?.trim() && (
+              <div
+                tabIndex={0}
+                aria-label="Terms and conditions"
+                className="max-h-[45vh] overflow-y-auto whitespace-pre-line rounded-2xl border border-line bg-bg/60 p-4 text-sm leading-relaxed text-ink"
+              >
+                {event.termsText.trim()}
+              </div>
+            )}
+            <div className="flex flex-wrap gap-2">
+              {event.termsPdfUrl && (
+                <a href={event.termsPdfUrl} target="_blank" rel="noreferrer" className="btn-ghost inline-flex items-center gap-2 text-sm">
+                  📄 Full terms (PDF)
+                </a>
+              )}
+              {event.consentFormUrl && (
+                <a href={event.consentFormUrl} target="_blank" rel="noreferrer" download className="btn-ghost inline-flex items-center gap-2 text-sm">
+                  ⬇ Consent form (PDF)
+                </a>
+              )}
+            </div>
+            {event.consentFormUrl && (
+              <p className="text-xs text-mute">
+                Registering someone under 18? You&apos;ll need this form signed by their parent or guardian, and will
+                upload it with their details.
+              </p>
+            )}
+            <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-line p-4 text-sm text-ink">
+              <input
+                type="checkbox"
+                className="mt-0.5 h-4 w-4 accent-[rgb(var(--primary))]"
+                checked={acceptedEventTerms}
+                onChange={(e) => {
+                  setAcceptedEventTerms(e.target.checked);
+                  setError(null);
+                }}
+              />
+              <span>
+                I have read and accept the terms and conditions of <span className="font-medium">{event.title}</span>
+                {form?.perTicket ? ', for myself and everyone I register' : ''}.
+              </span>
+            </label>
+          </div>
+        )}
+
         {step === 'tickets' && (
           <>
             <div>
@@ -412,7 +492,9 @@ export function RegisterPanel({
                       <span className="min-w-0 flex-1">
                         <span className="block font-medium text-ink">{t.name}</span>
                         <span className="block text-xs text-mute">
-                          {out ? (w.registration ? 'Full' : 'Sold out') : [...t.perks, t.left <= 20 ? `${t.left} left` : ''].filter(Boolean).join(' · ')}
+                          {out
+                            ? w.registration ? 'Full' : 'Sold out'
+                            : [t.minAge ? `Ages ${t.minAge}+` : '', ...t.perks, t.left <= 20 ? `${t.left} left` : ''].filter(Boolean).join(' · ')}
                         </span>
                       </span>
                       <span className="font-display text-lg text-gold">{t.priceINR > 0 ? formatINR(t.priceINR) : 'Free'}</span>
@@ -463,6 +545,8 @@ export function RegisterPanel({
               setError(null);
             }}
             disabled={busy}
+            rules={ageRules}
+            consentFormUrl={event.consentFormUrl}
           />
         )}
 
@@ -669,11 +753,13 @@ export function RegisterPanel({
             </div>
             <div className="font-display text-xl leading-tight text-ink">{total > 0 ? formatINR(total) : 'Free'}</div>
           </div>
-        <button type="submit" className="btn-primary flex-1 py-3.5 text-base" disabled={busy || soldOut}>
+        <button type="submit" className="btn-primary flex-1 py-3.5 text-base" disabled={busy || soldOut || (step === 'terms' && !acceptedEventTerms)}>
           {soldOut
             ? fullText
             : busy
               ? 'Please wait…'
+              : step === 'terms'
+                ? 'Accept & continue'
               : step === 'account' && !user
                 ? codeSentTo
                   ? 'Verify code'

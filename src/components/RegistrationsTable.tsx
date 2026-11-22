@@ -52,8 +52,15 @@ function Cell({ value, type, age }: { value: string; type: string; age?: number 
     const s = STATUS[value] ?? { label: value, cls: 'bg-line text-mute' };
     return <span className={`whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-medium ${s.cls}`}>{s.label}</span>;
   }
-  if (type === 'image') {
+  if (type === 'image' || type === 'file') {
     if (!/^https?:\/\//.test(value)) return <span className="text-mute">{value}</span>;
+    if (/\.pdf([?&]|$)/i.test(value)) {
+      return (
+        <a href={value} target="_blank" rel="noopener noreferrer" className="whitespace-nowrap text-gold underline">
+          📄 PDF
+        </a>
+      );
+    }
     return (
       <a href={value} target="_blank" rel="noopener noreferrer" className="inline-block" title="Open photo">
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -275,7 +282,7 @@ export function RegistrationsTable({ data, csvHref }: { data: RegistrationsData;
 
       <p className="mt-3 text-sm text-mute">
         {rows.length === data.rows.length ? `${data.rows.length} people` : `${rows.length} of ${data.rows.length} people`} ·{' '}
-        {confirmedPeople} confirmed. Photo links work for an hour; reload the page for fresh ones.
+        {confirmedPeople} confirmed. Photo and file links work for an hour; reload the page for fresh ones.
       </p>
 
       <div className="card mt-3 max-h-[70vh] overflow-auto">

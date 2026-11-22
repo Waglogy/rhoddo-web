@@ -11,6 +11,7 @@ const TYPE_LABELS: Record<FormFieldType, string> = {
   multi_select: 'Choose several',
   checkbox: 'Tick box',
   image: 'Photo upload',
+  file: 'File upload (photo or PDF)',
 };
 
 /** Read-only view of an event's registration form, for admins reviewing the event. */
@@ -39,6 +40,8 @@ export function RegistrationFormPreview({ form, csvHref }: { form: EventFormDef;
               {' '}
               · {TYPE_LABELS[f.type]}
               {f.options?.length ? `: ${f.options.join(', ')}` : ''}
+              {f.dob ? ' · date of birth' : ''}
+              {f.showIf === 'under18' ? ' · only under 18' : f.showIf === 'adult' ? ' · only 18+' : ''}
             </span>
             {f.help && <div className="ml-4 text-xs text-mute">{f.help}</div>}
           </li>
