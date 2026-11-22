@@ -76,6 +76,8 @@ export function RegistrationsTable({ data, csvHref }: { data: RegistrationsData;
   const [status, setStatus] = useState('');
   const statusCol = data.columns.findIndex((c) => c.type === 'status');
   const passCol = 3;
+  // Columns before this are the booking's own (order, status, pass, who, User ID); form answers follow.
+  const FIRST_FORM_COL = 10;
   const [pass, setPass] = useState('');
   const passes = useMemo(() => [...new Set(data.rows.map((r) => r[passCol]))].sort(), [data.rows]);
 
@@ -84,7 +86,7 @@ export function RegistrationsTable({ data, csvHref }: { data: RegistrationsData;
     () =>
       data.columns
         .map((c, i) => ({ ...c, i }))
-        .filter((c) => c.i >= 9 && c.type === 'select')
+        .filter((c) => c.i >= FIRST_FORM_COL && c.type === 'select')
         .map((c) => {
           const counts = new Map<string, number>();
           for (const r of data.rows) if (r[c.i]) counts.set(r[c.i], (counts.get(r[c.i]) ?? 0) + 1);
@@ -96,7 +98,7 @@ export function RegistrationsTable({ data, csvHref }: { data: RegistrationsData;
   const [choice, setChoice] = useState<Record<number, string>>({});
 
   // Age on race day, from the first date question that looks like a date of birth.
-  const dobCol = data.columns.findIndex((c, i) => i >= 9 && c.type === 'date' && /birth|dob|born|age/i.test(c.label));
+  const dobCol = data.columns.findIndex((c, i) => i >= FIRST_FORM_COL && c.type === 'date' && /birth|dob|born|age/i.test(c.label));
   const raceDay = useMemo(() => (data.event.date ? new Date(data.event.date) : new Date()), [data.event.date]);
   const ages = useMemo(() => data.rows.map((r) => (dobCol >= 0 ? ageOn(r[dobCol], raceDay) : null)), [data.rows, dobCol, raceDay]);
   const [ageGroup, setAgeGroup] = useState('');
@@ -155,10 +157,10 @@ export function RegistrationsTable({ data, csvHref }: { data: RegistrationsData;
   const confirmedPeople = data.rows.filter((r) => r[statusCol] === 'confirmed').length;
 
   // On screen, each runner's own details come first; order and buyer info move to the end.
-  // The API's order is: Order, Registered at, Status, Pass, People, Person, Registered by, Email, Phone, ...form answers.
+  // The API's order is: Order, Registered at, Status, Pass, People, Person, Registered by, Email, Phone, User ID, ...form answers.
   const order = useMemo(() => {
-    const formCols = data.columns.map((_, i) => i).filter((i) => i >= 9);
-    return [3, 2, ...formCols, 5, 6, 7, 8, 0, 1, 4].filter((i) => i < data.columns.length);
+    const formCols = data.columns.map((_, i) => i).filter((i) => i >= FIRST_FORM_COL);
+    return [3, 2, ...formCols, 5, 6, 9, 7, 8, 0, 1, 4].filter((i) => i < data.columns.length);
   }, [data.columns]);
 
   return (

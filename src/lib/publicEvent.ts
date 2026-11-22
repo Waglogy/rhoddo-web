@@ -57,7 +57,7 @@ export const loadEventBySlug = cache((slug: string) => load(`/events/by-slug/${e
 export const loadEventById = cache((id: string) => load(`/events/${encodeURIComponent(id)}`));
 
 /** The buyer signed in on this browser, or null. Same account as the app. */
-export async function loadSignedInBuyer(): Promise<Buyer | null> {
+export const loadSignedInBuyer = cache(async (): Promise<Buyer | null> => {
   const token = (await cookies()).get(USER_COOKIE)?.value;
   if (!token) return null;
   try {
@@ -68,7 +68,7 @@ export async function loadSignedInBuyer(): Promise<Buyer | null> {
   } catch {
     return null;
   }
-}
+});
 
 // Written out in Sikkim time, because the server may run in another time zone.
 export function formatWhen(iso: string): string {

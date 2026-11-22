@@ -420,7 +420,7 @@ export function EventForm({
                     value={t.perks.join(', ')}
                     onChange={(e) =>
                       updateTier(i, {
-                        perks: e.target.value.split(',').map((s) => s.trim()).filter(Boolean),
+                        perks: e.target.value.split(/,(?!\d{2,3}\b)/).map((s) => s.trim()).filter(Boolean),
                       })
                     }
                   />
