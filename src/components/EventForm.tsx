@@ -420,7 +420,10 @@ export function EventForm({
                     value={t.perks.join(', ')}
                     onChange={(e) =>
                       updateTier(i, {
-                        perks: e.target.value.split(/,(?!\d{2,3}\b)/).map((s) => s.trim()).filter(Boolean),
+                        perks: e.target.value
+                          .split(/,(?!\s?\d{2,3}(?!\d))/)
+                          .map((s) => s.trim().replace(/(\d),\s+(\d{2,3})(?!\d)/g, '$1,$2'))
+                          .filter(Boolean),
                       })
                     }
                   />
@@ -528,7 +531,7 @@ function CategoryNote({ locked, category }: { locked: boolean; category: string 
     <p className="mt-1 text-[11px] text-mute">
       {locked && "The category can't change once people have signed up. "}
       Rhoddo reviews each new event once and sets its commission, a share of each {w.booking}.
-      {w.registration && ' Sports events use registration wording: people register and get a pass.'}
+      {w.registration && ' Sports and workshop events use registration wording: people register and get a pass.'}
     </p>
   );
 }

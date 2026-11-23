@@ -234,7 +234,7 @@ export function CategoriesClient({ categories }: { categories: CategoryRow[] }) 
                 </div>
                 <div className="mt-0.5 truncate text-xs text-mute">
                   {c.subtitle} · {c.eventCount} event{c.eventCount === 1 ? '' : 's'}
-                  {c.protected && ' · Always free, needs review'}
+                  {c.protected && " · Can't be deleted"}
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -258,18 +258,18 @@ export function CategoriesClient({ categories }: { categories: CategoryRow[] }) 
                 >
                   Edit
                 </button>
+                <button
+                  type="button"
+                  className="btn-ghost"
+                  disabled={busy}
+                  onClick={() =>
+                    run(() => clientApi(`/admin/categories/${c.id}`, { method: 'PUT', body: { active: !c.active } }))
+                  }
+                >
+                  {c.active ? 'Hide' : 'Show'}
+                </button>
                 {!c.protected && (
                   <>
-                    <button
-                      type="button"
-                      className="btn-ghost"
-                      disabled={busy}
-                      onClick={() =>
-                        run(() => clientApi(`/admin/categories/${c.id}`, { method: 'PUT', body: { active: !c.active } }))
-                      }
-                    >
-                      {c.active ? 'Hide' : 'Show'}
-                    </button>
                     <button
                       type="button"
                       className="btn-danger"

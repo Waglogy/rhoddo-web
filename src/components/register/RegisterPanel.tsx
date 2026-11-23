@@ -18,7 +18,7 @@ import {
   type EventForm,
   type FormAnswers,
 } from './RegistrationFields';
-import { eventWords } from '@/lib/eventWords';
+import { eventWords, participantsWord } from '@/lib/eventWords';
 import { SupportNote } from '@/components/SupportNote';
 import { uploadPickedImages } from './formImages';
 
@@ -418,7 +418,7 @@ export function RegisterPanel({
     terms: 'Terms',
     tickets: 'Pass',
     account: 'Contact',
-    details: w.registration ? 'Runners' : 'Details',
+    details: participantsWord(event.category),
     pay: total > 0 ? 'Pay' : 'Confirm',
   };
 

@@ -5,7 +5,8 @@ import { useState } from 'react';
 // Hosts write "About" as plain text. This turns the usual shapes into a readable page:
 //   RACES / Registration:   -> a heading (a short line in capitals, or ending with ":")
 //   • 21 km: Tashi to ...   -> a bullet, with the part before ":" in bold
-//   anything else           -> a paragraph (lines next to each other stay together)
+//   lines next to each other -> a list, one item per line (hosts put one fact per line)
+//   a line on its own       -> a paragraph
 // Nothing the host wrote is dropped or reordered.
 
 type Block =
@@ -17,8 +18,11 @@ const BULLET = /^\s*(?:[•●▪◦*-]|\d+[.)])\s+/;
 
 function isHeading(line: string): boolean {
   const t = line.trim();
-  if (!t || t.length > 48 || BULLET.test(t)) return false;
-  const letters = t.replace(/[^A-Za-z]/g, '');
+  if (!t || t.length > 60 || BULLET.test(t)) return false;
+  // A note in brackets after a capitals heading is fine: "CATEGORIES (age on race day)".
+  const bare = t.replace(/\s*\([^)]*\)\s*$/, '');
+  if (bare.length > 48) return false;
+  const letters = bare.replace(/[^A-Za-z]/g, '');
   if (letters.length >= 3 && letters === letters.toUpperCase()) return true; // RACES
   const lead = t.match(/^([^:]{3,30}):\s/)?.[1]; // CASH PRIZES: ₹4,12,000 in total
   if (lead && t.length <= 60) {
@@ -32,7 +36,9 @@ export function parseAbout(text: string): Block[] {
   const blocks: Block[] = [];
   let para: string[] = [];
   const flush = () => {
-    if (para.length) blocks.push({ kind: 'para', text: para.join(' ') });
+    // One line is a paragraph; several lines in a row are a list of facts, one per line.
+    if (para.length === 1) blocks.push({ kind: 'para', text: para[0] });
+    else if (para.length > 1) blocks.push({ kind: 'list', items: para });
     para = [];
   };
   for (const raw of text.replace(/\r\n/g, '\n').split('\n')) {
@@ -73,8 +79,11 @@ function Item({ text }: { text: string }) {
   );
 }
 
-function sentenceCase(s: string) {
+function sentenceCase(s: string): string {
   // RACES -> Races; CASH PRIZES: ₹4,12,000 in total -> Cash prizes: ₹4,12,000 in total
+  // A note in brackets keeps its own case: "CATEGORIES (age on race day)" -> "Categories (age on race day)".
+  const paren = s.match(/^(.*?)(\s*\([^)]*\))$/);
+  if (paren) return sentenceCase(paren[1]) + paren[2];
   const m = s.match(/^([^:]+)(:.*)?$/)!;
   const head = m[1];
   const letters = head.replace(/[^A-Za-z]/g, '');

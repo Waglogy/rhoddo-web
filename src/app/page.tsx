@@ -9,7 +9,7 @@ import { AppShowcase, HeroEvent, loadOpenEvents } from '@/components/FeaturedEve
 export const metadata: Metadata = {
   title: 'Rhoddo — Races & events across Sikkim',
   description:
-    'Register for marathons, trail runs, cycle races and tournaments across Sikkim, plus concerts, festivals and more. One tap, one pass, no fuss.',
+    'Register for marathons, trail runs, cycle races, tournaments and hands-on workshops across Sikkim. One tap, one pass, no fuss.',
 };
 
 const PLAY_STORE_URL =
@@ -87,9 +87,9 @@ export default async function Landing() {
               Sikkim.
             </h1>
             <p className="mt-5 text-sm leading-relaxed text-mute sm:mt-6 sm:text-base md:text-lg">
-              Marathons, trail runs, cycle races and tournaments across Sikkim.
-              Register, fill in your runner details and get your pass in one tap.
-              Concerts, festivals and more are here too, for after the finish line.
+              Marathons, trail runs, cycle races and tournaments across Sikkim,
+              plus hands-on workshops. Register, fill in your details and get your
+              pass in one tap.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:justify-center md:justify-start">
@@ -166,7 +166,7 @@ export default async function Landing() {
               {
                 eyebrow: 'Discover',
                 title: 'Races near you, by district',
-                body: 'Find marathons, 10Ks, trail runs, cycle climbs and tournaments by district and date. Concerts, festivals and dinners are a tap away too.',
+                body: 'Find marathons, 10Ks, trail runs, cycle climbs, tournaments and workshops by district and date.',
               },
               {
                 eyebrow: 'One pass',
@@ -176,7 +176,7 @@ export default async function Landing() {
               {
                 eyebrow: 'Hosted by',
                 title: 'Race organisers, clubs and venues',
-                body: 'Verified organisers only: running and cycling clubs, sports associations, schools, resorts and the small places worth knowing.',
+                body: 'Verified organisers only: running and cycling clubs, sports associations, schools and workshop hosts.',
               },
             ].map((f) => (
               <div key={f.title} className="card p-6">
@@ -222,12 +222,12 @@ export default async function Landing() {
             <div>
               <div className="label">For hosts</div>
               <h2 className="mt-2 max-w-2xl font-display text-3xl text-ink md:text-4xl">
-                Organising a marathon, a race or a tournament? List with Rhoddo.
+                Organising a race, a tournament or a workshop? List with Rhoddo.
               </h2>
               <p className="mt-3 max-w-xl text-sm text-mute">
-                Take registrations, collect runner details, and scan passes on race
-                day, all from the Rhoddo host portal. Payments go straight to you and
-                runners pay no fees. Venues and event organisers are welcome too.
+                Take registrations, collect participant details with your own form, and
+                scan passes on the day, all from the Rhoddo host portal. Payments go
+                straight to you and participants pay no fees.
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center md:flex-col md:items-stretch lg:flex-row lg:items-center">
@@ -258,13 +258,13 @@ export default async function Landing() {
         <div className="relative mx-auto max-w-4xl px-6 py-28 text-center">
           <div className="label justify-center">Download the app</div>
           <h2 className="mt-3 font-display text-5xl leading-tight text-ink md:text-6xl">
-            Sikkim&apos;s races and events,
+            Sikkim&apos;s races and workshops,
             <br />
             in your pocket.
           </h2>
           <p className="mx-auto mt-5 max-w-xl text-base text-mute">
             Free to download. Always free to browse. Pay only when you register for a
-            race or book a pass.
+            race or a workshop.
           </p>
 
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">

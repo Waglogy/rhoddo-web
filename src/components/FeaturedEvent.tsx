@@ -149,7 +149,7 @@ export function AppShowcase() {
             {[
               ['Your pass on your phone', 'QR passes for every runner, ready for race-day check-in.'],
               ['Race updates', 'Reminders and announcements from the organiser.'],
-              ['Every event in Sikkim', 'Races, festivals and the Sikkim festival calendar, by district and date.'],
+              ['Races and workshops across Sikkim', 'Find what’s on by district and date.'],
             ].map(([t, d]) => (
               <li key={t} className="flex gap-3">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-pine/15 text-[11px] text-pine" aria-hidden>
