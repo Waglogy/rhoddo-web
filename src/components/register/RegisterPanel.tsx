@@ -13,7 +13,7 @@ import {
   RegistrationFields,
   answerSetsNeeded,
   applicableAnswers,
-  firstFormError,
+  formProblems,
   resizeAnswers,
   type EventForm,
   type FormAnswers,
@@ -95,7 +95,15 @@ export function RegisterPanel({
 
   const [step, setStep] = useState<Step>(steps[0]);
   const [acceptedEventTerms, setAcceptedEventTerms] = useState(false);
-  const [tierId, setTierId] = useState(() => (event.tiers.find((t) => t.left > 0) ?? event.tiers[0])?.id);
+  // Set after a failed "Continue", so each step can mark what's missing.
+  const [termsError, setTermsError] = useState(false);
+  const [showFormErrors, setShowFormErrors] = useState(false);
+  const [contactErrors, setContactErrors] = useState<{ name?: string; phone?: string; agree?: string }>({});
+  // Nothing is picked until the person chooses a pass, here or on the event page.
+  const [tierId, setTierId] = useState<string | undefined>(
+    () => event.tiers.find((t) => t.id === preferredTierId && t.left > 0)?.id,
+  );
+  const [passError, setPassError] = useState(false);
   const [qty, setQty] = useState(1);
   const [answers, setAnswers] = useState<FormAnswers[]>([]);
   const [user, setUser] = useState<Buyer | null>(initialUser);
@@ -131,7 +139,9 @@ export function RegisterPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preferredTierId]);
 
-  const tier = event.tiers.find((t) => t.id === tierId) ?? event.tiers[0];
+  const chosenTier = event.tiers.find((t) => t.id === tierId);
+  // Prices below use the chosen pass; the fallback only keeps the maths simple before one is chosen.
+  const tier = chosenTier ?? event.tiers[0];
   if (!tier) {
     return <p className="text-sm text-mute">Registration isn&apos;t open for this event yet.</p>;
   }
@@ -154,6 +164,12 @@ export function RegisterPanel({
   const formAnswers = form ? resizeAnswers(answers, answerSetsNeeded(form, qty)) : undefined;
 
   function continueFromTickets() {
+    if (!chosenTier) {
+      setPassError(true);
+      setError('Please choose a pass to continue.');
+      scrollToProblem('pass-choice');
+      return;
+    }
     if (tier.left <= 0) return setError(w.registration ? 'This pass is full. Choose another one.' : 'This pass is sold out. Choose another one.');
     // A changed pass or quantity changes the price, so any promo is checked again.
     setPreview(null);
@@ -163,14 +179,37 @@ export function RegisterPanel({
 
   const ageRules = { eventDate: event.date, minAge: tier.minAge, passName: tier.name };
 
+  /** Brings a field with a problem into view, after the warning has rendered. */
+  function scrollToProblem(id: string) {
+    requestAnimationFrame(() => {
+      const el = document.getElementById(id);
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el?.querySelector<HTMLElement>('input, textarea, button')?.focus({ preventScroll: true });
+    });
+  }
+
   function continueFromTerms() {
-    if (!acceptedEventTerms) return setError('Please read and accept the terms and conditions to continue');
+    if (!acceptedEventTerms) {
+      setTermsError(true);
+      setError('Please tick the box to accept the terms and conditions before continuing.');
+      scrollToProblem('event-terms-accept');
+      return;
+    }
     go('tickets');
   }
 
   function continueFromDetails() {
-    const problem = form && formAnswers ? firstFormError(form, formAnswers, ageRules) : null;
-    if (problem) return setError(problem);
+    const problems = form && formAnswers ? formProblems(form, formAnswers, ageRules) : [];
+    if (problems.length) {
+      setShowFormErrors(true);
+      setError(
+        problems.length === 1
+          ? problems[0].full
+          : `Please fix the ${problems.length} highlighted fields. First: ${problems[0].full}`,
+      );
+      scrollToProblem(problems[0].key);
+      return;
+    }
     go('pay');
   }
 
@@ -216,9 +255,18 @@ export function RegisterPanel({
 
   async function continueFromAccount() {
     if (!user) return;
-    if (needsName && !name.trim()) return setError('Enter your name');
-    if (!mobileDigits(phone)) return setError('Enter a valid 10-digit mobile number');
-    if (needsTerms && !agreed) return setError('Please accept the Terms of Use and Privacy Policy');
+    const problems = {
+      ...(needsName && !name.trim() && { name: 'Enter your name' }),
+      ...(!mobileDigits(phone) && { phone: phone.trim() ? 'Enter a valid 10-digit mobile number' : 'Enter your mobile number' }),
+      ...(needsTerms && !agreed && { agree: 'Please tick this box to continue' }),
+    };
+    setContactErrors(problems);
+    const first = (['name', 'phone', 'agree'] as const).find((k) => problems[k]);
+    if (first) {
+      setError(first === 'agree' ? 'Please accept the Terms of Use and Privacy Policy' : problems[first]!);
+      scrollToProblem(`contact-${first}`);
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -440,11 +488,17 @@ export function RegisterPanel({
                 upload it with their details.
               </p>
             )}
-            <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-line p-4 text-sm text-ink">
+            <div id="event-terms-accept" className="scroll-mt-6">
+            <label
+              className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 text-sm text-ink transition ${
+                termsError && !acceptedEventTerms ? 'border-primary bg-primary/5 ring-2 ring-primary/30' : 'border-line'
+              }`}
+            >
               <input
                 type="checkbox"
                 className="mt-0.5 h-4 w-4 accent-[rgb(var(--primary))]"
                 checked={acceptedEventTerms}
+                aria-invalid={termsError && !acceptedEventTerms ? true : undefined}
                 onChange={(e) => {
                   setAcceptedEventTerms(e.target.checked);
                   setError(null);
@@ -455,6 +509,12 @@ export function RegisterPanel({
                 {form?.perTicket ? ', for myself and everyone I register' : ''}.
               </span>
             </label>
+            {termsError && !acceptedEventTerms && (
+              <p role="alert" className="mt-2 flex items-center gap-1.5 text-xs font-medium text-primary">
+                <span aria-hidden>⚠</span> Please tick this box to accept the terms and conditions.
+              </p>
+            )}
+            </div>
           </div>
         )}
 
@@ -462,9 +522,20 @@ export function RegisterPanel({
           <>
             <div>
               <h2 className="font-display text-2xl text-ink">Choose your pass</h2>
-              <div className="mt-4 space-y-2" role="radiogroup" aria-label="Pass">
+              {passError && !chosenTier && (
+                <p role="alert" className="mt-2 flex items-center gap-1.5 text-xs font-medium text-primary">
+                  <span aria-hidden>⚠</span> Please choose a pass to continue.
+                </p>
+              )}
+              <div
+                id="pass-choice"
+                className={`mt-4 scroll-mt-6 space-y-2 ${passError && !chosenTier ? 'rounded-2xl ring-2 ring-primary/40 ring-offset-4 ring-offset-panel' : ''}`}
+                role="radiogroup"
+                aria-label="Pass"
+                aria-invalid={passError && !chosenTier ? true : undefined}
+              >
                 {event.tiers.map((t) => {
-                  const selected = t.id === tier.id;
+                  const selected = t.id === chosenTier?.id;
                   const out = t.left <= 0;
                   return (
                     <button
@@ -475,6 +546,8 @@ export function RegisterPanel({
                       disabled={out}
                       onClick={() => {
                         setTierId(t.id);
+                        setPassError(false);
+                        setError(null);
                         setQty((q) => Math.max(1, Math.min(q, MAX_PER_REGISTRATION, t.left)));
                       }}
                       className={`flex w-full items-center gap-3 rounded-2xl border p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-50 ${
@@ -544,6 +617,7 @@ export function RegisterPanel({
               setError(null);
             }}
             disabled={busy}
+            showErrors={showFormErrors}
             rules={ageRules}
             consentFormUrl={event.consentFormUrl}
           />
@@ -613,25 +687,38 @@ export function RegisterPanel({
                   </button>
                 </div>
                 {needsName && (
-                  <div>
+                  <div id="contact-name" className="scroll-mt-6">
                     <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-ink">
                       Your name
                     </label>
                     <input
                       id="name"
-                      className="input"
+                      className={`input ${contactErrors.name ? 'border-primary' : ''}`}
                       autoComplete="name"
                       maxLength={80}
                       value={name}
-                      onChange={(e) => setName(e.target.value)}
+                      aria-invalid={contactErrors.name ? true : undefined}
+                      onChange={(e) => {
+                        setName(e.target.value);
+                        setContactErrors((c) => ({ ...c, name: undefined }));
+                      }}
                     />
+                    {contactErrors.name && (
+                    <p role="alert" className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-primary">
+                      <span aria-hidden>⚠</span> {contactErrors.name}
+                    </p>
+                  )}
                   </div>
                 )}
-                <div>
+                <div id="contact-phone" className="scroll-mt-6">
                   <label htmlFor="phone" className="mb-1.5 block text-sm font-medium text-ink">
                     Mobile number
                   </label>
-                  <div className="flex items-stretch overflow-hidden rounded-xl border border-line bg-bg focus-within:border-primary">
+                  <div
+                    className={`flex items-stretch overflow-hidden rounded-xl border bg-bg focus-within:border-primary ${
+                      contactErrors.phone ? 'border-primary ring-2 ring-primary/20' : 'border-line'
+                    }`}
+                  >
                     <span className="flex items-center border-r border-line px-3 text-ink">+91</span>
                     <input
                       id="phone"
@@ -641,18 +728,35 @@ export function RegisterPanel({
                       autoComplete="tel-national"
                       placeholder="98765 43210"
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value.replace(/[^\d\s+]/g, '').slice(0, 14))}
+                      aria-invalid={contactErrors.phone ? true : undefined}
+                      onChange={(e) => {
+                        setPhone(e.target.value.replace(/[^\d\s+]/g, '').slice(0, 14));
+                        setContactErrors((c) => ({ ...c, phone: undefined }));
+                      }}
                     />
                   </div>
+                  {contactErrors.phone && (
+                    <p role="alert" className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-primary">
+                      <span aria-hidden>⚠</span> {contactErrors.phone}
+                    </p>
+                  )}
                   <p className="mt-1 text-xs text-mute">So the organiser can reach you about the event.</p>
                 </div>
                 {needsTerms && (
-                  <label className="flex cursor-pointer items-start gap-3 text-sm text-ink">
+                  <div id="contact-agree" className="scroll-mt-6">
+                  <label
+                    className={`flex cursor-pointer items-start gap-3 text-sm text-ink ${
+                      contactErrors.agree ? 'rounded-xl border border-primary bg-primary/5 p-3' : ''
+                    }`}
+                  >
                     <input
                       type="checkbox"
                       className="mt-0.5 h-4 w-4 accent-[rgb(var(--primary))]"
                       checked={agreed}
-                      onChange={(e) => setAgreed(e.target.checked)}
+                      onChange={(e) => {
+                        setAgreed(e.target.checked);
+                        setContactErrors((c) => ({ ...c, agree: undefined }));
+                      }}
                     />
                     <span>
                       I agree to Rhoddo&apos;s{' '}
@@ -666,6 +770,12 @@ export function RegisterPanel({
                       .
                     </span>
                   </label>
+                  {contactErrors.agree && (
+                    <p role="alert" className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-primary">
+                      <span aria-hidden>⚠</span> {contactErrors.agree}
+                    </p>
+                  )}
+                  </div>
                 )}
               </>
             )}
@@ -746,13 +856,16 @@ export function RegisterPanel({
               ←
             </button>
           )}
-          <div className="min-w-0 shrink-0">
-            <div className="text-[11px] uppercase tracking-wider text-mute">
-              {qty} × {tier.name.length > 14 ? 'pass' : tier.name}
+          {/* The price shows once a pass is chosen, and not over the terms. */}
+          {chosenTier && step !== 'terms' && (
+            <div className="min-w-0 shrink-0">
+              <div className="text-[11px] uppercase tracking-wider text-mute">
+                {qty} × {tier.name.length > 14 ? 'pass' : tier.name}
+              </div>
+              <div className="font-display text-xl leading-tight text-ink">{total > 0 ? formatINR(total) : 'Free'}</div>
             </div>
-            <div className="font-display text-xl leading-tight text-ink">{total > 0 ? formatINR(total) : 'Free'}</div>
-          </div>
-        <button type="submit" className="btn-primary flex-1 py-3.5 text-base" disabled={busy || soldOut || (step === 'terms' && !acceptedEventTerms)}>
+          )}
+        <button type="submit" className="btn-primary flex-1 py-3.5 text-base" disabled={busy || soldOut}>
           {soldOut
             ? fullText
             : busy

@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 import { AppHomeMock } from '@/components/AppHomeMock';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { AccountLink } from '@/components/account/AccountLink';
-import { FeaturedEvent } from '@/components/FeaturedEvent';
+import { AppShowcase, HeroEvent, loadOpenEvents } from '@/components/FeaturedEvent';
 
 export const metadata: Metadata = {
   title: 'Rhoddo — Races & events across Sikkim',
@@ -15,7 +15,9 @@ export const metadata: Metadata = {
 const PLAY_STORE_URL =
   'https://play.google.com/store/apps/details?id=com.rhoddo.app&pcampaignid=web_share';
 
-export default function Landing() {
+export default async function Landing() {
+  // The newest event open for registration fills the hero; the app preview moves below it.
+  const [event, ...moreEvents] = await loadOpenEvents();
   return (
     <div className="theme-site min-h-screen bg-bg text-ink">
       {/* NAV */}
@@ -33,11 +35,11 @@ export default function Landing() {
             </Link>
           </nav>
           <div className="flex items-center gap-2 sm:gap-3">
-            <AccountLink />
+            <AccountLink compact />
             <ThemeToggle />
             <Link
               href="/host/login"
-              className="rounded-xl px-3 py-2 text-sm text-mute transition hover:text-ink md:hidden"
+              className="hidden rounded-xl px-3 py-2 text-sm text-mute transition hover:text-ink sm:inline-block md:hidden"
             >
               Hosts
             </Link>
@@ -51,7 +53,7 @@ export default function Landing() {
               href={PLAY_STORE_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-xl border border-line px-4 py-2 text-sm text-ink transition hover:border-gold hover:text-gold"
+              className="whitespace-nowrap rounded-xl border border-line px-3 py-2 text-sm text-ink transition hover:border-gold hover:text-gold sm:px-4"
             >
               Get the app
             </a>
@@ -74,7 +76,7 @@ export default function Landing() {
         </div>
 
         {/* On larger screens the hero fills the first screen below the nav, phone included. */}
-        <div className="relative mx-auto max-w-6xl px-5 pb-16 pt-10 sm:px-6 sm:pb-24 sm:pt-16 md:grid md:min-h-[min(calc(100svh-96px),820px)] md:grid-cols-[1.1fr_0.9fr] md:items-center md:gap-12 md:py-8">
+        <div className="relative mx-auto flex max-w-6xl flex-col px-5 pb-16 pt-6 sm:px-6 sm:pb-24 sm:pt-10 md:grid md:min-h-[min(calc(100svh-96px),820px)] md:grid-cols-[1.1fr_0.9fr] md:items-center md:gap-12 md:py-8">
           <div className="relative z-10 flex min-w-0 flex-col justify-center text-center md:text-left">
             <div className="label flex justify-center md:justify-start">Made in Sikkim</div>
             <h1 className="mt-3 font-display text-[2.25rem] leading-[1.08] text-ink sm:text-5xl md:text-6xl lg:text-7xl [@media(min-width:768px)_and_(max-height:820px)]:text-6xl">
@@ -122,7 +124,17 @@ export default function Landing() {
             </div>
           </div>
 
-          {/* Phone mock, set into the landscape — hidden on mobile, shown on md+ */}
+          {event ? (
+            // The open event: first thing on phones, beside the headline on larger screens.
+            <div className="relative order-first mb-10 flex justify-center md:order-none md:mb-0">
+              <div className="pointer-events-none absolute left-1/2 top-1/2 hidden h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(circle,rgba(232,184,74,0.18)_0%,transparent_65%)] md:block" />
+              <div className="pointer-events-none absolute -bottom-24 left-1/2 hidden h-[760px] w-[1400px] -translate-x-1/2 bg-[image:var(--art-peaks)] bg-contain bg-bottom bg-no-repeat opacity-90 md:block [mask-image:linear-gradient(to_right,transparent_24%,black_36%)]" />
+              <div className="relative z-10 flex w-full justify-center [@media(min-width:768px)_and_(max-height:760px)]:[zoom:0.88]">
+                <HeroEvent event={event} more={moreEvents} />
+              </div>
+            </div>
+          ) : (
+          /* Phone mock, set into the landscape — hidden on mobile, shown on md+ */
           <div className="hidden items-center justify-center md:relative md:flex">
             {/* Sunrise behind the peaks */}
             <div className="pointer-events-none absolute left-1/2 top-1/2 h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(circle,rgba(232,184,74,0.18)_0%,transparent_65%)]" />
@@ -133,12 +145,13 @@ export default function Landing() {
               <AppHomeMock />
             </div>
           </div>
+          )}
         </div>
 
       </section>
 
-      {/* The next upcoming event, when there is one */}
-      <FeaturedEvent />
+      {/* The app and its preview phone, when the hero holds an event */}
+      {event && <AppShowcase />}
 
       {/* FEATURES */}
       <section id="features" className="border-t border-line bg-panel/40">
