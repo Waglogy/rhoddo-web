@@ -107,32 +107,49 @@ function isEmpty(v: AnswerValue | undefined): boolean {
   return v === undefined || v === false || (typeof v === 'string' && !v.trim()) || (Array.isArray(v) && !v.length);
 }
 
-/** The first problem with the answers, worded for the buyer, or null when they're ready. */
-export function firstFormError(form: EventForm, answers: FormAnswers[], rules: AgeRules = {}): string | null {
+/** One problem with an answer: which field (for highlighting it) and what to say. */
+export type FormProblem = { key: string; message: string; full: string };
+
+/** The page id of a person's field, for scrolling to it. */
+export const fieldDomId = (index: number, fieldId: string) => `reg-field-${index}-${fieldId}`;
+
+/** What's wrong with one answer, worded for the person filling it in, or null. */
+function answerProblem(f: FormField, v: AnswerValue | undefined): string | null {
+  if (isEmpty(v)) {
+    if (!f.required) return null;
+    if (f.type === 'checkbox') return 'Please tick this box to continue';
+    if (f.type === 'image' || f.type === 'file') return 'Please upload this';
+    if (f.type === 'select' || f.type === 'multi_select') return 'Please choose an option';
+    return 'This is required';
+  }
+  const s = typeof v === 'string' ? v.trim() : '';
+  if (f.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s)) return 'Enter a valid email address';
+  if (f.type === 'phone' && !/^\+?\d{10,15}$/.test(s.replace(/[\s()-]/g, ''))) return 'Enter a valid phone number (10 digits)';
+  if (f.type === 'number' && !Number.isFinite(Number(s))) return 'Enter a number';
+  if (f.type === 'date' && (!/^\d{4}-\d{2}-\d{2}$/.test(s) || Number.isNaN(Date.parse(s)))) return 'Enter a date';
+  return null;
+}
+
+/** Every problem with the answers, in the order they appear on the page. */
+export function formProblems(form: EventForm, answers: FormAnswers[], rules: AgeRules = {}): FormProblem[] {
+  const out: FormProblem[] = [];
   for (let i = 0; i < answers.length; i++) {
     const who = answers.length > 1 ? `Person ${i + 1}: ` : '';
     const age = personAge(form, answers[i], rules.eventDate);
     const tooYoung = ageProblem(age, rules);
-    if (tooYoung) return `${who}${tooYoung}`;
     for (const f of form.fields) {
       if (!fieldApplies(f, age)) continue;
-      const v = answers[i][f.id];
-      if (isEmpty(v)) {
-        if (f.required) return `${who}${f.type === 'checkbox' ? 'please tick' : 'fill in'} "${f.label}"`;
-        continue;
-      }
-      const s = typeof v === 'string' ? v.trim() : '';
-      if (f.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s)) return `${who}"${f.label}" isn't a valid email`;
-      if (f.type === 'phone' && !/^\+?\d{10,15}$/.test(s.replace(/[\s()-]/g, ''))) {
-        return `${who}"${f.label}" isn't a valid phone number`;
-      }
-      if (f.type === 'number' && !Number.isFinite(Number(s))) return `${who}"${f.label}" should be a number`;
-      if (f.type === 'date' && (!/^\d{4}-\d{2}-\d{2}$/.test(s) || Number.isNaN(Date.parse(s)))) {
-        return `${who}enter a date for "${f.label}"`;
-      }
+      let message = answerProblem(f, answers[i][f.id]);
+      if (!message && f.dob && tooYoung) message = tooYoung.charAt(0).toUpperCase() + tooYoung.slice(1);
+      if (message) out.push({ key: fieldDomId(i, f.id), message, full: `${who}${f.label}: ${message.charAt(0).toLowerCase()}${message.slice(1)}` });
     }
   }
-  return null;
+  return out;
+}
+
+/** The first problem with the answers, worded for the buyer, or null when they're ready. */
+export function firstFormError(form: EventForm, answers: FormAnswers[], rules: AgeRules = {}): string | null {
+  return formProblems(form, answers, rules)[0]?.full ?? null;
 }
 
 export function RegistrationFields({
@@ -142,6 +159,7 @@ export function RegistrationFields({
   disabled,
   rules = {},
   consentFormUrl,
+  showErrors = false,
 }: {
   form: EventForm;
   answers: FormAnswers[];
@@ -151,6 +169,8 @@ export function RegistrationFields({
   rules?: AgeRules;
   /** The host's printable consent form, offered to under-18s. */
   consentFormUrl?: string | null;
+  /** After a failed "Continue": show what's missing or wrong under each field. */
+  showErrors?: boolean;
 }) {
   const setAnswer = (index: number, fieldId: string, value: AnswerValue) => {
     onChange(answers.map((a, i) => (i === index ? { ...a, [fieldId]: value } : a)));
@@ -158,6 +178,7 @@ export function RegistrationFields({
   // Questions the host marked "usually the same for the whole group".
   const copyable = form.fields.filter((f) => f.copyable && !isUpload(f.type));
   const hasAgeQuestions = form.fields.some((f) => f.showIf);
+  const errors = new Map(showErrors ? formProblems(form, answers, rules).map((p) => [p.key, p.message]) : []);
   const copyFromFirst = (index: number) => {
     const first = answers[0] ?? {};
     const copied: FormAnswers = {};
@@ -198,6 +219,7 @@ export function RegistrationFields({
             rules={rules}
             consentFormUrl={consentFormUrl}
             hasAgeQuestions={hasAgeQuestions}
+            errors={errors}
             onAnswer={(fieldId, v) => setAnswer(i, fieldId, v)}
           />
         </fieldset>
@@ -214,6 +236,7 @@ function PersonFields({
   rules,
   consentFormUrl,
   hasAgeQuestions,
+  errors,
   onAnswer,
 }: {
   form: EventForm;
@@ -222,6 +245,7 @@ function PersonFields({
   rules: AgeRules;
   consentFormUrl?: string | null;
   hasAgeQuestions: boolean;
+  errors: Map<string, string>;
   onAnswer: (fieldId: string, value: AnswerValue) => void;
 }) {
   const age = personAge(form, set, rules.eventDate);
@@ -233,7 +257,7 @@ function PersonFields({
       {form.fields.map((f) => {
         if (!fieldApplies(f, age)) return null;
         return (
-          <div key={f.id} className="space-y-3">
+          <div key={f.id} id={fieldDomId(index, f.id)} className="scroll-mt-6 space-y-3">
             {minor && f === firstMinorField && (
               <div className="rounded-xl border border-gold/40 bg-gold/10 p-4 text-sm text-ink">
                 <div className="font-medium">This runner is under 18 ({age} on the event day)</div>
@@ -254,7 +278,22 @@ function PersonFields({
                 )}
               </div>
             )}
-            <FieldInput id={`${index}-${f.id}`} field={f} value={set[f.id]} onChange={(v) => onAnswer(f.id, v)} />
+            {(() => {
+              const error = errors.get(fieldDomId(index, f.id));
+              return (
+                <div
+                  className={error ? 'rounded-xl border border-primary/60 bg-primary/5 p-3 [&_.input]:border-primary' : ''}
+                  aria-invalid={error ? true : undefined}
+                >
+                  <FieldInput id={`${index}-${f.id}`} field={f} value={set[f.id]} onChange={(v) => onAnswer(f.id, v)} />
+                  {error && !(f.dob && problem) && (
+                    <p role="alert" className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-primary">
+                      <span aria-hidden>⚠</span> {error}
+                    </p>
+                  )}
+                </div>
+              );
+            })()}
             {f.dob && problem && (
               <p role="alert" className="-mt-1 text-xs text-primary">
                 {problem.charAt(0).toUpperCase() + problem.slice(1)}. Go back and choose another pass.
