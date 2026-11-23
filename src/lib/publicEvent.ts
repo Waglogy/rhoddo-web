@@ -31,6 +31,10 @@ export type PublicEvent = {
   /** A form to download, sign and upload (e.g. parent consent for under-18s). */
   consentFormUrl?: string | null;
   registrationClosesAt?: string | null;
+  /** When the event was added to Rhoddo. */
+  createdAt?: string | null;
+  /** Set by admins: higher shows first. */
+  showFirstRank?: number | null;
 };
 
 /** True once the host's closing time for new registrations has passed. */
