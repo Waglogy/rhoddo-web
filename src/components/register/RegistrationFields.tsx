@@ -260,7 +260,7 @@ function PersonFields({
           <div key={f.id} id={fieldDomId(index, f.id)} className="scroll-mt-6 space-y-3">
             {minor && f === firstMinorField && (
               <div className="rounded-xl border border-gold/40 bg-gold/10 p-4 text-sm text-ink">
-                <div className="font-medium">This runner is under 18 ({age} on the event day)</div>
+                <div className="font-medium">This person is under 18 ({age} on the event day)</div>
                 <p className="mt-1 text-mute">
                   A parent or guardian must give consent.
                   {consentFormUrl ? ' Download the consent form, have it signed, then upload a photo or PDF of it below.' : ''}

@@ -154,7 +154,7 @@ async function EventBody({ event, isAndroid }: { event: Extract<EventLookup, { e
           {event.tiers.length > 0 && (
             <section aria-labelledby="passes-title" className="space-y-3">
               <h2 id="passes-title" className="font-display text-2xl text-ink">
-                {w.registration ? 'Race passes' : 'Tickets'}
+                {event.category === 'sports' ? 'Race passes' : w.registration ? 'Passes' : 'Tickets'}
               </h2>
               <ul className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-panel">
                 {event.tiers.map((t) => {

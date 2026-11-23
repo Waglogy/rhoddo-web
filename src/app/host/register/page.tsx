@@ -55,8 +55,8 @@ export default function HostRegisterPage() {
             <span className="text-gold">Keep more of every ticket.</span>
           </h1>
           <p className="mt-5 text-sm text-mute md:text-base">
-            Marathons, trail runs, cycle races and tournaments, plus workshops,
-            festivals and dinners. Take registrations, collect runner details with
+            Marathons, trail runs, cycle races and tournaments, plus hands-on
+            workshops. Take registrations, collect runner details with
             your own form, and scan passes at the start line, without the buyer fees
             that put people off signing up.
           </p>

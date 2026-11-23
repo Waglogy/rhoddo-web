@@ -1,8 +1,12 @@
-// Sports events (runs, races) are registrations, not bookings: people register and get a pass.
+// Sports events (runs, races) and workshops are registrations, not bookings: people register and get a pass.
 // Every other event keeps booking/ticket wording. Keep in step with the copies in rhoddo-api
 // (src/lib/eventWords.ts) and rhoddo-app- (src/lib/eventWords.ts).
 
-export const REGISTRATION_CATEGORIES = ['sports'];
+export const REGISTRATION_CATEGORIES = ['sports', 'workshop'];
+
+/** Who signs up, for headings: runners at a race, participants at a workshop. */
+export const participantsWord = (category: string | null | undefined) =>
+  category === 'sports' ? 'Runners' : category === 'workshop' ? 'Participants' : 'Details';
 
 export function isRegistrationEvent(category: string | null | undefined): boolean {
   return !!category && REGISTRATION_CATEGORIES.includes(category);

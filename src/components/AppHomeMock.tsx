@@ -10,31 +10,18 @@ const PROMOS = ['/landing/promo-1.jpg', '/landing/promo-2.jpg', '/landing/promo-
 const MOODS = [
   { label: 'Sports', sub: 'runs & races', image: '/landing/mood-sports.jpg', tint: '#8CA8D1', icon: 'bike' },
   { label: 'Workshops', sub: 'hands-on', image: '/landing/mood-workshops.jpg', tint: '#4A9C7F', icon: 'wrench' },
-  { label: 'Food & Dining', sub: 'chef tables', image: '/landing/mood-foodanddining.jpg', tint: '#E8B84A', icon: 'food' },
-  { label: 'Cultural', sub: 'heritage & rituals', image: '/landing/mood-cultural.jpg', tint: '#5B7FB9', icon: 'palette' },
-  { label: 'Festivals', sub: 'seasonal', image: '/landing/mood-festivals.jpg', tint: '#E8576A', icon: 'sparkles' },
-  { label: 'Adventure', sub: 'trek & ride', image: '/landing/mood-adventure.jpg', tint: '#2E6E5B', icon: 'signpost' },
-  { label: 'Stays & Retreats', sub: 'weekend stays', image: '/landing/mood-stays.jpg', tint: '#B88A1F', icon: 'bed' },
 ] as const;
 
-// Illustrative listings, taken from the app's sample data (src/data/mock.ts).
+// Illustrative listings. Rhoddo launches with sports and workshops only.
 const THIS_WEEK = [
   { title: 'Thangka Painting Workshop', when: 'Thursday', district: 'Gangtok', price: '₹1,500', image: '/landing/mood-workshops.jpg' },
-  { title: 'Phagshapa Chef Table', when: 'Saturday', district: 'Gangtok', price: '₹2,200', image: '/landing/mood-foodanddining.jpg' },
-  { title: 'Goecha La Ridge Trek', when: 'Sunday', district: 'Yuksom', price: '₹18,000', image: '/landing/mood-adventure.jpg' },
+  { title: 'Trail Running Clinic', when: 'Saturday', district: 'Gangtok', price: '₹600', image: '/landing/mood-sports.jpg' },
+  { title: 'Bamboo Craft Workshop', when: 'Sunday', district: 'Namchi', price: '₹900', image: '/landing/mood-workshops.jpg' },
 ];
 
 const RACE_ROWS = [
   { title: 'Gangtok Hill Half Marathon', when: 'SUNDAY', district: 'Gangtok', price: '₹799', image: '/landing/mood-sports.jpg' },
   { title: 'Ravangla Trail 10K', when: 'NEXT WEEK', district: 'Ravangla', price: '₹499', image: '/landing/mood-adventure.jpg' },
-];
-
-// November 2026 starts on a Sunday and has 30 days, so no leading blanks.
-const NOVEMBER_DAYS = Array.from({ length: 30 }, (_, i) => i + 1);
-const NOVEMBER_FESTIVALS = [
-  { day: 1, name: 'Lhabab Duechen' },
-  { day: 9, name: 'Laxmi Puja (Deepawali)' },
-  { day: 30, name: 'Sakewa (Udhauli)' },
 ];
 
 const ICONS: Record<string, ReactNode> = {
@@ -232,60 +219,6 @@ function Moods() {
   );
 }
 
-function FestivalCard() {
-  const festivalDays = new Set(NOVEMBER_FESTIVALS.map((f) => f.day));
-  return (
-    <div className="mx-[19px] mt-[13px] overflow-hidden rounded-[14px] border-[1.5px] border-primary bg-panel">
-      <div className="flex items-start justify-between bg-gradient-to-b from-gold/10 to-transparent px-[10px] pb-[6px] pt-[10px]">
-        <div>
-          <div className="text-[8px] font-medium tracking-[0.2em] text-ink/50">2026</div>
-          <div className="font-display text-[20px] font-bold leading-[24px] text-ink">November</div>
-          <div className="mt-[6px] h-[2.5px] w-[22px] rounded-full bg-primary" />
-        </div>
-        <div className="flex items-center gap-[3px] rounded-full bg-gold/10 px-[8px] py-[3px] text-[8px] font-medium text-gold">
-          <Icon name="star" size={9} />
-          3 festivals
-        </div>
-      </div>
-
-      <div className="grid grid-cols-7 px-[9px] pb-[8px] pt-[4px] text-center">
-        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
-          <div key={i} className="flex h-[20px] items-center justify-center text-[8px] font-medium text-ink/50">
-            {d}
-          </div>
-        ))}
-        {NOVEMBER_DAYS.map((d) => (
-          <div key={d} className="flex h-[20px] items-center justify-center">
-            <span
-              className={`flex h-[17px] w-[17px] items-center justify-center rounded-full text-[9.5px] font-medium ${
-                festivalDays.has(d) ? 'bg-primary/15 text-primary' : 'text-ink'
-              }`}
-            >
-              {d}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      <div className="space-y-[6px] px-[10px] pb-[10px]">
-        {NOVEMBER_FESTIVALS.map((f) => (
-          <div key={f.day} className="flex items-center gap-[9px]">
-            <span className="flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-[6px] bg-primary/10 text-primary">
-              <Icon name="star" size={10} />
-            </span>
-            <div className="min-w-0">
-              <div className="truncate text-[10.5px] leading-[14px] text-ink">{f.name}</div>
-              <div className="text-[8.5px] font-medium tracking-[0.04em] text-ink/50">
-                {String(f.day).padStart(2, '0')} Nov
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function WeekCards() {
   return (
     <div className="no-scrollbar mt-[13px] flex gap-[9px] overflow-x-auto px-[19px]">
@@ -391,7 +324,7 @@ export function AppHomeMock() {
             {/* Scrolls by itself. Hover to scroll with wheel, trackpad or arrow keys; the page takes over at either end. */}
             <AutoScrollArea
               role="region"
-              aria-label="Scrollable preview of the Rhoddo Android app home screen, with promotional banners, Browse by mood categories led by Sports, upcoming races and runs, the Sikkim Festival Calendar and upcoming events"
+              aria-label="Scrollable preview of the Rhoddo Android app home screen, with promotional banners, Browse by mood categories led by Sports, upcoming races and runs, and upcoming workshops"
               tabIndex={0}
               className="no-scrollbar absolute inset-0 overflow-y-auto outline-none"
             >
@@ -409,12 +342,7 @@ export function AppHomeMock() {
                 </div>
 
                 <div className="mt-[25px]">
-                  <SectionHead title="Sikkim Festival Calendar" subtitle="Festivals & celebrations · 2026" />
-                  <FestivalCard />
-                </div>
-
-                <div className="mt-[25px]">
-                  <SectionHead title="What's happening" subtitle="Across the state" />
+                  <SectionHead title="Workshops" subtitle="Learn something new this week" />
                   <WeekCards />
                 </div>
 

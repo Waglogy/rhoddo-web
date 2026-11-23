@@ -528,7 +528,7 @@ function CategoryNote({ locked, category }: { locked: boolean; category: string 
     <p className="mt-1 text-[11px] text-mute">
       {locked && "The category can't change once people have signed up. "}
       Rhoddo reviews each new event once and sets its commission, a share of each {w.booking}.
-      {w.registration && ' Sports events use registration wording: people register and get a pass.'}
+      {w.registration && ' Sports and workshop events use registration wording: people register and get a pass.'}
     </p>
   );
 }
