@@ -55,7 +55,7 @@ export default function HostRegisterPage() {
             <span className="text-gold">Keep more of every ticket.</span>
           </h1>
           <p className="mt-5 text-sm text-mute md:text-base">
-            Marathons, trail runs, cycle races and tournaments, plus concerts,
+            Marathons, trail runs, cycle races and tournaments, plus workshops,
             festivals and dinners. Take registrations, collect runner details with
             your own form, and scan passes at the start line, without the buyer fees
             that put people off signing up.
@@ -87,7 +87,7 @@ export default function HostRegisterPage() {
           <p className="mt-1 text-xs text-mute">
             After signing up, verify your phone number with a code. We&apos;ll then review
             your application within 2 working days. Once approved, you can add your venues
-            and events, from races to concerts.
+            and events, from races to workshops.
           </p>
 
           <form onSubmit={onSubmit} className="mt-6 space-y-4">

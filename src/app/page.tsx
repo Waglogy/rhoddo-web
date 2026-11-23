@@ -9,7 +9,7 @@ import { AppShowcase, HeroEvent, loadOpenEvents } from '@/components/FeaturedEve
 export const metadata: Metadata = {
   title: 'Rhoddo — Races & events across Sikkim',
   description:
-    'Register for marathons, trail runs, cycle races and tournaments across Sikkim, plus concerts, festivals and more. One tap, one pass, no fuss.',
+    'Register for marathons, trail runs, cycle races and tournaments across Sikkim, plus workshops, festivals and more. One tap, one pass, no fuss.',
 };
 
 const PLAY_STORE_URL =
@@ -89,7 +89,7 @@ export default async function Landing() {
             <p className="mt-5 text-sm leading-relaxed text-mute sm:mt-6 sm:text-base md:text-lg">
               Marathons, trail runs, cycle races and tournaments across Sikkim.
               Register, fill in your runner details and get your pass in one tap.
-              Concerts, festivals and more are here too, for after the finish line.
+              Workshops, festivals and more are here too, for after the finish line.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:justify-center md:justify-start">
@@ -166,7 +166,7 @@ export default async function Landing() {
               {
                 eyebrow: 'Discover',
                 title: 'Races near you, by district',
-                body: 'Find marathons, 10Ks, trail runs, cycle climbs and tournaments by district and date. Concerts, festivals and dinners are a tap away too.',
+                body: 'Find marathons, 10Ks, trail runs, cycle climbs and tournaments by district and date. Workshops, festivals and dinners are a tap away too.',
               },
               {
                 eyebrow: 'One pass',
