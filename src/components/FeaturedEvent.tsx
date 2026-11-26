@@ -135,7 +135,7 @@ export function AppShowcase() {
         <div className="absolute -left-40 top-10 h-[460px] w-[460px] rounded-full bg-pine/20 blur-[140px]" />
         <div className="absolute right-[-120px] bottom-[-80px] h-[420px] w-[420px] rounded-full bg-gold/15 blur-[140px]" />
       </div>
-      <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-6 py-20 md:grid-cols-[1fr_auto] md:py-24">
+      <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-6 py-14 sm:py-20 md:grid-cols-[1fr_auto] md:py-24">
         <div>
           <div className="label">The Rhoddo app</div>
           <h2 id="app-title" className="mt-2 max-w-xl font-display text-4xl leading-tight text-ink md:text-5xl">

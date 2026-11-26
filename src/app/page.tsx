@@ -76,7 +76,7 @@ export default async function Landing() {
         </div>
 
         {/* On larger screens the hero fills the first screen below the nav, phone included. */}
-        <div className="relative mx-auto flex max-w-6xl flex-col px-5 pb-16 pt-6 sm:px-6 sm:pb-24 sm:pt-10 md:grid md:min-h-[min(calc(100svh-96px),820px)] md:grid-cols-[1.1fr_0.9fr] md:items-center md:gap-12 md:py-8">
+        <div className="relative mx-auto flex max-w-6xl flex-col px-5 pb-12 pt-6 sm:px-6 sm:pb-24 sm:pt-10 md:grid md:min-h-[min(calc(100svh-96px),820px)] md:grid-cols-[1.1fr_0.9fr] md:items-center md:gap-12 md:py-8">
           <div className="relative z-10 flex min-w-0 flex-col justify-center text-center md:text-left">
             <div className="label flex justify-center md:justify-start">Made in Sikkim</div>
             <h1 className="mt-3 font-display text-[2.25rem] leading-[1.08] text-ink sm:text-5xl md:text-6xl lg:text-7xl [@media(min-width:768px)_and_(max-height:820px)]:text-6xl">
@@ -155,13 +155,13 @@ export default async function Landing() {
 
       {/* FEATURES */}
       <section id="features" className="border-t border-line bg-panel/40">
-        <div className="mx-auto max-w-6xl px-6 py-24">
+        <div className="mx-auto max-w-6xl px-6 py-14 sm:py-24">
           <div className="label">Built for the hills</div>
-          <h2 className="mt-2 max-w-2xl font-display text-4xl text-ink md:text-5xl">
+          <h2 className="mt-2 max-w-2xl font-display text-3xl text-ink sm:text-4xl md:text-5xl">
             Every start line across Sikkim, in one place.
           </h2>
 
-          <div className="mt-14 grid gap-6 md:grid-cols-3">
+          <div className="mt-8 grid gap-5 sm:mt-14 sm:gap-6 md:grid-cols-3">
             {[
               {
                 eyebrow: 'Discover',
@@ -193,20 +193,20 @@ export default async function Landing() {
 
       {/* HOW IT WORKS */}
       <section id="how" className="border-t border-line">
-        <div className="mx-auto max-w-6xl px-6 py-24">
+        <div className="mx-auto max-w-6xl px-6 py-14 sm:py-24">
           <div className="label">How it works</div>
-          <h2 className="mt-2 max-w-2xl font-display text-4xl text-ink md:text-5xl">
+          <h2 className="mt-2 max-w-2xl font-display text-3xl text-ink sm:text-4xl md:text-5xl">
             From start line to pass in under a minute.
           </h2>
 
-          <div className="mt-14 grid gap-10 md:grid-cols-3">
+          <div className="mt-8 grid gap-8 sm:mt-14 sm:gap-10 md:grid-cols-3">
             {[
               { n: '01', t: 'Find', b: 'Open the app and pick a race, a district or a mood. See what\'s on this weekend and this season.' },
               { n: '02', t: 'Register', b: 'Choose your race category, fill in your runner details and pay in INR. Your pass is ready instantly in your Passes tab.' },
               { n: '03', t: 'Show up', b: 'Show your QR at the start or the gate. The organiser scans it and you\'re in. No paper, no faff.' },
             ].map((s) => (
               <div key={s.n}>
-                <div className="font-display text-5xl text-gold">{s.n}</div>
+                <div className="font-display text-4xl text-gold sm:text-5xl">{s.n}</div>
                 <div className="mt-3 font-display text-2xl text-ink">{s.t}</div>
                 <p className="mt-2 text-sm leading-relaxed text-mute">{s.b}</p>
               </div>
@@ -217,7 +217,7 @@ export default async function Landing() {
 
       {/* HOSTS CTA */}
       <section id="hosts" className="border-t border-line bg-panel/40">
-        <div className="mx-auto max-w-6xl px-6 py-20">
+        <div className="mx-auto max-w-6xl px-6 py-14 sm:py-20">
           <div className="grid gap-10 md:grid-cols-[1fr_auto] md:items-end">
             <div>
               <div className="label">For hosts</div>
@@ -255,9 +255,9 @@ export default async function Landing() {
           <div className="absolute right-10 top-10 h-[260px] w-[260px] rounded-full bg-gold/15 blur-[120px]" />
         </div>
 
-        <div className="relative mx-auto max-w-4xl px-6 py-28 text-center">
+        <div className="relative mx-auto max-w-4xl px-6 py-16 text-center sm:py-28">
           <div className="label justify-center">Download the app</div>
-          <h2 className="mt-3 font-display text-5xl leading-tight text-ink md:text-6xl">
+          <h2 className="mt-3 font-display text-[2.1rem] leading-tight text-ink sm:text-5xl md:text-6xl">
             Sikkim&apos;s races and workshops,
             <br />
             in your pocket.
@@ -305,7 +305,6 @@ export default async function Landing() {
             <Link href="/contact" className="hover:text-ink">Contact</Link>
             <Link href="/terms" className="hover:text-ink">Terms</Link>
             <Link href="/host-terms" className="hover:text-ink">Host Terms</Link>
-            <a href="#" className="hover:text-ink">Contact</a>
             <Link href="/host/login" className="hover:text-gold">Host sign in</Link>
             <Link href="/host/register" className="hover:text-gold">Apply as a host</Link>
           </div>
