@@ -481,7 +481,7 @@ function ImageInput({
             )}
           </div>
         )}
-        <label className="btn-ghost cursor-pointer whitespace-nowrap">
+        <label className="btn-ghost relative cursor-pointer whitespace-nowrap">
           {working ? 'Preparing…' : chosen ? (allowPdf ? 'Change file' : 'Change photo') : allowPdf ? 'Choose photo or PDF' : 'Choose photo'}
           <input
             id={id}

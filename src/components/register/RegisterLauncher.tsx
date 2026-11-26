@@ -136,7 +136,7 @@ export function RegisterLauncher({
           role="dialog"
           aria-modal="true"
           aria-labelledby="register-title"
-          className={`absolute inset-0 flex flex-col bg-panel transition-all duration-200 sm:inset-auto sm:left-1/2 sm:top-1/2 sm:h-[min(90dvh,780px)] sm:w-[min(92vw,520px)] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:overflow-hidden sm:rounded-3xl sm:border sm:border-line sm:shadow-2xl ${
+          className={`absolute inset-0 flex flex-col bg-panel transition-all duration-200 sm:inset-auto sm:left-1/2 sm:top-1/2 sm:h-[min(90dvh,780px)] sm:w-[min(92vw,520px)] sm:-translate-x-1/2 sm:-translate-y-1/2 overflow-clip sm:rounded-3xl sm:border sm:border-line sm:shadow-2xl ${
             open ? 'translate-y-0 opacity-100 sm:scale-100' : 'translate-y-6 opacity-0 sm:scale-95'
           }`}
         >
