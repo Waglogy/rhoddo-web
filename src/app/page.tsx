@@ -22,9 +22,9 @@ export default async function Landing() {
     <div className="theme-site min-h-screen bg-bg text-ink">
       {/* NAV */}
       <header className="relative z-10">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-          <Link href="/" className="flex items-center gap-2">
-            <Logo className="h-8 w-auto sm:h-10" />
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-6 sm:py-6">
+          <Link href="/" className="flex shrink-0 items-center gap-2" aria-label="Rhoddo home">
+            <Logo className="h-7 w-auto sm:h-10" />
           </Link>
           <nav className="hidden items-center gap-8 text-sm text-mute md:flex">
             <a href="#features" className="transition hover:text-ink">Features</a>
@@ -53,7 +53,7 @@ export default async function Landing() {
               href={PLAY_STORE_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="whitespace-nowrap rounded-xl border border-line px-3 py-2 text-sm text-ink transition hover:border-gold hover:text-gold sm:px-4"
+              className="hidden whitespace-nowrap rounded-xl border border-line px-4 py-2 text-sm text-ink transition hover:border-gold hover:text-gold sm:inline-block"
             >
               Get the app
             </a>
@@ -75,58 +75,54 @@ export default async function Landing() {
           <div className="absolute inset-0 [background-image:var(--hero-scrim)]" />
         </div>
 
-        {/* On larger screens the hero fills the first screen below the nav, phone included. */}
-        <div className="relative mx-auto flex max-w-6xl flex-col px-5 pb-12 pt-6 sm:px-6 sm:pb-24 sm:pt-10 md:grid md:min-h-[min(calc(100svh-96px),820px)] md:grid-cols-[1.1fr_0.9fr] md:items-center md:gap-12 md:py-8">
-          <div className="relative z-10 flex min-w-0 flex-col justify-center text-center md:text-left">
-            <div className="label flex justify-center md:justify-start">Made in Sikkim</div>
-            <h1 className="mt-3 font-display text-[2.25rem] leading-[1.08] text-ink sm:text-5xl md:text-6xl lg:text-7xl [@media(min-width:768px)_and_(max-height:820px)]:text-6xl">
-              Run the
-              <br />
-              <span className="text-primary">hills</span> of
-              <br />
-              Sikkim.
+        {/* On larger screens the hero fills the first screen below the nav, phone included.
+            Phones read it top to bottom: a short intro, the open event, then the actions. */}
+        <div className="relative mx-auto flex max-w-6xl flex-col px-5 pb-10 pt-5 sm:px-6 sm:pb-24 sm:pt-10 md:grid md:min-h-[min(calc(100svh-96px),820px)] md:grid-cols-[1.1fr_0.9fr] md:grid-rows-[auto_auto] md:content-center md:items-center md:gap-x-12 md:gap-y-0 md:py-8">
+          <div className="relative z-10 min-w-0 md:col-start-1 md:row-start-1 md:self-end">
+            <div className="label">Made in Sikkim</div>
+            <h1 className="mt-2 font-display text-[2.15rem] leading-[1.05] tracking-[-0.01em] text-ink sm:text-5xl md:mt-3 md:text-6xl lg:text-7xl [@media(min-width:768px)_and_(max-height:820px)]:text-6xl">
+              Run the <span className="text-primary">hills</span>
+              <br className="hidden md:block" /> of Sikkim.
             </h1>
-            <p className="mt-5 text-sm leading-relaxed text-mute sm:mt-6 sm:text-base md:text-lg">
-              Marathons, trail runs, cycle races and tournaments across Sikkim,
-              plus hands-on workshops. Register, fill in your details and get your
-              pass in one tap.
+            <p className="mt-3 max-w-md text-[15px] leading-relaxed text-mute sm:mt-6 sm:text-base md:text-lg">
+              Races and hands-on workshops across Sikkim. Register in a minute and keep your pass on your phone.
             </p>
+          </div>
 
-            <div className="mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:justify-center md:justify-start">
+          <div className="relative z-10 order-3 min-w-0 md:order-none md:col-start-1 md:row-start-2 md:self-start">
+            <div className="mt-6 grid grid-cols-2 gap-3 sm:mt-10 sm:flex sm:flex-wrap">
               <a
                 href={PLAY_STORE_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-primary"
+                className="btn-primary px-4 py-3 text-sm sm:px-6 sm:text-base"
               >
-                ↓ Download app
+                Get the app
               </a>
-              <Link href="/host/login" className="btn-ghost border-gold/30 text-gold hover:border-gold">
-                Host portal →
+              <Link href="/host/login" className="btn-ghost border-gold/30 px-4 py-3 text-sm text-gold hover:border-gold sm:px-6 sm:text-base">
+                Host an event
               </Link>
             </div>
 
-            <div className="mt-8 flex items-center justify-center gap-4 text-xs text-mute sm:mt-10 sm:gap-6 md:justify-start">
+            <dl className="mt-6 grid grid-cols-3 divide-x divide-line rounded-2xl border border-line bg-panel/70 py-3.5 text-center sm:mt-10 sm:max-w-md md:bg-transparent">
               <div>
-                <div className="font-display text-xl text-ink sm:text-2xl">6</div>
-                <div className="mt-0.5 uppercase tracking-wider">Districts</div>
+                <dd className="font-display text-xl text-ink sm:text-2xl">6</dd>
+                <dt className="mt-0.5 text-[10.5px] uppercase tracking-wider text-mute">Districts</dt>
               </div>
-              <div className="h-8 w-px bg-line" />
               <div>
-                <div className="font-display text-xl text-ink sm:text-2xl">₹0</div>
-                <div className="mt-0.5 uppercase tracking-wider">Buyer fees</div>
+                <dd className="font-display text-xl text-ink sm:text-2xl">₹0</dd>
+                <dt className="mt-0.5 text-[10.5px] uppercase tracking-wider text-mute">Buyer fees</dt>
               </div>
-              <div className="h-8 w-px bg-line" />
               <div>
-                <div className="font-display text-xl text-gold sm:text-2xl">1 tap</div>
-                <div className="mt-0.5 uppercase tracking-wider">To pass</div>
+                <dd className="font-display text-xl text-gold sm:text-2xl">1 tap</dd>
+                <dt className="mt-0.5 text-[10.5px] uppercase tracking-wider text-mute">To your pass</dt>
               </div>
-            </div>
+            </dl>
           </div>
 
           {event ? (
             // The open event: first thing on phones, beside the headline on larger screens.
-            <div className="relative order-first mb-10 flex justify-center md:order-none md:mb-0">
+            <div className="relative order-2 mt-6 flex justify-center md:order-none md:col-start-2 md:row-span-2 md:row-start-1 md:mt-0">
               <div className="pointer-events-none absolute left-1/2 top-1/2 hidden h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(circle,rgba(232,184,74,0.18)_0%,transparent_65%)] md:block" />
               <div className="pointer-events-none absolute -bottom-24 left-1/2 hidden h-[760px] w-[1400px] -translate-x-1/2 bg-[image:var(--art-peaks)] bg-contain bg-bottom bg-no-repeat opacity-90 md:block [mask-image:linear-gradient(to_right,transparent_24%,black_36%)]" />
               <div className="relative z-10 flex w-full justify-center [@media(min-width:768px)_and_(max-height:760px)]:[zoom:0.88]">
@@ -135,7 +131,7 @@ export default async function Landing() {
             </div>
           ) : (
           /* Phone mock, set into the landscape — hidden on mobile, shown on md+ */
-          <div className="hidden items-center justify-center md:relative md:flex">
+          <div className="hidden items-center justify-center md:relative md:col-start-2 md:row-span-2 md:row-start-1 md:flex">
             {/* Sunrise behind the peaks */}
             <div className="pointer-events-none absolute left-1/2 top-1/2 h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(circle,rgba(232,184,74,0.18)_0%,transparent_65%)]" />
             {/* Peaks centred on the phone, so it always sits in the valley between them */}
