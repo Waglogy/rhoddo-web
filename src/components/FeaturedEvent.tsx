@@ -59,42 +59,41 @@ export function HeroEvent({ event, more }: { event: PublicEvent; more: PublicEve
             <img src={event.image} alt="" className="absolute inset-0 h-full w-full object-contain" fetchPriority="high" />
           )}
         </Link>
-        <div className="space-y-4 p-5 sm:p-6">
+        <div className="space-y-4 p-4 sm:p-6">
           <div>
             <span
-              className={`mb-3 inline-block rounded-full px-3 py-1 text-xs font-medium ${
+              className={`mb-2.5 inline-block rounded-full px-3 py-1 text-xs font-medium ${
                 soldOut ? 'bg-line text-mute' : 'bg-pine/15 text-pine'
               }`}
             >
               {!soldOut && <span className="mr-1.5 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-pine align-middle" />}
               {soldOut ? (w.registration ? 'Registration full' : 'Sold out') : w.registration ? 'Now open for registration' : 'Booking open'}
             </span>
-            <h2 id="featured-title" className="font-display text-2xl leading-tight text-ink sm:text-[1.7rem]">
+            <h2 id="featured-title" className="font-display text-[1.45rem] leading-tight text-ink sm:text-[1.7rem]">
               <Link href={href} className="hover:underline">
                 {event.title}
               </Link>
             </h2>
             {event.tagline && <p className="mt-1 text-sm text-mute">{event.tagline}</p>}
           </div>
-          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
-            <dt className="text-mute">When</dt>
-            <dd className="text-ink">{formatWhen(event.date)}</dd>
-            <dt className="text-mute">Where</dt>
-            <dd className="text-ink">{formatPlace(event)}</dd>
-            <dt className="text-mute">Entry</dt>
-            <dd className="font-medium text-ink">{entryLabel(event)}</dd>
-            {event.registrationClosesAt && (
-              <>
-                <dt className="text-mute">Closes</dt>
-                <dd className="text-ink">{formatWhen(event.registrationClosesAt)}</dd>
-              </>
-            )}
+          <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line text-sm">
+            {[
+              ['When', formatWhen(event.date)],
+              ['Where', formatPlace(event)],
+              ['Entry', entryLabel(event)],
+              ...(event.registrationClosesAt ? [['Closes', formatWhen(event.registrationClosesAt)]] : []),
+            ].map(([label, value]) => (
+              <div key={label} className="bg-panel px-3.5 py-3">
+                <dt className="text-[10.5px] font-medium uppercase tracking-wider text-mute">{label}</dt>
+                <dd className="mt-0.5 leading-snug text-ink">{value}</dd>
+              </div>
+            ))}
           </dl>
-          <div className="flex flex-col gap-2.5 sm:flex-row">
-            <Link href={href} className="btn-primary flex-1 py-3 text-center text-base">
+          <div className="flex gap-2.5">
+            <Link href={href} className="btn-primary flex-[1.4] py-3 text-center text-[15px] sm:text-base">
               {soldOut ? 'View event' : w.registration ? 'Register now' : 'Book now'}
             </Link>
-            <OpenInAppButton eventId={event.id} className="btn-ghost flex-1 py-3 text-center text-base" />
+            <OpenInAppButton eventId={event.id} className="btn-ghost flex-1 whitespace-nowrap px-3 py-3 text-center text-[15px] sm:text-base" />
           </div>
         </div>
       </section>
