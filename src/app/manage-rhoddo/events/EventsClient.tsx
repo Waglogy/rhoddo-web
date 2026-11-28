@@ -12,6 +12,7 @@ import {
   reviewEvent,
   setEventCommission,
 } from '@/actions/adminEvents';
+import type { ActionResult } from '@/lib/adminAction';
 
 export type EventRow = {
   id: string;
@@ -71,12 +72,16 @@ export function EventsClient({ events }: { events: EventRow[] }) {
   const liveCount = events.filter((e) => e.published).length;
   const pausedCount = events.length - liveCount;
 
-  function runAction(id: string, fn: () => Promise<void>) {
+  // Actions return { ok, error } (production hides thrown server action messages).
+  function runAction(id: string, fn: () => Promise<ActionResult>) {
     setErr(null);
     setBusyId(id);
     startTransition(() => {
       fn()
-        .catch((e) => setErr(e instanceof Error ? e.message : 'Something went wrong'))
+        .then((r) => {
+          if (!r.ok) setErr(r.error);
+        })
+        .catch(() => setErr('Something went wrong. Try again.'))
         .finally(() => setBusyId(null));
     });
   }

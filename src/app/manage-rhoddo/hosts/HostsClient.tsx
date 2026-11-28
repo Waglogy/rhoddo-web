@@ -7,6 +7,7 @@ import {
   setOrganizerCommission,
   setOrganizerStatus,
 } from '@/actions/adminHosts';
+import type { ActionResult } from '@/lib/adminAction';
 import { CommissionInput, parseCommission } from '@/components/CommissionInput';
 import { formatPercent } from '@/lib/pricing';
 import { recordFeePayment, undoFeePayment, type FeePaymentResult } from '@/actions/hostFeePayments';
@@ -42,10 +43,15 @@ export function HostsClient({ organizers }: { organizers: OrganizerRow[] }) {
     return organizers.filter((o) => o.status === filter);
   }, [organizers, filter]);
 
-  function runAction(fn: () => Promise<void>) {
+  // Actions return { ok, error } (production hides thrown server action messages).
+  function runAction(fn: () => Promise<ActionResult>) {
     setErr(null);
     startTransition(() => {
-      fn().catch((e) => setErr(e instanceof Error ? e.message : 'Something went wrong'));
+      fn()
+        .then((r) => {
+          if (!r.ok) setErr(r.error);
+        })
+        .catch(() => setErr('Something went wrong. Try again.'));
     });
   }
 

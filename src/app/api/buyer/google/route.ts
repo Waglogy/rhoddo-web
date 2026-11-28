@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { forwardClientHeaders } from '@/lib/forwardClient';
 import { cookies } from 'next/headers';
 import { USER_COOKIE } from '@/lib/auth';
 
@@ -15,7 +16,7 @@ export async function POST(req: Request) {
   try {
     res = await fetch(`${API_URL}/auth/google`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...forwardClientHeaders(req) },
       body: JSON.stringify({ idToken: body.idToken }),
       cache: 'no-store',
     });

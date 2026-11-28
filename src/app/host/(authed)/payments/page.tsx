@@ -18,7 +18,9 @@ type Payment = {
   razorpayPaymentId: string | null;
   tierName: string;
   event: { id: string; title: string };
-  buyer: { id: string; name: string; accountEmail?: string | null; email: string | null; phone: string | null };
+  // Only the contact details the buyer gave for this booking (the API doesn't send hosts
+  // the buyer's own account email or user id).
+  buyer: { name: string; email: string | null; phone: string | null };
 };
 
 type EventRow = {
@@ -228,13 +230,6 @@ export default async function HostPaymentsPage({ searchParams }: { searchParams:
                 <div className="min-w-0 text-sm">
                   <div className="truncate text-ink" title="Account name">{p.buyer.name}</div>
                   <div className="truncate text-xs text-mute">{[p.buyer.email, p.buyer.phone].filter(Boolean).join(' · ') || '—'}</div>
-                  {p.buyer.accountEmail && p.buyer.accountEmail !== p.buyer.email && (
-                    <div className="truncate text-xs text-mute">Account: {p.buyer.accountEmail}</div>
-                  )}
-                  <div className="mt-0.5 truncate text-[11px] text-mute">
-                    User ID:{' '}
-                    <span className="select-all font-mono">{p.buyer.id}</span>
-                  </div>
                   <div className="mt-1 font-mono text-[11px] text-mute">
                     {p.orderNo}
                     {p.razorpayPaymentId && <> · {p.razorpayPaymentId}</>}

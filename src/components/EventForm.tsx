@@ -210,11 +210,11 @@ export function EventForm({
         <div className="mt-6 grid gap-5 md:grid-cols-2">
           <div className="md:col-span-2">
             <label className="label mb-1 block">Title</label>
-            <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} required />
+            <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={150} required />
           </div>
           <div className="md:col-span-2">
             <label className="label mb-1 block">Tagline</label>
-            <input className="input" value={tagline} onChange={(e) => setTagline(e.target.value)} required />
+            <input className="input" value={tagline} onChange={(e) => setTagline(e.target.value)} maxLength={200} required />
           </div>
           <div className="md:col-span-2">
             <label className="label mb-1 block">Registration link</label>
@@ -280,7 +280,7 @@ export function EventForm({
               label="Host name"
               info="The person, group or company running this event. Buyers see this on the event page, so it can be different from the venue."
             />
-            <input className="input" value={hostName} onChange={(e) => setHostName(e.target.value)} required />
+            <input className="input" value={hostName} onChange={(e) => setHostName(e.target.value)} maxLength={120} required />
           </div>
           <div>
             <label className="label mb-1 block">Starting price (INR)</label>
@@ -298,7 +298,7 @@ export function EventForm({
               label="Color hint"
               info="An accent colour saved with this event, as a hex code like #C8402B. It isn't shown on the app or website yet, so you can leave it as it is."
             />
-            <input className="input" value={colorHint} onChange={(e) => setColorHint(e.target.value)} />
+            <input className="input" value={colorHint} onChange={(e) => setColorHint(e.target.value)} maxLength={30} />
           </div>
           <div>
             <FieldLabel
@@ -316,6 +316,7 @@ export function EventForm({
               className="input min-h-[140px]"
               value={about}
               onChange={(e) => setAbout(e.target.value)}
+              maxLength={20000}
               required
             />
           </div>
@@ -354,7 +355,8 @@ export function EventForm({
       <section className="card p-6">
         <div className="flex items-center justify-between">
           <h2 className="font-display text-xl text-ink">{isRegistrationEvent(category) ? 'Registration passes' : 'Ticket tiers'}</h2>
-          <button type="button" onClick={addTier} className="btn-ghost">{isRegistrationEvent(category) ? '+ Add pass' : '+ Add tier'}</button>
+          {/* The API takes up to 20 passes per event. */}
+          <button type="button" onClick={addTier} disabled={tiers.length >= 20} className="btn-ghost disabled:opacity-50">{isRegistrationEvent(category) ? '+ Add pass' : '+ Add tier'}</button>
         </div>
         <div className="mt-6 space-y-4">
           {tiers.map((t, i) => (
@@ -366,6 +368,7 @@ export function EventForm({
                     className="input"
                     value={t.name}
                     onChange={(e) => updateTier(i, { name: e.target.value })}
+                    maxLength={80}
                     required
                   />
                 </div>

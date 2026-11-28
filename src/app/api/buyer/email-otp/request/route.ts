@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server';
+import { forwardClientHeaders } from '@/lib/forwardClient';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.rhoddo.com';
 
 // Emails a sign-in code to a buyer registering on the website.
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || req.headers.get('x-real-ip');
-  if (ip) headers['X-Forwarded-For'] = ip;
+  const headers: Record<string, string> = { 'Content-Type': 'application/json', ...forwardClientHeaders(req) };
   let res: Response;
   try {
     res = await fetch(`${API_URL}/auth/email-otp/request`, {

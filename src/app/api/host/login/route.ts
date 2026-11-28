@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { forwardClientHeaders } from '@/lib/forwardClient';
 import { cookies } from 'next/headers';
 import { HOST_COOKIE } from '@/lib/auth';
 
@@ -8,7 +9,7 @@ export async function POST(req: Request) {
   const body = await req.json();
   const res = await fetch(`${API_URL}/auth/organizer/login`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...forwardClientHeaders(req) },
     body: JSON.stringify(body),
   });
   const data = await res.json();

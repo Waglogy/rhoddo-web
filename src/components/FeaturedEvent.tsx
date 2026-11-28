@@ -126,6 +126,140 @@ export function HeroEvent({ event, more }: { event: PublicEvent; more: PublicEve
   );
 }
 
+/** The badge on an event card: open, or full. */
+function OpenBadge({ e }: { e: PublicEvent }) {
+  const w = eventWords(e.category);
+  const soldOut = !!e.tiers?.length && e.tiers.every((t) => t.left <= 0);
+  return (
+    <span
+      className={`inline-block self-start rounded-full px-3 py-1 text-xs font-medium ${
+        soldOut ? 'bg-line text-mute' : 'bg-pine/15 text-pine'
+      }`}
+    >
+      {!soldOut && <span className="mr-1.5 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-pine align-middle" />}
+      {soldOut ? (w.registration ? 'Registration full' : 'Sold out') : w.registration ? 'Open for registration' : 'Booking open'}
+    </span>
+  );
+}
+
+/** The card's button: "Register" / "Book", or "View event" when full. `long` adds "now". */
+function actionLabel(e: PublicEvent, long = false) {
+  const w = eventWords(e.category);
+  const soldOut = !!e.tiers?.length && e.tiers.every((t) => t.left <= 0);
+  if (soldOut) return 'View event';
+  return `${w.registration ? 'Register' : 'Book'}${long ? ' now' : ''}`;
+}
+
+/** The poster, never cropped (posters come in every shape). */
+function Poster({ e, className }: { e: PublicEvent; className: string }) {
+  return (
+    <Link href={linkFor(e)} className={`relative block overflow-hidden bg-[#0f2a1d] ${className}`} aria-label={e.title}>
+      {e.image && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={e.image} alt="" className="absolute inset-0 h-full w-full object-contain" loading="lazy" />
+      )}
+    </Link>
+  );
+}
+
+/** A single open event: one wide card, poster beside the details, so the row isn't half empty. */
+function WideEventCard({ e }: { e: PublicEvent }) {
+  const href = linkFor(e);
+  return (
+    <div className="overflow-hidden rounded-3xl border border-line bg-panel shadow-card md:grid md:grid-cols-[1.15fr_1fr]">
+      <Poster e={e} className="aspect-[16/10] md:aspect-auto md:min-h-[340px]" />
+      <div className="flex flex-col gap-4 p-5 sm:p-7 md:p-8">
+        <OpenBadge e={e} />
+        <div>
+          <h3 className="font-display text-2xl leading-tight text-ink md:text-3xl">
+            <Link href={href} className="hover:underline">
+              {e.title}
+            </Link>
+          </h3>
+          {e.tagline && <p className="mt-2 text-mute">{e.tagline}</p>}
+        </div>
+        <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line text-sm">
+          {[
+            ['When', formatWhen(e.date)],
+            ['Where', formatPlace(e)],
+            ['Entry', entryLabel(e)],
+            ...(e.registrationClosesAt ? [['Closes', formatWhen(e.registrationClosesAt)]] : []),
+          ].map(([label, value]) => (
+            <div key={label} className="bg-panel px-3.5 py-3">
+              <dt className="text-[10.5px] font-medium uppercase tracking-wider text-mute">{label}</dt>
+              <dd className="mt-0.5 leading-snug text-ink">{value}</dd>
+            </div>
+          ))}
+        </dl>
+        <div className="mt-auto flex gap-2.5 pt-1">
+          <Link href={href} className="btn-primary flex-[1.4] py-3 text-center text-[15px] sm:text-base">
+            {actionLabel(e, true)}
+          </Link>
+          <OpenInAppButton eventId={e.id} className="btn-ghost flex-1 whitespace-nowrap px-3 py-3 text-center text-[15px] sm:text-base" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** One of several open events, as a card in a row. */
+function EventCard({ e }: { e: PublicEvent }) {
+  const href = linkFor(e);
+  return (
+    <li className="flex flex-col overflow-hidden rounded-3xl border border-line bg-panel shadow-card">
+      <Poster e={e} className="aspect-[16/10]" />
+      <div className="flex flex-1 flex-col gap-3 p-4 sm:p-5">
+        <OpenBadge e={e} />
+        <h3 className="font-display text-xl leading-tight text-ink">
+          <Link href={href} className="hover:underline">
+            {e.title}
+          </Link>
+        </h3>
+        <div className="space-y-0.5 text-sm text-mute">
+          <div>{formatWhen(e.date)}</div>
+          <div>{formatPlace(e)}</div>
+        </div>
+        <div className="mt-auto flex items-center justify-between gap-3 pt-2">
+          <span className="text-sm font-medium text-gold">{entryLabel(e)}</span>
+          <Link href={href} className="btn-primary px-4 py-2 text-sm">
+            {actionLabel(e)}
+          </Link>
+        </div>
+      </div>
+    </li>
+  );
+}
+
+/**
+ * "Happening right now": the open events, for visitors who aren't signed in (their hero
+ * shows the app preview instead of an event). The layout follows how many there are, so the
+ * section never looks half empty: one wide card, two side by side, or rows of three.
+ */
+export function HappeningNow({ events }: { events: PublicEvent[] }) {
+  if (events.length === 0) return null;
+  return (
+    <section id="happening" aria-labelledby="happening-title" className="border-t border-line">
+      <div className="mx-auto max-w-6xl px-5 py-14 sm:px-6 sm:py-20">
+        <div className="label">On Rhoddo</div>
+        <h2 id="happening-title" className="mt-2 font-display text-3xl leading-tight text-ink md:text-4xl">
+          Happening right now
+        </h2>
+        <div className="mt-8">
+          {events.length === 1 ? (
+            <WideEventCard e={events[0]} />
+          ) : (
+            <ul className={`grid gap-5 sm:grid-cols-2 ${events.length >= 3 ? 'lg:grid-cols-3' : ''}`}>
+              {events.map((e) => (
+                <EventCard key={e.id} e={e} />
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /** The app, with its preview phone: shown below the hero when the hero holds an event. */
 export function AppShowcase() {
   return (

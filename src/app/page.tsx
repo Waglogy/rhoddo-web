@@ -4,7 +4,8 @@ import type { Metadata } from 'next';
 import { AppHomeMock } from '@/components/AppHomeMock';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { AccountLink } from '@/components/account/AccountLink';
-import { AppShowcase, HeroEvent, loadOpenEvents } from '@/components/FeaturedEvent';
+import { AppShowcase, HappeningNow, HeroEvent, loadOpenEvents } from '@/components/FeaturedEvent';
+import { loadSignedInBuyer } from '@/lib/publicEvent';
 
 export const metadata: Metadata = {
   title: 'Rhoddo — Races & events across Sikkim',
@@ -16,8 +17,13 @@ const PLAY_STORE_URL =
   'https://play.google.com/store/apps/details?id=com.rhoddo.app&pcampaignid=web_share';
 
 export default async function Landing() {
-  // The newest event open for registration fills the hero; the app preview moves below it.
-  const [event, ...moreEvents] = await loadOpenEvents();
+  // Signed in: the newest open event fills the hero and the app preview moves below it.
+  // Signed out: the hero shows the app preview, and the open events get their own
+  // "Happening right now" section under it.
+  const [openEvents, buyer] = await Promise.all([loadOpenEvents(), loadSignedInBuyer()]);
+  const signedIn = !!buyer;
+  const [first, ...moreEvents] = openEvents;
+  const event = signedIn ? first : undefined;
   return (
     <div className="theme-site min-h-screen bg-bg text-ink">
       {/* NAV */}
@@ -26,26 +32,26 @@ export default async function Landing() {
           <Link href="/" className="flex shrink-0 items-center gap-2" aria-label="Rhoddo home">
             <Logo className="h-7 w-auto sm:h-10" />
           </Link>
-          <nav className="hidden items-center gap-8 text-sm text-mute md:flex">
-            <a href="#features" className="transition hover:text-ink">Features</a>
+          {/* Section links, only where they fit on one line beside the buttons (laptops up).
+              Host sign-in is the "Hosts" button on the right, at every size. */}
+          <nav className="hidden items-center gap-8 whitespace-nowrap text-sm text-mute lg:flex">
             <a href="#how" className="transition hover:text-ink">How it works</a>
-            <a href="#hosts" className="transition hover:text-ink">For hosts</a>
-            <Link href="/host/login" className="transition hover:text-ink">
-              Host sign in
-            </Link>
+            {!signedIn && openEvents.length > 0 && (
+              <a href="#happening" className="transition hover:text-ink">Happening now</a>
+            )}
           </nav>
           <div className="flex items-center gap-2 sm:gap-3">
             <AccountLink compact />
             <ThemeToggle />
             <Link
               href="/host/login"
-              className="hidden rounded-xl px-3 py-2 text-sm text-mute transition hover:text-ink sm:inline-block md:hidden"
+              className="hidden whitespace-nowrap rounded-xl px-3 py-2 text-sm text-mute transition hover:text-ink sm:inline-block"
             >
               Hosts
             </Link>
             <Link
               href="/host/register"
-              className="hidden rounded-xl border border-transparent px-3 py-2 text-sm text-mute transition hover:text-ink sm:inline-block"
+              className="hidden whitespace-nowrap rounded-xl border border-transparent px-3 py-2 text-sm text-mute transition hover:text-ink sm:inline-block"
             >
               List your event
             </Link>
@@ -149,6 +155,9 @@ export default async function Landing() {
       {/* The app and its preview phone, when the hero holds an event */}
       {event && <AppShowcase />}
 
+      {/* Visitors who aren't signed in: the open events, below the app preview hero */}
+      {!signedIn && <HappeningNow events={openEvents} />}
+
       {/* FEATURES */}
       <section id="features" className="border-t border-line bg-panel/40">
         <div className="mx-auto max-w-6xl px-6 py-14 sm:py-24">
@@ -251,14 +260,17 @@ export default async function Landing() {
           <div className="absolute right-10 top-10 h-[260px] w-[260px] rounded-full bg-gold/15 blur-[120px]" />
         </div>
 
-        <div className="relative mx-auto max-w-4xl px-6 py-16 text-center sm:py-28">
+        <div className="relative mx-auto max-w-5xl px-5 py-16 text-center sm:px-6 sm:py-28">
           <div className="label justify-center">Download the app</div>
-          <h2 className="mt-3 font-display text-[2.1rem] leading-tight text-ink sm:text-5xl md:text-6xl">
+          {/* Exactly two lines on every screen: each line stays whole, and the size follows the
+              screen width (smaller on phones, up to 3.6rem on desktop) so the longer first line
+              always fits. */}
+          <h2 className="mt-3 whitespace-nowrap font-display text-[clamp(1.15rem,5.3vw,3.6rem)] leading-tight text-ink">
             Sikkim&apos;s races and workshops,
             <br />
             in your pocket.
           </h2>
-          <p className="mx-auto mt-5 max-w-xl text-base text-mute">
+          <p className="mx-auto mt-4 max-w-xl text-[15px] text-mute sm:mt-5 sm:text-base">
             Free to download. Always free to browse. Pay only when you register for a
             race or a workshop.
           </p>
@@ -287,24 +299,49 @@ export default async function Landing() {
       </section>
 
       {/* FOOTER */}
+      {/* Phones: logo, then the two link columns side by side, then the credit line.
+          Tablets up: logo on the left, the two columns on the right. */}
       <footer className="border-t border-line">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 px-6 py-12 md:flex-row">
-          <div className="flex items-center gap-3">
-            <Logo className="h-8 w-auto" />
-            <span className="text-[10px] uppercase tracking-[0.18em] text-mute">
-              · Sikkim
-            </span>
+        <div className="mx-auto max-w-6xl px-6 py-10 sm:py-12">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-[1fr_auto_auto] sm:gap-x-16">
+            <div className="col-span-2 sm:col-span-1">
+              <div className="flex items-center gap-3">
+                <Logo className="h-8 w-auto" />
+                <span className="text-[10px] uppercase tracking-[0.18em] text-mute">· Sikkim</span>
+              </div>
+              <p className="mt-3 max-w-xs text-sm text-mute">Races and hands-on workshops across Sikkim.</p>
+            </div>
+            <nav aria-label="Rhoddo">
+              <div className="label">Rhoddo</div>
+              <ul className="mt-3 space-y-1 text-sm">
+                {[
+                  ['/contact', 'Contact'],
+                  ['/privacy', 'Privacy'],
+                  ['/refund-policy', 'Refunds'],
+                  ['/terms', 'Terms'],
+                ].map(([href, label]) => (
+                  <li key={href}>
+                    <Link href={href} className="inline-block py-1 text-mute transition hover:text-ink">{label}</Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+            <nav aria-label="Hosts">
+              <div className="label">Hosts</div>
+              <ul className="mt-3 space-y-1 text-sm">
+                {[
+                  ['/host/login', 'Host sign in'],
+                  ['/host/register', 'Apply as a host'],
+                  ['/host-terms', 'Host Terms'],
+                ].map(([href, label]) => (
+                  <li key={href}>
+                    <Link href={href} className="inline-block py-1 text-mute transition hover:text-gold">{label}</Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-mute md:justify-start">
-            <Link href="/privacy" className="hover:text-ink">Privacy</Link>
-            <Link href="/refund-policy" className="hover:text-ink">Refunds</Link>
-            <Link href="/contact" className="hover:text-ink">Contact</Link>
-            <Link href="/terms" className="hover:text-ink">Terms</Link>
-            <Link href="/host-terms" className="hover:text-ink">Host Terms</Link>
-            <Link href="/host/login" className="hover:text-gold">Host sign in</Link>
-            <Link href="/host/register" className="hover:text-gold">Apply as a host</Link>
-          </div>
-          <div className="text-center text-[11px] text-mute md:text-right">
+          <div className="mt-10 border-t border-line pt-6 text-[11px] text-mute">
             Built by <span className="text-gold">WAGLOGY</span>
           </div>
         </div>
