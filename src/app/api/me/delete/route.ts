@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { forwardClientHeaders } from '@/lib/forwardClient';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.rhoddo.com';
 
@@ -11,7 +12,7 @@ export async function POST(req: NextRequest) {
   const confirm = body?.step === 'confirm';
   const upstream = await fetch(`${API_URL}/me/${confirm ? 'confirm-deletion' : 'request-deletion'}`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...forwardClientHeaders(req) },
     body: JSON.stringify(confirm ? { email: body.email, code: body.code } : { email: body.email }),
   });
   const data = await upstream.json().catch(() => ({ error: 'Something went wrong. Please try again.' }));

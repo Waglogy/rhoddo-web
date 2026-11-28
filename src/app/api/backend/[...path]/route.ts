@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { forwardClientHeaders } from '@/lib/forwardClient';
 import { cookies } from 'next/headers';
 import { ADMIN_COOKIE, HOST_COOKIE, USER_COOKIE } from '@/lib/auth';
 
@@ -33,12 +34,8 @@ async function forward(req: Request, { params }: Context) {
     return NextResponse.json({ error: 'Please sign in again' }, { status: 401 });
   }
 
-  const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
-  // Lets the API record who accepted the Host Terms, from where.
-  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || req.headers.get('x-real-ip');
-  if (ip) headers['X-Forwarded-For'] = ip;
-  const userAgent = req.headers.get('user-agent');
-  if (userAgent) headers['User-Agent'] = userAgent;
+  // The visitor's address (for rate limits and Terms records) and browser.
+  const headers: Record<string, string> = { Authorization: `Bearer ${token}`, ...forwardClientHeaders(req) };
   // Uploads need the original Content-Type, because it holds the multipart boundary.
   const contentType = req.headers.get('content-type');
   if (contentType) headers['Content-Type'] = contentType;

@@ -100,7 +100,7 @@ export function VenueForm({
         <div className="mt-6 grid gap-5 md:grid-cols-2">
           <div className="md:col-span-2">
             <label className="label mb-1 block">Name</label>
-            <input className="input" value={name} onChange={(e) => setName(e.target.value)} required />
+            <input className="input" value={name} onChange={(e) => setName(e.target.value)} maxLength={150} required />
           </div>
           <div>
             <label className="label mb-1 block">Kind</label>
@@ -116,7 +116,7 @@ export function VenueForm({
           </div>
           <div className="md:col-span-2">
             <label className="label mb-1 block">Address</label>
-            <input className="input" value={address} onChange={(e) => setAddress(e.target.value)} required />
+            <input className="input" value={address} onChange={(e) => setAddress(e.target.value)} maxLength={300} required />
           </div>
           {mode === 'admin' && (
             <div>
@@ -138,6 +138,7 @@ export function VenueForm({
               className="input min-h-[100px]"
               value={blurb}
               onChange={(e) => setBlurb(e.target.value)}
+              maxLength={2000}
               required
             />
           </div>

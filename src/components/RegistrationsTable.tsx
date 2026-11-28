@@ -160,8 +160,10 @@ export function RegistrationsTable({ data, csvHref }: { data: RegistrationsData;
   // The API's order is: Order, Registered at, Status, Pass, People, Person, Registered by, Email, Phone, User ID, ...form answers.
   const order = useMemo(() => {
     const formCols = data.columns.map((_, i) => i).filter((i) => i >= FIRST_FORM_COL);
-    return [3, 2, ...formCols, 5, 6, 9, 7, 8, 0, 1, 4].filter((i) => i < data.columns.length);
-  }, [data.columns]);
+    // User ID (column 9) is left empty for hosts, so it's only shown when it has values (admins).
+    const hasUserIds = data.rows.some((r) => r[9]);
+    return [3, 2, ...formCols, 5, 6, 9, 7, 8, 0, 1, 4].filter((i) => i < data.columns.length && (i !== 9 || hasUserIds));
+  }, [data.columns, data.rows]);
 
   return (
     <div className="min-w-0">
