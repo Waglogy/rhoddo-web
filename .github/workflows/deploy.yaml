@@ -85,15 +85,26 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      # The server is ARM, so the image is built under QEMU emulation. Node sometimes crashes
+      # there ("qemu: uncaught target signal 4 (Illegal instruction)") depending on the GitHub
+      # machine, so a failed build is tried again, up to 3 times, before the job fails.
       - name: Build ARM64 image and export
         run: |
-          docker buildx build \
-            --platform linux/arm64 \
-            --build-arg NEXT_PUBLIC_API_URL="$NEXT_PUBLIC_API_URL" \
-            --tag rhoddo-web:latest \
-            --output type=docker,dest=rhoddo-web.tar \
-            -f Dockerfile.deploy \
-            .
+          for attempt in 1 2 3; do
+            if docker buildx build \
+              --platform linux/arm64 \
+              --build-arg NEXT_PUBLIC_API_URL="$NEXT_PUBLIC_API_URL" \
+              --tag rhoddo-web:latest \
+              --output type=docker,dest=rhoddo-web.tar \
+              -f Dockerfile.deploy \
+              .; then
+              exit 0
+            fi
+            echo "Build attempt $attempt failed. Trying again..."
+            sleep 10
+          done
+          echo "The image failed to build 3 times."
+          exit 1
 
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.9.0
@@ -107,12 +118,17 @@ jobs:
         run: |
           scp rhoddo-web.tar ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/tmp/rhoddo-web.tar
 
+      # This file is rewritten on every deploy, so every setting the site needs goes here.
+      # WEB_PROXY_KEY must be the same secret value as in the rhoddo-api repo (src/lib/forwardClient.ts).
       - name: Write environment file on server
+        env:
+          WEB_PROXY_KEY: ${{ secrets.WEB_PROXY_KEY }}
         run: |
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << EOF
             mkdir -p /home/${{ secrets.SERVER_USER }}/rhoddo-web
             cat > /home/${{ secrets.SERVER_USER }}/rhoddo-web/.env << 'ENVFILE'
           NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+          WEB_PROXY_KEY=${WEB_PROXY_KEY}
           ENVFILE
           EOF
 

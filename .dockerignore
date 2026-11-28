@@ -1,0 +1,9 @@
+# Not sent to the Docker build. node_modules and .next are built inside the image for ARM;
+# copying the build machine's own (x86) copies in would overwrite them.
+node_modules
+.next
+.git
+.github
+.env*
+*.tar
+npm-debug.log*
